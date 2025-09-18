@@ -290,9 +290,6 @@ const LiveChannels = () => {
                     <span className="text-xs text-muted-foreground">
                       Updated: {new Date(channel.updatedAt).toLocaleDateString()}
                     </span>
-                    <Button size="sm" variant="outline" className="border-border">
-                      Manage
-                    </Button>
                   </div>
                 </div>
               </div>
