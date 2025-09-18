@@ -42,7 +42,9 @@ const LiveChannels = () => {
 
   const getStatusBadge = (channel: Channel) => {
     // Determine status based on channel data - you can customize this logic
-    const isActive = channel.ip && channel.port
+    const isActive = channel.channelType === "ip" 
+      ? (channel.ip && channel.port)
+      : (channel.majorNumber && channel.minorNumber)
     if (isActive) {
       return <Badge className="bg-success text-success-foreground">Live</Badge>
     }
@@ -55,7 +57,11 @@ const LiveChannels = () => {
     return matchesSearch && matchesCategory
   })
 
-  const activeChannels = channels.filter(c => c.ip && c.port).length
+  const activeChannels = channels.filter(c => 
+    c.channelType === "ip" 
+      ? (c.ip && c.port)
+      : (c.majorNumber && c.minorNumber)
+  ).length
 
   const handleCreateChannel = () => {
     setEditingChannel(undefined)
@@ -218,7 +224,8 @@ const LiveChannels = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              {channel.ip && channel.port && (
+              {((channel.channelType === "ip" && channel.ip && channel.port) || 
+                (channel.channelType === "rf" && channel.majorNumber && channel.minorNumber)) && (
                 <div className="absolute bottom-3 left-3">
                   <div className="bg-black/70 px-2 py-1 rounded-md flex items-center space-x-1">
                     <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
@@ -235,25 +242,45 @@ const LiveChannels = () => {
                   <p className="text-sm text-muted-foreground">{channel.category}</p>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-muted-foreground">IP Address</p>
-                    <p className="font-medium text-card-foreground">{channel.ip}</p>
+                {channel.channelType === "ip" && (
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-muted-foreground">IP Address</p>
+                      <p className="font-medium text-card-foreground">{channel.ip || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Port</p>
+                      <p className="font-medium text-card-foreground">{channel.port || 'N/A'}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-muted-foreground">Port</p>
-                    <p className="font-medium text-card-foreground">{channel.port}</p>
+                )}
+                
+                {channel.channelType === "rf" && (
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-muted-foreground">Major Number</p>
+                      <p className="font-medium text-card-foreground">{channel.majorNumber || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <p className="text-muted-foreground">Minor Number</p>
+                      <p className="font-medium text-card-foreground">{channel.minorNumber || 'N/A'}</p>
+                    </div>
                   </div>
-                </div>
+                )}
                 
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <p className="text-muted-foreground">Type</p>
-                    <p className="font-medium text-card-foreground">{channel.channelType.toUpperCase()}</p>
+                    <p className="font-medium text-card-foreground">{channel.channelType?.toUpperCase() || 'N/A'}</p>
                   </div>
                   <div>
                     <p className="text-muted-foreground">Broadcast</p>
-                    <p className="font-medium text-card-foreground">{channel.ipBroadcastType.toUpperCase()}</p>
+                    <p className="font-medium text-card-foreground">
+                      {channel.channelType === "ip" 
+                        ? (channel.ipBroadcastType?.toUpperCase() || 'N/A')
+                        : (channel.rfBroadcastType?.toUpperCase() || 'N/A')
+                      }
+                    </p>
                   </div>
                 </div>
                 
