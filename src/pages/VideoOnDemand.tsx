@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getVodItems, VodItem, importVod } from "@/services/channelApi";
+import { PermissionError } from "@/lib/apiErrorHandler";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -550,6 +551,8 @@ const VideoOnDemand = () => {
   };
 
   if (error) {
+    const isPermissionError = error instanceof PermissionError;
+    
     return (
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-between mb-8">
@@ -567,10 +570,13 @@ const VideoOnDemand = () => {
           <CardHeader>
             <CardTitle className="text-destructive flex items-center gap-2">
               <Film className="w-5 h-5" />
-              Failed to Load VOD Content
+              {isPermissionError ? "Access Denied" : "Failed to Load VOD Content"}
             </CardTitle>
             <CardDescription>
-              Unable to connect to the VOD service. Please check your connection.
+              {isPermissionError 
+                ? "You do not have permission to use this module. Please contact your administrator." 
+                : "Unable to connect to the VOD service. Please check your connection."
+              }
             </CardDescription>
           </CardHeader>
           <CardContent>
