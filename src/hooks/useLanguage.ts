@@ -227,7 +227,36 @@ export const useLanguage = () => {
 
   const getAvailableLanguages = useCallback((items: Array<{ Locale: string }>) => {
     const availableLocales = [...new Set(items.map(item => item.Locale))];
-    return SUPPORTED_LANGUAGES.filter(lang => availableLocales.includes(lang.code));
+    
+    // Create a more flexible matching system
+    const matchedLanguages = SUPPORTED_LANGUAGES.filter(lang => {
+      // Direct match
+      if (availableLocales.includes(lang.code)) return true;
+      
+      // Base language match (e.g., 'en' matches 'en-US')
+      const baseLang = lang.code.split('-')[0];
+      if (availableLocales.some(locale => locale.startsWith(baseLang))) return true;
+      
+      // Reverse match (e.g., 'en-US' in data matches 'en' in supported languages)
+      if (availableLocales.some(locale => locale.split('-')[0] === baseLang)) return true;
+      
+      return false;
+    });
+    
+    // Always include English as fallback if any data exists
+    if (matchedLanguages.length === 0 && availableLocales.length > 0) {
+      const englishLang = SUPPORTED_LANGUAGES.find(lang => lang.code === 'en');
+      if (englishLang) matchedLanguages.push(englishLang);
+    }
+    
+    // Sort by preference: exact matches first, then base language matches
+    return matchedLanguages.sort((a, b) => {
+      const aExact = availableLocales.includes(a.code);
+      const bExact = availableLocales.includes(b.code);
+      if (aExact && !bExact) return -1;
+      if (!aExact && bExact) return 1;
+      return a.name.localeCompare(b.name);
+    });
   }, []);
 
   const getLocalizedContent = useCallback(<T extends { Locale: string; Text: string }>(
