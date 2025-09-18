@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { login, generateDeviceId } from "@/services/authApi";
 import { LogIn, Eye, EyeOff } from "lucide-react";
 
@@ -14,6 +15,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { checkAuth } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -42,7 +44,8 @@ const Login = () => {
         description: "You have been logged in successfully.",
       });
 
-      // Redirect to dashboard after successful login
+      // Refresh auth status and redirect to dashboard
+      await checkAuth();
       navigate("/");
     } catch (error) {
       toast({
