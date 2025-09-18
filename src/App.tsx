@@ -8,6 +8,8 @@ import { AppSidebar } from "@/components/AppSidebar";
 import Dashboard from "./pages/Dashboard";
 import LiveChannels from "./pages/LiveChannels";
 import VideoOnDemand from "./pages/VideoOnDemand";
+import Login from "./pages/Login";
+import PasswordReset from "./pages/PasswordReset";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +34,8 @@ const App = () => (
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/channels" element={<LiveChannels />} />
                 <Route path="/vod" element={<VideoOnDemand />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/password-reset" element={<PasswordReset />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
