@@ -1,6 +1,5 @@
 // Channel API service for IPTV system
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
-const API_KEY = import.meta.env.VITE_API_KEY
 
 export interface Channel {
   _id: string
@@ -226,9 +225,9 @@ export interface VodResponse {
 export const getChannels = async (): Promise<ChannelResponse> => {
   const response = await fetch(`${API_BASE_URL}/api/databases/list-documents`, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': API_KEY,
     },
     body: JSON.stringify({
       databaseId: 'royaltv_main',
@@ -247,9 +246,9 @@ export const getChannels = async (): Promise<ChannelResponse> => {
 export const createChannel = async (channelData: CreateChannelRequest): Promise<any> => {
   const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/channels`, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': API_KEY,
     },
     body: JSON.stringify(channelData),
   })
@@ -265,9 +264,9 @@ export const createChannel = async (channelData: CreateChannelRequest): Promise<
 export const updateChannel = async (channelId: string, channelData: Partial<CreateChannelRequest>): Promise<any> => {
   const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/channels/${channelId}`, {
     method: 'PUT',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': API_KEY,
     },
     body: JSON.stringify(channelData),
   })
@@ -283,9 +282,9 @@ export const updateChannel = async (channelId: string, channelData: Partial<Crea
 export const deleteChannel = async (channelId: string): Promise<any> => {
   const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/channels/${channelId}`, {
     method: 'DELETE',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': API_KEY,
     },
   })
 
@@ -300,9 +299,9 @@ export const deleteChannel = async (channelId: string): Promise<any> => {
 export const getVodItems = async (): Promise<VodResponse> => {
   const response = await fetch(`${API_BASE_URL}/api/databases/list-documents`, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': API_KEY,
     },
     body: JSON.stringify({
       databaseId: 'royaltv_main',
@@ -321,9 +320,9 @@ export const getVodItems = async (): Promise<VodResponse> => {
 export const importVod = async (url: string): Promise<any> => {
   const response = await fetch(`${API_BASE_URL}/api/services/request/import_vod/ingest`, {
     method: 'POST',
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': API_KEY,
     },
     body: JSON.stringify({ url }),
   })
@@ -339,10 +338,7 @@ export const importVod = async (url: string): Promise<any> => {
 export const getHealth = async (): Promise<HealthResponse> => {
   const response = await fetch(`${API_BASE_URL}/health`, {
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': API_KEY
-    }
+    credentials: 'include',
   });
 
   if (!response.ok) {
