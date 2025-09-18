@@ -21,30 +21,37 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <ProtectedRoute>
-          <SidebarProvider>
-            <div className="min-h-screen flex w-full bg-gradient-dark">
-              {/* Global sidebar trigger */}
-              <header className="fixed top-0 left-0 z-50 h-12 flex items-center bg-background/80 backdrop-blur-md border-b border-border">
-                <SidebarTrigger className="ml-4" />
-              </header>
-              
-              <AppSidebar />
-              
-              <main className="flex-1 pt-12">
-                <Routes>
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/channels" element={<LiveChannels />} />
-                  <Route path="/vod" element={<VideoOnDemand />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/password-reset" element={<PasswordReset />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </main>
-            </div>
-          </SidebarProvider>
-        </ProtectedRoute>
+        <Routes>
+          {/* Authentication routes - no layout */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/password-reset" element={<PasswordReset />} />
+          
+          {/* Protected routes with layout */}
+          <Route path="/*" element={
+            <ProtectedRoute>
+              <SidebarProvider>
+                <div className="min-h-screen flex w-full bg-gradient-dark">
+                  {/* Global sidebar trigger */}
+                  <header className="fixed top-0 left-0 z-50 h-12 flex items-center bg-background/80 backdrop-blur-md border-b border-border">
+                    <SidebarTrigger className="ml-4" />
+                  </header>
+                  
+                  <AppSidebar />
+                  
+                  <main className="flex-1 pt-12">
+                    <Routes>
+                      <Route path="/" element={<Dashboard />} />
+                      <Route path="/channels" element={<LiveChannels />} />
+                      <Route path="/vod" element={<VideoOnDemand />} />
+                      {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </main>
+                </div>
+              </SidebarProvider>
+            </ProtectedRoute>
+          } />
+        </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
