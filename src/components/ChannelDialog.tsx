@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -41,6 +41,34 @@ export const ChannelDialog = ({ open, onOpenChange, channel, onSuccess }: Channe
   })
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
+
+  // Update form data when channel prop changes
+  useEffect(() => {
+    if (channel) {
+      setFormData({
+        name: channel.name,
+        category: channel.category,
+        channelType: channel.channelType,
+        description: channel.description,
+        imgUrl: channel.imgUrl,
+        ip: channel.ip,
+        ipBroadcastType: channel.ipBroadcastType,
+        port: channel.port,
+      })
+    } else {
+      // Reset form for new channel
+      setFormData({
+        name: "",
+        category: "",
+        channelType: "ip",
+        description: "",
+        imgUrl: "",
+        ip: "",
+        ipBroadcastType: "udp",
+        port: "",
+      })
+    }
+  }, [channel, open])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
