@@ -35,9 +35,14 @@ export const ChannelDialog = ({ open, onOpenChange, channel, onSuccess }: Channe
     channelType: channel?.channelType || "ip",
     description: channel?.description || "",
     imgUrl: channel?.imgUrl || "",
+    // IP fields
     ip: channel?.ip || "",
     ipBroadcastType: channel?.ipBroadcastType || "udp",
     port: channel?.port || "",
+    // RF fields
+    majorNumber: channel?.majorNumber || "",
+    minorNumber: channel?.minorNumber || "",
+    rfBroadcastType: channel?.rfBroadcastType || "cable",
   })
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
@@ -51,9 +56,14 @@ export const ChannelDialog = ({ open, onOpenChange, channel, onSuccess }: Channe
         channelType: channel.channelType,
         description: channel.description,
         imgUrl: channel.imgUrl,
-        ip: channel.ip,
-        ipBroadcastType: channel.ipBroadcastType,
-        port: channel.port,
+        // IP fields
+        ip: channel.ip || "",
+        ipBroadcastType: channel.ipBroadcastType || "udp",
+        port: channel.port || "",
+        // RF fields
+        majorNumber: channel.majorNumber || "",
+        minorNumber: channel.minorNumber || "",
+        rfBroadcastType: channel.rfBroadcastType || "cable",
       })
     } else {
       // Reset form for new channel
@@ -63,9 +73,14 @@ export const ChannelDialog = ({ open, onOpenChange, channel, onSuccess }: Channe
         channelType: "ip",
         description: "",
         imgUrl: "",
+        // IP fields
         ip: "",
         ipBroadcastType: "udp",
         port: "",
+        // RF fields
+        majorNumber: "",
+        minorNumber: "",
+        rfBroadcastType: "cable",
       })
     }
   }, [channel, open])
@@ -161,57 +176,100 @@ export const ChannelDialog = ({ open, onOpenChange, channel, onSuccess }: Channe
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="ip" className="text-foreground">IP Address</Label>
-              <Input
-                id="ip"
-                value={formData.ip}
-                onChange={(e) => handleChange('ip', e.target.value)}
-                required
-                className="bg-card border-border"
-              />
-            </div>
-            <div>
-              <Label htmlFor="port" className="text-foreground">Port</Label>
-              <Input
-                id="port"
-                value={formData.port}
-                onChange={(e) => handleChange('port', e.target.value)}
-                required
-                className="bg-card border-border"
-              />
-            </div>
+          <div>
+            <Label htmlFor="channelType" className="text-foreground">Channel Type</Label>
+            <Select value={formData.channelType} onValueChange={(value) => handleChange('channelType', value as "ip" | "rf")}>
+              <SelectTrigger className="bg-card border-border">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-popover border-border">
+                <SelectItem value="ip">IP</SelectItem>
+                <SelectItem value="rf">RF</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="channelType" className="text-foreground">Channel Type</Label>
-              <Select value={formData.channelType} onValueChange={(value) => handleChange('channelType', value)}>
-                <SelectTrigger className="bg-card border-border">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
-                  <SelectItem value="ip">IP</SelectItem>
-                  <SelectItem value="satellite">Satellite</SelectItem>
-                  <SelectItem value="cable">Cable</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="ipBroadcastType" className="text-foreground">Broadcast Type</Label>
-              <Select value={formData.ipBroadcastType} onValueChange={(value) => handleChange('ipBroadcastType', value)}>
-                <SelectTrigger className="bg-card border-border">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
-                  <SelectItem value="udp">UDP</SelectItem>
-                  <SelectItem value="tcp">TCP</SelectItem>
-                  <SelectItem value="multicast">Multicast</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          {formData.channelType === "ip" && (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="ip" className="text-foreground">IP Address</Label>
+                  <Input
+                    id="ip"
+                    value={formData.ip || ""}
+                    onChange={(e) => handleChange('ip', e.target.value)}
+                    required
+                    className="bg-card border-border"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="port" className="text-foreground">Port</Label>
+                  <Input
+                    id="port"
+                    value={formData.port || ""}
+                    onChange={(e) => handleChange('port', e.target.value)}
+                    required
+                    className="bg-card border-border"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="ipBroadcastType" className="text-foreground">IP Broadcast Type</Label>
+                <Select value={formData.ipBroadcastType} onValueChange={(value) => handleChange('ipBroadcastType', value)}>
+                  <SelectTrigger className="bg-card border-border">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border">
+                    <SelectItem value="udp">UDP</SelectItem>
+                    <SelectItem value="tcp">TCP</SelectItem>
+                    <SelectItem value="multicast">Multicast</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
+          )}
+
+          {formData.channelType === "rf" && (
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="majorNumber" className="text-foreground">Major Number</Label>
+                  <Input
+                    id="majorNumber"
+                    value={formData.majorNumber || ""}
+                    onChange={(e) => handleChange('majorNumber', e.target.value)}
+                    required
+                    className="bg-card border-border"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="minorNumber" className="text-foreground">Minor Number</Label>
+                  <Input
+                    id="minorNumber"
+                    value={formData.minorNumber || ""}
+                    onChange={(e) => handleChange('minorNumber', e.target.value)}
+                    required
+                    className="bg-card border-border"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="rfBroadcastType" className="text-foreground">RF Broadcast Type</Label>
+                <Select value={formData.rfBroadcastType} onValueChange={(value) => handleChange('rfBroadcastType', value)}>
+                  <SelectTrigger className="bg-card border-border">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover border-border">
+                    <SelectItem value="cable">Cable</SelectItem>
+                    <SelectItem value="antenna">Antenna</SelectItem>
+                    <SelectItem value="satellite">Satellite</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </>
+          )}
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="border-border">

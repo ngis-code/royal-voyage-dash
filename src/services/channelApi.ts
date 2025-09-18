@@ -6,14 +6,19 @@ export interface Channel {
   _id: string
   _permissions: string[]
   category: string
-  channelType: string
+  channelType: "ip" | "rf"
   createdAt: string
   description: string
   imgUrl: string
-  ip: string
-  ipBroadcastType: string
+  // IP channel fields
+  ip?: string
+  ipBroadcastType?: string
+  port?: string
+  // RF channel fields
+  majorNumber?: string
+  minorNumber?: string
+  rfBroadcastType?: string
   name: string
-  port: string
   updatedAt: string
 }
 
@@ -32,13 +37,18 @@ export interface ChannelResponse {
 
 export interface CreateChannelRequest {
   category: string
-  channelType: string
+  channelType: "ip" | "rf"
   description: string
   imgUrl: string
-  ip: string
-  ipBroadcastType: string
   name: string
-  port: string
+  // IP channel fields
+  ip?: string
+  ipBroadcastType?: string
+  port?: string
+  // RF channel fields
+  majorNumber?: string
+  minorNumber?: string
+  rfBroadcastType?: string
 }
 
 // Get all channels
