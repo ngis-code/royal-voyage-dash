@@ -27,45 +27,45 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card className="bg-gradient-card border-border shadow-card-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-card-foreground">Live Channels</CardTitle>
+            <CardTitle className="text-sm font-medium text-card-foreground">Total Channels</CardTitle>
             <Tv className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-card-foreground">4</div>
-            <p className="text-xs text-muted-foreground">+1 from yesterday</p>
+            <div className="text-2xl font-bold text-card-foreground">0</div>
+            <p className="text-xs text-muted-foreground">No channels configured</p>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-card border-border shadow-card-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-card-foreground">Active Viewers</CardTitle>
-            <Users className="h-4 w-4 text-success" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-card-foreground">5,130</div>
-            <p className="text-xs text-muted-foreground">+12% from last hour</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-card border-border shadow-card-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-card-foreground">Stream Quality</CardTitle>
+            <CardTitle className="text-sm font-medium text-card-foreground">Active Channels</CardTitle>
             <Signal className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-card-foreground">98.5%</div>
-            <p className="text-xs text-muted-foreground">Uptime this month</p>
+            <div className="text-2xl font-bold text-card-foreground">0</div>
+            <p className="text-xs text-muted-foreground">Live broadcasts</p>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-card border-border shadow-card-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-card-foreground">Bandwidth</CardTitle>
-            <TrendingUp className="h-4 w-4 text-warning" />
+            <CardTitle className="text-sm font-medium text-card-foreground">System Status</CardTitle>
+            <Signal className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-card-foreground">33.6 Mbps</div>
-            <p className="text-xs text-muted-foreground">Current usage</p>
+            <div className="text-2xl font-bold text-card-foreground">Online</div>
+            <p className="text-xs text-muted-foreground">All systems operational</p>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-gradient-card border-border shadow-card-shadow">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium text-card-foreground">Configuration</CardTitle>
+            <Settings className="h-4 w-4 text-primary" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-card-foreground">Ready</div>
+            <p className="text-xs text-muted-foreground">System configured</p>
           </CardContent>
         </Card>
       </div>
@@ -74,57 +74,57 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="bg-gradient-card border-border shadow-card-shadow">
           <CardHeader>
-            <CardTitle className="text-card-foreground">Channel Status</CardTitle>
+            <CardTitle className="text-card-foreground">Getting Started</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between p-3 bg-background/50 rounded-lg">
               <div className="flex items-center space-x-3">
-                <div className="w-3 h-3 bg-success rounded-full"></div>
-                <span className="font-medium text-card-foreground">RC Sports HD</span>
+                <div className="w-3 h-3 bg-primary rounded-half"></div>
+                <span className="font-medium text-card-foreground">Configure your first channel</span>
               </div>
-              <span className="text-sm text-muted-foreground">1,420 viewers</span>
+              <Button size="sm" variant="outline">Setup</Button>
             </div>
             <div className="flex items-center justify-between p-3 bg-background/50 rounded-lg">
               <div className="flex items-center space-x-3">
-                <div className="w-3 h-3 bg-success rounded-full"></div>
-                <span className="font-medium text-card-foreground">RC Movies Premium</span>
+                <div className="w-3 h-3 bg-muted rounded-half"></div>
+                <span className="font-medium text-card-foreground">Test broadcast quality</span>
               </div>
-              <span className="text-sm text-muted-foreground">2,150 viewers</span>
+              <Button size="sm" variant="outline" disabled>Pending</Button>
             </div>
             <div className="flex items-center justify-between p-3 bg-background/50 rounded-lg">
               <div className="flex items-center space-x-3">
-                <div className="w-3 h-3 bg-warning rounded-full"></div>
-                <span className="font-medium text-card-foreground">RC Entertainment</span>
+                <div className="w-3 h-3 bg-muted rounded-half"></div>
+                <span className="font-medium text-card-foreground">Monitor system performance</span>
               </div>
-              <span className="text-sm text-muted-foreground">Maintenance</span>
+              <Button size="sm" variant="outline" disabled>Pending</Button>
             </div>
           </CardContent>
         </Card>
 
         <Card className="bg-gradient-card border-border shadow-card-shadow">
           <CardHeader>
-            <CardTitle className="text-card-foreground">Recent Activity</CardTitle>
+            <CardTitle className="text-card-foreground">System Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-start space-x-3">
-              <div className="w-2 h-2 bg-primary rounded-full mt-2"></div>
+              <div className="w-2 h-2 bg-success rounded-full mt-2"></div>
               <div>
-                <p className="text-sm font-medium text-card-foreground">Channel RC Sports HD updated</p>
-                <p className="text-xs text-muted-foreground">5 minutes ago</p>
+                <p className="text-sm font-medium text-card-foreground">API Connection</p>
+                <p className="text-xs text-muted-foreground">Connected and operational</p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
               <div className="w-2 h-2 bg-success rounded-full mt-2"></div>
               <div>
-                <p className="text-sm font-medium text-card-foreground">New viewer milestone reached</p>
-                <p className="text-xs text-muted-foreground">1 hour ago</p>
+                <p className="text-sm font-medium text-card-foreground">Database Status</p>
+                <p className="text-xs text-muted-foreground">Ready for operations</p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
-              <div className="w-2 h-2 bg-warning rounded-full mt-2"></div>
+              <div className="w-2 h-2 bg-success rounded-full mt-2"></div>
               <div>
-                <p className="text-sm font-medium text-card-foreground">Maintenance scheduled</p>
-                <p className="text-xs text-muted-foreground">3 hours ago</p>
+                <p className="text-sm font-medium text-card-foreground">System Health</p>
+                <p className="text-xs text-muted-foreground">All services running</p>
               </div>
             </div>
           </CardContent>

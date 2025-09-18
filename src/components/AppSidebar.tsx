@@ -1,4 +1,4 @@
-import { Home, Tv, Settings, BarChart3, Users, Radio } from "lucide-react"
+import { Home, Tv } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 
 import {
@@ -16,10 +16,6 @@ import {
 const menuItems = [
   { title: "Dashboard", url: "/", icon: Home },
   { title: "Live Channels", url: "/channels", icon: Tv },
-  { title: "Analytics", url: "/analytics", icon: BarChart3 },
-  { title: "Users", url: "/users", icon: Users },
-  { title: "Broadcast", url: "/broadcast", icon: Radio },
-  { title: "Settings", url: "/settings", icon: Settings },
 ]
 
 export function AppSidebar() {
