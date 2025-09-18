@@ -172,7 +172,41 @@ export interface VodItem {
       DisplayOrder: number
       Role: string
     }>
+    Crew: Array<{
+      Name: string
+      DisplayOrder: number
+      Role: string
+    }>
+    Ratings: Array<{
+      Authority: string
+      Value: string
+    }>
+    Assets: Array<{
+      Name: string
+      AssetType: string
+      FileType: string
+      Location: string
+      Locale: string
+    }>
+    Episodes: any[]
   }
+  raw?: {
+    Title: string
+    PublicityMetadataLocation: string
+    Identifiers: {
+      FilmNumber: string
+    }
+    DRMKeyInfo: any
+    EffectiveLicenseDates: {
+      LicenseStart: string
+      LicenseEnd: string
+    }
+    ProtectionType: string
+    FilmVersion: string
+    Asset: any
+    StreamingManifests: any
+  }
+  resolvedAssets?: any
 }
 
 export interface VodResponse {
