@@ -1,0 +1,130 @@
+// Channel API service for IPTV system
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
+const API_KEY = import.meta.env.VITE_API_KEY
+
+export interface Channel {
+  _id: string
+  _permissions: string[]
+  category: string
+  channelType: string
+  createdAt: string
+  description: string
+  imgUrl: string
+  ip: string
+  ipBroadcastType: string
+  name: string
+  port: string
+  updatedAt: string
+}
+
+export interface ChannelResponse {
+  status: number
+  payload: {
+    documents: Channel[]
+    canAccessAllDocuments: boolean
+    pagination: {
+      offset: number
+      limit: number
+      total: number
+    }
+  }
+}
+
+export interface CreateChannelRequest {
+  category: string
+  channelType: string
+  description: string
+  imgUrl: string
+  ip: string
+  ipBroadcastType: string
+  name: string
+  port: string
+}
+
+// Get all channels
+export const getChannels = async (): Promise<ChannelResponse> => {
+  const response = await fetch(`${API_BASE_URL}/api/databases/list-documents`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+    },
+    body: JSON.stringify({
+      databaseId: 'royaltv_main',
+      collectionId: 'channels',
+    }),
+  })
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch channels: ${response.statusText}`)
+  }
+
+  return response.json()
+}
+
+// Create a new channel
+export const createChannel = async (channelData: CreateChannelRequest): Promise<any> => {
+  const response = await fetch(`${API_BASE_URL}/api/databases/create-document`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+    },
+    body: JSON.stringify({
+      databaseId: 'royaltv_main',
+      collectionId: 'channels',
+      data: channelData,
+    }),
+  })
+
+  if (!response.ok) {
+    throw new Error(`Failed to create channel: ${response.statusText}`)
+  }
+
+  return response.json()
+}
+
+// Update a channel
+export const updateChannel = async (channelId: string, channelData: Partial<CreateChannelRequest>): Promise<any> => {
+  const response = await fetch(`${API_BASE_URL}/api/databases/update-document`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+    },
+    body: JSON.stringify({
+      databaseId: 'royaltv_main',
+      collectionId: 'channels',
+      documentId: channelId,
+      data: channelData,
+    }),
+  })
+
+  if (!response.ok) {
+    throw new Error(`Failed to update channel: ${response.statusText}`)
+  }
+
+  return response.json()
+}
+
+// Delete a channel
+export const deleteChannel = async (channelId: string): Promise<any> => {
+  const response = await fetch(`${API_BASE_URL}/api/databases/delete-document`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+    },
+    body: JSON.stringify({
+      databaseId: 'royaltv_main',
+      collectionId: 'channels',
+      documentId: channelId,
+    }),
+  })
+
+  if (!response.ok) {
+    throw new Error(`Failed to delete channel: ${response.statusText}`)
+  }
+
+  return response.json()
+}

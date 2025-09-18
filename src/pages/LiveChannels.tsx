@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Plus, Search, Filter, MoreHorizontal, Play, Users, Signal, Tv } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,93 +10,67 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-
-// Mock data for development
-const mockChannels = [
-  {
-    id: 1,
-    name: "RC Sports HD",
-    category: "Sports",
-    status: "active",
-    viewers: 1420,
-    quality: "1080p",
-    bandwidth: "8.5 Mbps",
-    thumbnail: "https://picsum.photos/400/225?random=1"
-  },
-  {
-    id: 2,
-    name: "RC News 24/7",
-    category: "News",
-    status: "active",
-    viewers: 890,
-    quality: "720p",
-    bandwidth: "5.2 Mbps",
-    thumbnail: "https://picsum.photos/400/225?random=2"
-  },
-  {
-    id: 3,
-    name: "RC Entertainment",
-    category: "Entertainment",
-    status: "maintenance",
-    viewers: 0,
-    quality: "1080p",
-    bandwidth: "0 Mbps",
-    thumbnail: "https://picsum.photos/400/225?random=3"
-  },
-  {
-    id: 4,
-    name: "RC Movies Premium",
-    category: "Movies",
-    status: "active",
-    viewers: 2150,
-    quality: "4K",
-    bandwidth: "15.8 Mbps",
-    thumbnail: "https://picsum.photos/400/225?random=4"
-  },
-  {
-    id: 5,
-    name: "RC Kids Zone",
-    category: "Kids",
-    status: "active",
-    viewers: 670,
-    quality: "720p",
-    bandwidth: "4.1 Mbps",
-    thumbnail: "https://picsum.photos/400/225?random=5"
-  },
-  {
-    id: 6,
-    name: "RC Documentary",
-    category: "Documentary",
-    status: "offline",
-    viewers: 0,
-    quality: "1080p",
-    bandwidth: "0 Mbps",
-    thumbnail: "https://picsum.photos/400/225?random=6"
-  }
-]
+import { useToast } from "@/hooks/use-toast"
+import { getChannels, Channel } from "@/services/channelApi"
 
 const LiveChannels = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
+  const [channels, setChannels] = useState<Channel[]>([])
+  const [loading, setLoading] = useState(true)
+  const { toast } = useToast()
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "active":
-        return <Badge className="bg-success text-success-foreground">Live</Badge>
-      case "maintenance":
-        return <Badge className="bg-warning text-warning-foreground">Maintenance</Badge>
-      case "offline":
-        return <Badge variant="destructive">Offline</Badge>
-      default:
-        return <Badge variant="secondary">{status}</Badge>
+  // Fetch channels from API
+  useEffect(() => {
+    const fetchChannels = async () => {
+      try {
+        setLoading(true)
+        const response = await getChannels()
+        setChannels(response.payload.documents)
+      } catch (error) {
+        console.error('Failed to fetch channels:', error)
+        toast({
+          title: "Error",
+          description: "Failed to load channels. Please try again.",
+          variant: "destructive",
+        })
+      } finally {
+        setLoading(false)
+      }
     }
+
+    fetchChannels()
+  }, [toast])
+
+  const getStatusBadge = (channel: Channel) => {
+    // Determine status based on channel data - you can customize this logic
+    const isActive = channel.ip && channel.port
+    if (isActive) {
+      return <Badge className="bg-success text-success-foreground">Live</Badge>
+    }
+    return <Badge variant="destructive">Offline</Badge>
   }
 
-  const filteredChannels = mockChannels.filter(channel => {
+  const filteredChannels = channels.filter(channel => {
     const matchesSearch = channel.name.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = selectedCategory === "all" || channel.category.toLowerCase() === selectedCategory
+    const matchesCategory = selectedCategory === "all" || channel.category.toLowerCase() === selectedCategory.toLowerCase()
     return matchesSearch && matchesCategory
   })
+
+  const activeChannels = channels.filter(c => c.ip && c.port).length
+  const totalViewers = activeChannels * 450 // Mock viewer calculation
+  const totalBandwidth = activeChannels * 5.2 // Mock bandwidth calculation
+
+  if (loading) {
+    return (
+      <div className="flex-1 flex items-center justify-center p-6">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-foreground">Loading channels...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="flex-1 space-y-6 p-6">
@@ -120,8 +94,8 @@ const LiveChannels = () => {
             <Tv className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-card-foreground">{mockChannels.length}</div>
-            <p className="text-xs text-muted-foreground">+2 from last week</p>
+            <div className="text-2xl font-bold text-card-foreground">{channels.length}</div>
+            <p className="text-xs text-muted-foreground">Loaded from API</p>
           </CardContent>
         </Card>
 
@@ -131,9 +105,7 @@ const LiveChannels = () => {
             <Signal className="h-4 w-4 text-success" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-card-foreground">
-              {mockChannels.filter(c => c.status === "active").length}
-            </div>
+            <div className="text-2xl font-bold text-card-foreground">{activeChannels}</div>
             <p className="text-xs text-muted-foreground">Live broadcasting</p>
           </CardContent>
         </Card>
@@ -144,9 +116,7 @@ const LiveChannels = () => {
             <Users className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-card-foreground">
-              {mockChannels.reduce((sum, channel) => sum + channel.viewers, 0).toLocaleString()}
-            </div>
+            <div className="text-2xl font-bold text-card-foreground">{totalViewers.toLocaleString()}</div>
             <p className="text-xs text-muted-foreground">Across all channels</p>
           </CardContent>
         </Card>
@@ -157,11 +127,7 @@ const LiveChannels = () => {
             <Play className="h-4 w-4 text-warning" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-card-foreground">
-              {mockChannels.reduce((sum, channel) => {
-                return sum + parseFloat(channel.bandwidth.replace(' Mbps', ''))
-              }, 0).toFixed(1)} Mbps
-            </div>
+            <div className="text-2xl font-bold text-card-foreground">{totalBandwidth.toFixed(1)} Mbps</div>
             <p className="text-xs text-muted-foreground">Current usage</p>
           </CardContent>
         </Card>
@@ -187,15 +153,19 @@ const LiveChannels = () => {
       {/* Channels Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredChannels.map((channel) => (
-          <Card key={channel.id} className="bg-gradient-card border-border shadow-card-shadow hover:shadow-professional transition-all duration-300 group overflow-hidden">
+          <Card key={channel._id} className="bg-gradient-card border-border shadow-card-shadow hover:shadow-professional transition-all duration-300 group overflow-hidden">
             <div className="relative">
               <img 
-                src={channel.thumbnail} 
+                src={channel.imgUrl.startsWith('/') ? `${import.meta.env.VITE_API_BASE_URL}${channel.imgUrl}` : channel.imgUrl}
                 alt={channel.name}
                 className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
+                onError={(e) => {
+                  // Fallback to a placeholder image if the channel image fails to load
+                  e.currentTarget.src = `https://picsum.photos/400/225?random=${channel._id}`
+                }}
               />
               <div className="absolute top-3 left-3">
-                {getStatusBadge(channel.status)}
+                {getStatusBadge(channel)}
               </div>
               <div className="absolute top-3 right-3">
                 <DropdownMenu>
@@ -211,7 +181,7 @@ const LiveChannels = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              {channel.status === "active" && (
+              {channel.ip && channel.port && (
                 <div className="absolute bottom-3 left-3">
                   <div className="bg-black/70 px-2 py-1 rounded-md flex items-center space-x-1">
                     <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
@@ -230,20 +200,36 @@ const LiveChannels = () => {
                 
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <p className="text-muted-foreground">Quality</p>
-                    <p className="font-medium text-card-foreground">{channel.quality}</p>
+                    <p className="text-muted-foreground">IP Address</p>
+                    <p className="font-medium text-card-foreground">{channel.ip}</p>
                   </div>
                   <div>
-                    <p className="text-muted-foreground">Viewers</p>
-                    <p className="font-medium text-card-foreground">{channel.viewers.toLocaleString()}</p>
+                    <p className="text-muted-foreground">Port</p>
+                    <p className="font-medium text-card-foreground">{channel.port}</p>
                   </div>
                 </div>
                 
-                <div className="flex justify-between items-center pt-2 border-t border-border">
-                  <span className="text-sm text-muted-foreground">{channel.bandwidth}</span>
-                  <Button size="sm" variant="outline" className="border-border">
-                    Manage
-                  </Button>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Type</p>
+                    <p className="font-medium text-card-foreground">{channel.channelType.toUpperCase()}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Broadcast</p>
+                    <p className="font-medium text-card-foreground">{channel.ipBroadcastType.toUpperCase()}</p>
+                  </div>
+                </div>
+                
+                <div className="pt-2 border-t border-border">
+                  <p className="text-xs text-muted-foreground mb-2">{channel.description}</p>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground">
+                      Updated: {new Date(channel.updatedAt).toLocaleDateString()}
+                    </span>
+                    <Button size="sm" variant="outline" className="border-border">
+                      Manage
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>
