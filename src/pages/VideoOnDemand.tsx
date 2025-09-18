@@ -85,7 +85,18 @@ const VideoOnDemand = () => {
 
     setIsImporting(true);
     try {
-      await importVod(importUrl);
+      const response = await importVod(importUrl);
+      
+      // Check if the import was successful
+      if (response.ok === false) {
+        toast({
+          title: "Import failed",
+          description: `Import failed with ${response.errors || 0} error(s). ${response.processed || 0} items processed, ${response.upserted || 0} items added.`,
+          variant: "destructive",
+        });
+        return;
+      }
+      
       toast({
         title: "VOD import started",
         description: "The import process has been initiated successfully.",
