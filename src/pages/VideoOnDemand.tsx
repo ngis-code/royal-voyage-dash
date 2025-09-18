@@ -3,15 +3,19 @@ import { getVodItems, VodItem } from "@/services/channelApi";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, Clock, Star, Users, Film, Play, RefreshCw, Image, Info, Award, Globe, HardDrive, Monitor } from "lucide-react";
+import { Calendar, Clock, Star, Users, Film, Play, RefreshCw, Image, Info, Award, Globe, HardDrive, Monitor, Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
+import { useLanguage } from "@/hooks/useLanguage";
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 const VideoOnDemand = () => {
+  const { selectedLanguage, changeLanguage, getAvailableLanguages, getLocalizedContent } = useLanguage();
+  
   const { data: vodData, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['vod-items'],
     queryFn: getVodItems,
@@ -40,27 +44,53 @@ const VideoOnDemand = () => {
     return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
   };
 
-  const getEnglishTitle = (vodItem: VodItem) => {
-    const englishTitle = vodItem.publicityMetadata.Titles.find(
-      title => title.Locale === 'en' || title.Locale === 'en-US'
-    );
-    return englishTitle?.Text || vodItem.publicityMetadata.Title;
+  const getLocalizedTitle = (vodItem: VodItem) => {
+    const localizedTitle = getLocalizedContent(vodItem.publicityMetadata.Titles);
+    return localizedTitle?.Text || vodItem.publicityMetadata.Title;
   };
 
-  const getEnglishSynopsis = (vodItem: VodItem) => {
-    const englishSynopsis = vodItem.publicityMetadata.Synopses.find(
-      synopsis => (synopsis.Locale === 'en' || synopsis.Locale === 'en-US') && 
-      synopsis.SourceType === 'TabletSynopsis'
+  const getLocalizedSynopsis = (vodItem: VodItem) => {
+    // Try to get TabletSynopsis first for better mobile display
+    const tabletSynopsis = vodItem.publicityMetadata.Synopses.filter(
+      synopsis => synopsis.SourceType === 'TabletSynopsis'
     );
-    return englishSynopsis?.Text || 
-           vodItem.publicityMetadata.Synopses.find(s => s.Locale === 'en' || s.Locale === 'en-US')?.Text ||
-           'No synopsis available';
+    
+    if (tabletSynopsis.length > 0) {
+      const localizedSynopsis = getLocalizedContent(tabletSynopsis);
+      if (localizedSynopsis) return localizedSynopsis.Text;
+    }
+    
+    // Fallback to any synopsis
+    const localizedSynopsis = getLocalizedContent(vodItem.publicityMetadata.Synopses);
+    return localizedSynopsis?.Text || 'No synopsis available';
   };
 
-  const getEnglishGenres = (vodItem: VodItem) => {
-    return vodItem.publicityMetadata.Genres.filter(
-      genre => genre.Locale === 'en' || genre.Locale === 'en-US'
-    ).slice(0, 3);
+  const getLocalizedGenres = (vodItem: VodItem) => {
+    const availableGenres = vodItem.publicityMetadata.Genres;
+    const uniqueGenres = availableGenres.filter((genre, index, self) => 
+      index === self.findIndex(g => g.Text === genre.Text && g.Locale === genre.Locale)
+    );
+    
+    // Get genres in selected language
+    const localizedGenres = uniqueGenres.filter(genre => 
+      genre.Locale === selectedLanguage || 
+      (selectedLanguage.includes('-') && genre.Locale === selectedLanguage.split('-')[0])
+    );
+    
+    // Fallback to English if no localized genres
+    const fallbackGenres = localizedGenres.length > 0 ? localizedGenres : 
+      uniqueGenres.filter(genre => genre.Locale === 'en' || genre.Locale === 'en-US');
+    
+    return fallbackGenres.slice(0, 3);
+  };
+
+  const getAvailableLanguagesForMovie = (vodItem: VodItem) => {
+    const allLocales = new Set([
+      ...vodItem.publicityMetadata.Titles.map(t => t.Locale),
+      ...vodItem.publicityMetadata.Synopses.map(s => s.Locale),
+      ...vodItem.publicityMetadata.Genres.map(g => g.Locale)
+    ]);
+    return getAvailableLanguages(Array.from(allLocales).map(locale => ({ Locale: locale })));
   };
 
   const getMainCast = (vodItem: VodItem) => {
@@ -157,7 +187,15 @@ const VideoOnDemand = () => {
         </DialogTrigger>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
-            <DialogTitle className="text-2xl">{getEnglishTitle(vodItem)}</DialogTitle>
+            <DialogTitle className="text-2xl flex items-center justify-between">
+              <span>{getLocalizedTitle(vodItem)}</span>
+              <LanguageSelector
+                availableLanguages={getAvailableLanguagesForMovie(vodItem)}
+                selectedLanguage={selectedLanguage}
+                onLanguageChange={changeLanguage}
+                compact
+              />
+            </DialogTitle>
           </DialogHeader>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-full">
@@ -167,7 +205,7 @@ const VideoOnDemand = () => {
                 {posterImage ? (
                   <img 
                     src={`https://assets.swankmp.net/${posterImage.Location}`}
-                    alt={`${getEnglishTitle(vodItem)} poster`}
+                    alt={`${getLocalizedTitle(vodItem)} poster`}
                     className="w-full h-full object-cover"
                     onError={(e) => {
                       e.currentTarget.style.display = 'none';
@@ -232,16 +270,33 @@ const VideoOnDemand = () => {
                     <div>
                       <h4 className="font-medium text-foreground mb-2">Synopsis</h4>
                       <p className="text-sm text-muted-foreground leading-relaxed">
-                        {getEnglishSynopsis(vodItem)}
+                        {getLocalizedSynopsis(vodItem)}
                       </p>
                     </div>
 
                     <div>
                       <h4 className="font-medium text-foreground mb-2">Genres</h4>
                       <div className="flex flex-wrap gap-2">
-                        {getEnglishGenres(vodItem).map((genre, index) => (
+                        {getLocalizedGenres(vodItem).map((genre, index) => (
                           <Badge key={index} variant="outline">
                             {genre.Text}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <h4 className="font-medium text-foreground mb-2">Available Languages</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {getAvailableLanguagesForMovie(vodItem).map((language) => (
+                          <Badge 
+                            key={language.code} 
+                            variant={language.code === selectedLanguage ? "default" : "secondary"}
+                            className="cursor-pointer"
+                            onClick={() => changeLanguage(language.code)}
+                          >
+                            <span className="mr-1">{language.flag}</span>
+                            {language.name}
                           </Badge>
                         ))}
                       </div>
@@ -454,10 +509,25 @@ const VideoOnDemand = () => {
             {vodData?.payload.documents.length || 0} movies available in your library
           </p>
         </div>
-        <Button onClick={handleRefresh} disabled={isFetching} className="gap-2">
-          <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
-          Refresh
-        </Button>
+        <div className="flex items-center gap-3">
+          {vodData?.payload.documents && vodData.payload.documents.length > 0 && (
+            <LanguageSelector
+              availableLanguages={getAvailableLanguages(
+                vodData.payload.documents.flatMap(movie => [
+                  ...movie.publicityMetadata.Titles,
+                  ...movie.publicityMetadata.Synopses,
+                  ...movie.publicityMetadata.Genres
+                ]).map(item => ({ Locale: item.Locale }))
+              )}
+              selectedLanguage={selectedLanguage}
+              onLanguageChange={changeLanguage}
+            />
+          )}
+          <Button onClick={handleRefresh} disabled={isFetching} className="gap-2">
+            <RefreshCw className={`w-4 h-4 ${isFetching ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -512,7 +582,7 @@ const VideoOnDemand = () => {
                       {posterImage ? (
                         <img 
                           src={`https://assets.swankmp.net/${posterImage.Location}`}
-                          alt={`${getEnglishTitle(vodItem)} poster`}
+                          alt={`${getLocalizedTitle(vodItem)} poster`}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none';
@@ -537,15 +607,25 @@ const VideoOnDemand = () => {
                         </div>
                       </div>
 
-                      {/* Rating badge */}
-                      <Badge variant="secondary" className="absolute top-3 right-3 bg-black/70 text-white border-0">
-                        {vodItem.publicityMetadata.Rating}
-                      </Badge>
+                      {/* Rating and Language badges */}
+                      <div className="absolute top-3 right-3 flex flex-col gap-2">
+                        <Badge variant="secondary" className="bg-black/70 text-white border-0">
+                          {vodItem.publicityMetadata.Rating}
+                        </Badge>
+                        {getAvailableLanguagesForMovie(vodItem).length > 1 && (
+                          <LanguageSelector
+                            availableLanguages={getAvailableLanguagesForMovie(vodItem)}
+                            selectedLanguage={selectedLanguage}
+                            onLanguageChange={changeLanguage}
+                            compact
+                          />
+                        )}
+                      </div>
                     </div>
 
                     <CardHeader className="pb-4">
                       <CardTitle className="text-lg leading-tight mb-2 group-hover:text-primary transition-colors">
-                        {getEnglishTitle(vodItem)}
+                        {getLocalizedTitle(vodItem)}
                       </CardTitle>
                       <CardDescription className="text-sm">
                         {vodItem.publicityMetadata.Studio} • {vodItem.publicityMetadata.ReleaseYear}
@@ -554,16 +634,24 @@ const VideoOnDemand = () => {
                             Directed by {director}
                           </span>
                         )}
+                        {getAvailableLanguagesForMovie(vodItem).length > 1 && (
+                          <div className="flex items-center gap-1 mt-2">
+                            <Languages className="w-3 h-3 text-muted-foreground" />
+                            <span className="text-xs text-muted-foreground">
+                              {getAvailableLanguagesForMovie(vodItem).length} languages
+                            </span>
+                          </div>
+                        )}
                       </CardDescription>
                     </CardHeader>
                     
                     <CardContent className="space-y-4">
                       <p className="text-sm text-muted-foreground line-clamp-3">
-                        {getEnglishSynopsis(vodItem)}
+                        {getLocalizedSynopsis(vodItem)}
                       </p>
 
                       <div className="flex flex-wrap gap-2">
-                        {getEnglishGenres(vodItem).map((genre, index) => (
+                        {getLocalizedGenres(vodItem).map((genre, index) => (
                           <Badge key={index} variant="outline" className="text-xs">
                             {genre.Text}
                           </Badge>
