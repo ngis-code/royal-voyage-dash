@@ -29,6 +29,14 @@ const VideoOnDemand = () => {
     queryKey: ['vod-items'],
     queryFn: getVodItems,
     refetchOnWindowFocus: false,
+    retry: (failureCount, error) => {
+      // Don't retry on permission errors (403)
+      if (error instanceof PermissionError) {
+        return false;
+      }
+      // Don't retry more than 2 times for other errors
+      return failureCount < 2;
+    },
   });
 
   const handleRefresh = async () => {
@@ -551,7 +559,9 @@ const VideoOnDemand = () => {
   };
 
   if (error) {
-    const isPermissionError = error instanceof PermissionError;
+    const isPermissionError = error instanceof PermissionError || 
+                              (error as any)?.message?.includes("permission") ||
+                              (error as any)?.message?.includes("You do not have permission");
     
     return (
       <div className="container mx-auto p-6">
@@ -580,10 +590,12 @@ const VideoOnDemand = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={handleRefresh} variant="outline" className="gap-2">
-              <RefreshCw className="w-4 h-4" />
-              Try Again
-            </Button>
+            {!isPermissionError && (
+              <Button onClick={handleRefresh} variant="outline" className="gap-2">
+                <RefreshCw className="w-4 h-4" />
+                Try Again
+              </Button>
+            )}
           </CardContent>
         </Card>
       </div>
