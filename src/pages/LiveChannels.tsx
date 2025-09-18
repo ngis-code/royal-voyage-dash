@@ -42,7 +42,7 @@ const LiveChannels = () => {
 
   const getStatusBadge = (channel: Channel) => {
     if (channel.status === "active") {
-      return <Badge className="bg-success text-success-foreground">Live</Badge>
+      return null // Don't show badge for active channels, use bottom left LIVE indicator instead
     }
     return <Badge variant="destructive">Inactive</Badge>
   }
@@ -191,9 +191,11 @@ const LiveChannels = () => {
                   e.currentTarget.src = 'https://via.placeholder.com/400x225/1a1a1a/white?text=No+Image'
                 }}
               />
-              <div className="absolute top-3 left-3">
-                {getStatusBadge(channel)}
-              </div>
+              {getStatusBadge(channel) && (
+                <div className="absolute top-3 left-3">
+                  {getStatusBadge(channel)}
+                </div>
+              )}
               <div className="absolute top-3 right-3">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
