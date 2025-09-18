@@ -336,6 +336,23 @@ export const importVod = async (url: string): Promise<any> => {
   return response.json()
 }
 
+// Delete a VOD item
+export const deleteVodItem = async (vodItemId: string): Promise<any> => {
+  const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/vod_imports/${vodItemId}`, {
+    method: 'DELETE',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return response.json()
+}
+
 // Health check
 export const getHealth = async (): Promise<HealthResponse> => {
   const response = await fetch(`${API_BASE_URL}/health`, {

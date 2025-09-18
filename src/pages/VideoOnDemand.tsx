@@ -1,14 +1,30 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getVodItems, VodItem, importVod } from "@/services/channelApi";
+import { getVodItems, VodItem, importVod, deleteVodItem } from "@/services/channelApi";
 import { PermissionError } from "@/lib/apiErrorHandler";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, Clock, Star, Users, Film, Play, RefreshCw, Image, Info, Award, Globe, HardDrive, Monitor, Languages, Search, ChevronDown, Download } from "lucide-react";
+import { Calendar, Clock, Star, Users, Film, Play, RefreshCw, Image, Info, Award, Globe, HardDrive, Monitor, Languages, Search, ChevronDown, Download, MoreVertical, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -24,6 +40,8 @@ const VideoOnDemand = () => {
   const [selectedMovie, setSelectedMovie] = useState<VodItem | null>(null);
   const [importUrl, setImportUrl] = useState("");
   const [isImporting, setIsImporting] = useState(false);
+  const [vodItemToDelete, setVodItemToDelete] = useState<VodItem | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   
   const { data: vodData, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['vod-items'],
@@ -85,6 +103,33 @@ const VideoOnDemand = () => {
       });
     } finally {
       setIsImporting(false);
+    }
+  };
+
+  const handleDeleteVod = (vodItem: VodItem) => {
+    setVodItemToDelete(vodItem);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!vodItemToDelete) return;
+
+    try {
+      await deleteVodItem(vodItemToDelete._id);
+      toast({
+        title: "Success",
+        description: "VOD item deleted successfully",
+      });
+      refetch();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete VOD item. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setVodItemToDelete(null);
+      setDeleteDialogOpen(false);
     }
   };
 
@@ -853,6 +898,28 @@ const VideoOnDemand = () => {
                           <div className="space-y-2">
                             <div className="flex items-center justify-between text-sm">
                               <span className="font-semibold text-foreground">{vodItem.publicityMetadata.Studio}</span>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteVod(vodItem);
+                                    }}
+                                    className="text-destructive"
+                                  >
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    Delete VOD Item
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                            
+                            <div className="flex items-center justify-center">
                               <Badge variant="secondary" className="text-xs">
                                 {vodItem.publicityMetadata.Category}
                               </Badge>
@@ -901,6 +968,28 @@ const VideoOnDemand = () => {
           )}
         </>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete VOD Item</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{vodItemToDelete ? getLocalizedTitle(vodItemToDelete) : ''}"? 
+              This action cannot be undone and will permanently remove the VOD item from your library.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
