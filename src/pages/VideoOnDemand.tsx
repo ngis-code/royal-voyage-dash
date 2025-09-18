@@ -45,43 +45,64 @@ const VideoOnDemand = () => {
   };
 
   const getLocalizedTitle = (vodItem: VodItem) => {
-    const localizedTitle = getLocalizedContent(vodItem.publicityMetadata.Titles);
+    const localizedTitle = getLocalizedContent(
+      vodItem.publicityMetadata.Titles, 
+      'en', 
+      'MasterTitle'
+    ) || getLocalizedContent(vodItem.publicityMetadata.Titles, 'en', 'Default');
     return localizedTitle?.Text || vodItem.publicityMetadata.Title;
   };
 
   const getLocalizedSynopsis = (vodItem: VodItem) => {
-    // Try to get TabletSynopsis first for better mobile display
-    const tabletSynopsis = vodItem.publicityMetadata.Synopses.filter(
-      synopsis => synopsis.SourceType === 'TabletSynopsis'
+    // Prefer TabletSynopsis for better display, then Default, then any available
+    const tabletSynopsis = getLocalizedContent(
+      vodItem.publicityMetadata.Synopses, 
+      'en', 
+      'TabletSynopsis'
     );
     
-    if (tabletSynopsis.length > 0) {
-      const localizedSynopsis = getLocalizedContent(tabletSynopsis);
-      if (localizedSynopsis) return localizedSynopsis.Text;
-    }
+    if (tabletSynopsis) return tabletSynopsis.Text;
     
-    // Fallback to any synopsis
-    const localizedSynopsis = getLocalizedContent(vodItem.publicityMetadata.Synopses);
-    return localizedSynopsis?.Text || 'No synopsis available';
+    const defaultSynopsis = getLocalizedContent(
+      vodItem.publicityMetadata.Synopses, 
+      'en', 
+      'Default'
+    );
+    
+    if (defaultSynopsis) return defaultSynopsis.Text;
+    
+    // Fallback to any available synopsis
+    const anySynopsis = getLocalizedContent(vodItem.publicityMetadata.Synopses, 'en');
+    return anySynopsis?.Text || 'No synopsis available';
   };
 
   const getLocalizedGenres = (vodItem: VodItem) => {
     const availableGenres = vodItem.publicityMetadata.Genres;
+    
+    // Get unique genres to avoid duplicates
     const uniqueGenres = availableGenres.filter((genre, index, self) => 
       index === self.findIndex(g => g.Text === genre.Text && g.Locale === genre.Locale)
     );
     
-    // Get genres in selected language
-    const localizedGenres = uniqueGenres.filter(genre => 
-      genre.Locale === selectedLanguage || 
-      (selectedLanguage.includes('-') && genre.Locale === selectedLanguage.split('-')[0])
-    );
+    // Get genres in selected language first
+    const localizedGenres = uniqueGenres.filter(genre => genre.Locale === selectedLanguage);
     
-    // Fallback to English if no localized genres
-    const fallbackGenres = localizedGenres.length > 0 ? localizedGenres : 
-      uniqueGenres.filter(genre => genre.Locale === 'en' || genre.Locale === 'en-US');
+    // If no exact match, try base language
+    if (localizedGenres.length === 0 && selectedLanguage.includes('-')) {
+      const baseLanguage = selectedLanguage.split('-')[0];
+      const baseGenres = uniqueGenres.filter(genre => genre.Locale === baseLanguage);
+      if (baseGenres.length > 0) return baseGenres.slice(0, 3);
+    }
     
-    return fallbackGenres.slice(0, 3);
+    // If still no match, fallback to English
+    if (localizedGenres.length === 0) {
+      const englishGenres = uniqueGenres.filter(genre => 
+        genre.Locale === 'en' || genre.Locale === 'en-US'
+      );
+      if (englishGenres.length > 0) return englishGenres.slice(0, 3);
+    }
+    
+    return localizedGenres.slice(0, 3);
   };
 
   const getAvailableLanguagesForMovie = (vodItem: VodItem) => {

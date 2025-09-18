@@ -228,57 +228,52 @@ export const useLanguage = () => {
   const getAvailableLanguages = useCallback((items: Array<{ Locale: string }>) => {
     const availableLocales = [...new Set(items.map(item => item.Locale))];
     
-    // Create a more flexible matching system
-    const matchedLanguages = SUPPORTED_LANGUAGES.filter(lang => {
-      // Direct match
-      if (availableLocales.includes(lang.code)) return true;
-      
-      // Base language match (e.g., 'en' matches 'en-US')
-      const baseLang = lang.code.split('-')[0];
-      if (availableLocales.some(locale => locale.startsWith(baseLang))) return true;
-      
-      // Reverse match (e.g., 'en-US' in data matches 'en' in supported languages)
-      if (availableLocales.some(locale => locale.split('-')[0] === baseLang)) return true;
-      
-      return false;
-    });
+    // Only show languages that actually exist in the data
+    const matchedLanguages = SUPPORTED_LANGUAGES.filter(lang => 
+      availableLocales.includes(lang.code)
+    );
     
-    // Always include English as fallback if any data exists
-    if (matchedLanguages.length === 0 && availableLocales.length > 0) {
-      const englishLang = SUPPORTED_LANGUAGES.find(lang => lang.code === 'en');
-      if (englishLang) matchedLanguages.push(englishLang);
-    }
-    
-    // Sort by preference: exact matches first, then base language matches
+    // Sort by locale preference
     return matchedLanguages.sort((a, b) => {
-      const aExact = availableLocales.includes(a.code);
-      const bExact = availableLocales.includes(b.code);
-      if (aExact && !bExact) return -1;
-      if (!aExact && bExact) return 1;
+      // Prioritize base languages first (en before en-US)
+      const aIsBase = !a.code.includes('-');
+      const bIsBase = !b.code.includes('-');
+      if (aIsBase && !bIsBase) return -1;
+      if (!aIsBase && bIsBase) return 1;
       return a.name.localeCompare(b.name);
     });
   }, []);
 
-  const getLocalizedContent = useCallback(<T extends { Locale: string; Text: string }>(
+  const getLocalizedContent = useCallback(<T extends { Locale: string; Text: string; SourceType?: string }>(
     items: T[],
-    fallbackLanguage = 'en'
+    fallbackLanguage = 'en',
+    preferredSourceType?: string
   ): T | null => {
+    // Filter by source type if specified
+    let filteredItems = items;
+    if (preferredSourceType) {
+      const itemsWithSourceType = items.filter(item => item.SourceType === preferredSourceType);
+      if (itemsWithSourceType.length > 0) {
+        filteredItems = itemsWithSourceType;
+      }
+    }
+    
     // Try exact match first
-    let content = items.find(item => item.Locale === selectedLanguage);
+    let content = filteredItems.find(item => item.Locale === selectedLanguage);
     
     // Try base language (e.g., 'en' for 'en-US')
     if (!content && selectedLanguage.includes('-')) {
       const baseLanguage = selectedLanguage.split('-')[0];
-      content = items.find(item => item.Locale === baseLanguage);
+      content = filteredItems.find(item => item.Locale === baseLanguage);
     }
     
     // Try fallback language
     if (!content) {
-      content = items.find(item => item.Locale === fallbackLanguage || item.Locale.startsWith(fallbackLanguage));
+      content = filteredItems.find(item => item.Locale === fallbackLanguage || item.Locale.startsWith(fallbackLanguage));
     }
     
     // Return first available if nothing else works
-    return content || items[0] || null;
+    return content || filteredItems[0] || null;
   }, [selectedLanguage]);
 
   return {
