@@ -1,0 +1,2644 @@
+{
+    "status": 200,
+    "payload": {
+        "documents": [
+            {
+                "_id": "0079527",
+                "_createdBy": "api_keys:import_vod",
+                "_permissions": [],
+                "asset": {
+                    "MediaFileInfoLocation": "Content/2434994/1/1/0079527.MPG.MediaFileInfo.json",
+                    "Location": "Content/2434994/1/1/",
+                    "EmbeddedTracks": [
+                        {
+                            "TrackNumber": 0,
+                            "Type": "audio",
+                            "Description": "English (United States)",
+                            "IsoCode": "en-US",
+                            "Format": "AC-3",
+                            "NumberOfChannels": null
+                        },
+                        {
+                            "TrackNumber": 1,
+                            "Type": "closedcaption",
+                            "Description": "English (United States)",
+                            "IsoCode": "en-US",
+                            "Format": "EIA-608",
+                            "NumberOfChannels": null
+                        }
+                    ],
+                    "SidecarAssetTracks": [
+                        {
+                            "Location": "Content/2434994/1/1/79527_en-US_2398fps.srt",
+                            "Type": "closedcaption",
+                            "Description": "English (United States)",
+                            "IsoCode": "en-US",
+                            "Format": "srt",
+                            "NumberOfChannels": null
+                        },
+                        {
+                            "Location": "Content/2434994/1/1/79527_es-MX_2398fps.srt",
+                            "Type": "subtitle",
+                            "Description": "Spanish (Mexico)",
+                            "IsoCode": "es-MX",
+                            "Format": "srt",
+                            "NumberOfChannels": null
+                        },
+                        {
+                            "Location": "Content/2434994/1/1/79527_ja-JP_2398fps.srt",
+                            "Type": "subtitle",
+                            "Description": "Japanese (Japan)",
+                            "IsoCode": "ja-JP",
+                            "Format": "srt",
+                            "NumberOfChannels": null
+                        }
+                    ]
+                },
+                "createdAt": "2025-09-18T16:08:06.825Z",
+                "drmKeyInfo": null,
+                "effectiveLicenseDates": {
+                    "LicenseStart": "2025-04-01T00:00:00",
+                    "LicenseEnd": "2025-07-01T00:00:00"
+                },
+                "filmVersion": "CC",
+                "identifiers": {
+                    "FilmNumber": "0079527"
+                },
+                "lastIngestedAt": "2025-09-18T16:08:06.791Z",
+                "mediaFileInfo": {
+                    "General": {
+                        "SwankProductNumber": 79527,
+                        "FilmVersion": "CC",
+                        "FileSizeInMb": 7257,
+                        "FileSizeBytes": 7610443604,
+                        "DateCreated": "2025-02-26T00:00:00",
+                        "DateModified": "2025-02-26T00:00:00",
+                        "Location": "0079527.MPG",
+                        "Format": "MPEG-TS",
+                        "FormatProfile": null,
+                        "CodecID": null,
+                        "FileRuntime": "7100",
+                        "BitRateMode": "Constant",
+                        "BitRate": "8 575 kb/s",
+                        "EncodedDate": null,
+                        "TaggedDate": null
+                    },
+                    "VideoTracks": [
+                        {
+                            "ID": "481",
+                            "Format": "AVC",
+                            "FormatInfo": "Advanced Video Codec",
+                            "FormatProfile": null,
+                            "FormatSettingsCABAC": "Yes",
+                            "FormatSettingsRefFrames": "2",
+                            "FormatSettingsGOP": "M=3, N=4",
+                            "CodecID": "27",
+                            "CodecIDInfo": null,
+                            "Duration": "7100",
+                            "BitRate": "8 045 kb/s",
+                            "BitRateMode": "Constant",
+                            "Standard": "NTSC",
+                            "BitRateMaximum": null,
+                            "Width": "1 280 pixels",
+                            "Height": "720 pixels",
+                            "DisplayAspectRatio": "16:9",
+                            "FrameRateMode": null,
+                            "FrameRate": "23.976 (24000/1001) FPS",
+                            "FrameRateMinimum": null,
+                            "FrameRateMaximum": null,
+                            "ColorSpace": "YUV",
+                            "ChromaSubsampling": "4:2:0",
+                            "BitDepth": "8",
+                            "ScanType": "Progressive",
+                            "BitsOverPixelsXFrame": "0.36",
+                            "StreamSize": "6.55 GiB (92%)",
+                            "TaggedDate": null
+                        }
+                    ],
+                    "AudioTracks": [
+                        {
+                            "ID": "482",
+                            "Format": "AC-3",
+                            "FormatInfo": "Audio Coding 3",
+                            "FormatProfile": null,
+                            "CodecID": "129",
+                            "Duration": 7100,
+                            "BitRateMode": "Constant",
+                            "BitRate": "224 kb/s",
+                            "BitRateMaximum": null,
+                            "Channels": 2,
+                            "ChannelPositions": "Front: L R",
+                            "SamplingRate": "48.0 kHz",
+                            "CompressionMode": "Lossy",
+                            "StreamSize": "190 MiB (3%)",
+                            "Title": null,
+                            "EncodedDate": null,
+                            "TaggedDate": null,
+                            "Language": null
+                        }
+                    ],
+                    "SubtitleTracks": [],
+                    "ClosedCaptionTracks": [
+                        {
+                            "ID": "481-CC1",
+                            "MenuID": "2 (0x2)",
+                            "MuxingMode": "SCTE 128 / DTVCC Transport",
+                            "MuxingModeMoreInfo": null,
+                            "Format": "EIA-608",
+                            "Duration": 7099,
+                            "BitRateMode": "Constant",
+                            "StreamSize": "0.00 Byte (0%)"
+                        },
+                        {
+                            "ID": "481-1",
+                            "MenuID": "2 (0x2)",
+                            "MuxingMode": "SCTE 128 / DTVCC Transport",
+                            "MuxingModeMoreInfo": null,
+                            "Format": "EIA-708",
+                            "Duration": 0,
+                            "BitRateMode": "Constant",
+                            "StreamSize": "0.00 Byte (0%)"
+                        }
+                    ]
+                },
+                "protectionType": "Pro:Idiom",
+                "publicityMetadata": {
+                    "Title": "Mufasa: The Lion King",
+                    "SwankTitle": "MUFASA THE LION KING",
+                    "Type": "Movie",
+                    "OriginalType": "Movie",
+                    "ReleaseYear": 2024,
+                    "Runtime": 118,
+                    "Remove": false,
+                    "Color": "COLOR",
+                    "LastModified": "2025-03-11T07:10:44",
+                    "ParentProductNumber": null,
+                    "Studio": "Walt Disney Pictures",
+                    "Category": "Film",
+                    "Subcategory": null,
+                    "Rating": "PG",
+                    "SeasonNumber": null,
+                    "EpisodeNumber": null,
+                    "SequenceNumber": null,
+                    "EarliestAvailabilityDateSortBy": "1800-01-01T00:00:00",
+                    "Identifiers": [
+                        {
+                            "Name": "CosmoID",
+                            "Value": "53750605",
+                            "OriginalType": "String"
+                        },
+                        {
+                            "Name": "FilmMetadataID",
+                            "Value": "66103",
+                            "OriginalType": "Integer"
+                        },
+                        {
+                            "Name": "GtmsTitleId",
+                            "Value": "57811",
+                            "OriginalType": "bigint"
+                        },
+                        {
+                            "Name": "ProductID",
+                            "Value": "294729",
+                            "OriginalType": "Integer"
+                        },
+                        {
+                            "Name": "ProductNumber",
+                            "Value": "0079527",
+                            "OriginalType": "String"
+                        },
+                        {
+                            "Name": "SwankFilmID",
+                            "Value": "0000078914",
+                            "OriginalType": "String"
+                        }
+                    ],
+                    "Titles": [
+                        {
+                            "Locale": "en",
+                            "Text": "Mufasa: The Lion King",
+                            "SourceType": "MasterTitle"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "Mufasa: Le roi lion",
+                            "SourceType": "MasterTitle"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Mufasa: The Lion King",
+                            "SourceType": "MasterTitle"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "Mufasa: Le roi lion",
+                            "SourceType": "MasterTitle"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "Mufasa: The Lion King",
+                            "SourceType": "Default"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "Mufasa: Le roi lion",
+                            "SourceType": "Default"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Mufasa: The Lion King",
+                            "SourceType": "Default"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "Mufasa: Le roi lion",
+                            "SourceType": "Default"
+                        }
+                    ],
+                    "Synopses": [
+                        {
+                            "Locale": "en",
+                            "Text": "The story introduces Mufasa as an orphaned cub, lost and alone until he meets a sympathetic lion named Taka—the heir to a royal bloodline.",
+                            "SourceType": "PhoneSynopsis"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "The story introduces Mufasa as an orphaned cub, lost and alone until he meets a sympathetic lion named Taka—the heir to a royal bloodline.",
+                            "SourceType": "PhoneSynopsis"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "“Mufasa: The Lion King” enlists Rafiki to relay the legend of Mufasa to young lion cub Kiara, daughter of Simba and Nala, with Timon and Pumbaa lending their signature schtick. Told in flashbacks, the story introduces Mufasa as an orphaned cub, lost and alone until he meets a sympathetic lion named Taka—the heir to a royal bloodline. The chance meeting sets in motion an expansive journey of an extraordinary group of misfits searching for their destiny—their bonds will be tested as they work together to evade a threatening and deadly foe.",
+                            "SourceType": "PlotSynopsis"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "“Mufasa: The Lion King” enlists Rafiki to relay the legend of Mufasa to young lion cub Kiara, daughter of Simba and Nala, with Timon and Pumbaa lending their signature schtick. Told in flashbacks, the story introduces Mufasa as an orphaned cub, lost and alone until he meets a sympathetic lion named Taka—the heir to a royal bloodline. The chance meeting sets in motion an expansive journey of an extraordinary group of misfits searching for their destiny—their bonds will be tested as they work together to evade a threatening and deadly foe.",
+                            "SourceType": "PlotSynopsis"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "The story introduces Mufasa as an orphaned cub, lost and alone until he meets a sympathetic lion named Taka—the heir to a royal bloodline. The chance meeting sets in motion an expansive journey of an extraordinary group of misfits searching for their destiny—their bonds will be tested as they work together to evade a threatening and deadly foe.",
+                            "SourceType": "TabletSynopsis"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "The story introduces Mufasa as an orphaned cub, lost and alone until he meets a sympathetic lion named Taka—the heir to a royal bloodline. The chance meeting sets in motion an expansive journey of an extraordinary group of misfits searching for their destiny—their bonds will be tested as they work together to evade a threatening and deadly foe.",
+                            "SourceType": "TabletSynopsis"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "Mufasa, un lionceau perdu et abandonné de tous, rencontre un lion sympathique nommé Taka, héritier d'une lignée royale. Cette rencontre fortuite déclenche le vaste voyage d'un groupe de marginaux à la recherche de leur destin.",
+                            "SourceType": "TabletSynopsis"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "Mufasa, un lionceau perdu et abandonné de tous, rencontre un lion sympathique nommé Taka, héritier d'une lignée royale. Cette rencontre fortuite déclenche le vaste voyage d'un groupe de marginaux à la recherche de leur destin.",
+                            "SourceType": "TabletSynopsis"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "“Mufasa: The Lion King” enlists Rafiki to relay the legend of Mufasa to young lion cub Kiara, daughter of Simba and Nala, with Timon and Pumbaa lending their signature schtick. Told in flashbacks, the story introduces Mufasa as an orphaned cub, lost and alone until he meets a sympathetic lion named Taka—the heir to a royal bloodline. The chance meeting sets in motion an expansive journey of an extraordinary group of misfits searching for their destiny—their bonds will be tested as they work together to evade a threatening and deadly foe.",
+                            "SourceType": "WebSynopsis"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "“Mufasa: The Lion King” enlists Rafiki to relay the legend of Mufasa to young lion cub Kiara, daughter of Simba and Nala, with Timon and Pumbaa lending their signature schtick. Told in flashbacks, the story introduces Mufasa as an orphaned cub, lost and alone until he meets a sympathetic lion named Taka—the heir to a royal bloodline. The chance meeting sets in motion an expansive journey of an extraordinary group of misfits searching for their destiny—their bonds will be tested as they work together to evade a threatening and deadly foe.",
+                            "SourceType": "WebSynopsis"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "“Mufasa: The Lion King” enlists Rafiki to relay the legend of Mufasa to young lion cub Kiara, daughter of Simba and Nala, with Timon and Pumbaa lending their signature schtick. Told in flashbacks, the story introduces Mufasa as an orphaned cub, lost and alone until he meets a sympathetic lion named Taka—the heir to a royal bloodline. The chance meeting sets in motion an expansive journey of an extraordinary group of misfits searching for their destiny—their bonds will be tested as they work together to evade a threatening and deadly foe.",
+                            "SourceType": "Default"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "“Mufasa: The Lion King” enlists Rafiki to relay the legend of Mufasa to young lion cub Kiara, daughter of Simba and Nala, with Timon and Pumbaa lending their signature schtick. Told in flashbacks, the story introduces Mufasa as an orphaned cub, lost and alone until he meets a sympathetic lion named Taka—the heir to a royal bloodline. The chance meeting sets in motion an expansive journey of an extraordinary group of misfits searching for their destiny—their bonds will be tested as they work together to evade a threatening and deadly foe.",
+                            "SourceType": "Default"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "Mufasa, un lionceau perdu et abandonné de tous, rencontre un lion sympathique nommé Taka, héritier d'une lignée royale. Cette rencontre fortuite déclenche le vaste voyage d'un groupe de marginaux à la recherche de leur destin.",
+                            "SourceType": "Default"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "Mufasa, un lionceau perdu et abandonné de tous, rencontre un lion sympathique nommé Taka, héritier d'une lignée royale. Cette rencontre fortuite déclenche le vaste voyage d'un groupe de marginaux à la recherche de leur destin.",
+                            "SourceType": "Default"
+                        }
+                    ],
+                    "Genres": [
+                        {
+                            "Locale": "en",
+                            "Text": "Adventure"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "Animated"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "Children's/Family"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "Drama"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "Fantasy"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Action-Adventure"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Adventure"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Animated"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Animation"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Children's/Family"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Drama"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Family"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Fantasy"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Musical"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "Animation"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "Aventure"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "Drame"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "Enfants/Famille"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "Animation"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "Aventure"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "Drame"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "Enfants/Famille"
+                        }
+                    ],
+                    "Tags": [
+                        {
+                            "Locale": "de",
+                            "Text": "Animiert",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "de",
+                            "Text": "Drama",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "de",
+                            "Text": "Familie",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "de",
+                            "Text": "Fantasy",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "de",
+                            "Text": "Prequel",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "de-DE",
+                            "Text": "Animiert",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "de-DE",
+                            "Text": "Drama",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "de-DE",
+                            "Text": "Familie",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "de-DE",
+                            "Text": "Fantasy",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "de-DE",
+                            "Text": "Prequel",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "Adventure",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "Animated",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "Drama",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "Family",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "Fantasy",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "Prequel",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-GB",
+                            "Text": "animated",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-GB",
+                            "Text": "drama",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-GB",
+                            "Text": "family",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-GB",
+                            "Text": "fantasy",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-GB",
+                            "Text": "prequel",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Adventure",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "ANIMALS AS THE MAIN CHARACTERS",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Animated",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "BLOCKBUSTER MOVIES (NEWEST)",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "DC MANUAL REVIEW REQUIRED",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "DCKS-EXCLUDE",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Drama",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "DRAMAS",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Family",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Fantasy",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "FATHER's DAY",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "June Library Streaming",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "K12 MANUAL REVIEW REQUIRED",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "May Library Streaming",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "MOTHER's DAY",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "MUSICALS",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "MYTHS, LEGENDS, FAIRY TALES AND FANTASIES",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Prequel",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "SAFARI ADVENTURES",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "SEQUELS, TRILOGIES AND MOVIE FRANCHISES",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "es",
+                            "Text": "caricaturas/animado",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es",
+                            "Text": "drama",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es",
+                            "Text": "familia",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es",
+                            "Text": "fantasía",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es",
+                            "Text": "precuela",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es-ES",
+                            "Text": "caricaturas/animado",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es-ES",
+                            "Text": "drama",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es-ES",
+                            "Text": "familia",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es-ES",
+                            "Text": "fantasía",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es-ES",
+                            "Text": "precuela",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es-MX",
+                            "Text": "caricaturas/animado",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es-MX",
+                            "Text": "drama",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es-MX",
+                            "Text": "familia",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es-MX",
+                            "Text": "fantasía",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es-MX",
+                            "Text": "precuela",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "dessin animé",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "Drame",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "famille",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "fantasy",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "préquel",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "dessin animé",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "Drame",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "famille",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "fantasy",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "préquel",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "it",
+                            "Text": "Animazione",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "it",
+                            "Text": "Drammatico",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "it",
+                            "Text": "famiglia",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "it",
+                            "Text": "fantasy",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "it",
+                            "Text": "prequel",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "it-IT",
+                            "Text": "Animazione",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "it-IT",
+                            "Text": "Drammatico",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "it-IT",
+                            "Text": "famiglia",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "it-IT",
+                            "Text": "fantasy",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "it-IT",
+                            "Text": "prequel",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "pt",
+                            "Text": "animação",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "pt",
+                            "Text": "drama",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "pt",
+                            "Text": "família",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "pt",
+                            "Text": "fantasia",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "pt",
+                            "Text": "prequela",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "pt-PT",
+                            "Text": "animação",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "pt-PT",
+                            "Text": "drama",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "pt-PT",
+                            "Text": "família",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "pt-PT",
+                            "Text": "fantasia",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "pt-PT",
+                            "Text": "prequela",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Drama (Not R)",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Disneyownedstudios",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "MUSICALS (Not R)",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Adventure (Not R)",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Fantasy Movie",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Drama Movie",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Children's/Family (Not R)",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Family Friendly Movie",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Haspromomaterials",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Animated (Not R)",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Patient Education - Beforeposthomestart (Not R)",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Motorcoach - Beforeposthomestart (Not R)",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Motorcoach - Newrelease (Not R)",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "K12 - Beforeposthomestart (Not R)",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "K12 - Newrelease (Not R)",
+                            "SourceType": "Custom"
+                        }
+                    ],
+                    "Cast": [
+                        {
+                            "PartName": "Mufasa(voice)",
+                            "Name": "Aaron Pierre",
+                            "DisplayOrder": 1,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Taka(voice)",
+                            "Name": "Kelvin Harrison Jr.",
+                            "DisplayOrder": 2,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Sarabi(voice)",
+                            "Name": "Tiffany Boone",
+                            "DisplayOrder": 3,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Young Rafiki(voice)",
+                            "Name": "Kagiso Lediga",
+                            "DisplayOrder": 4,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Zazu(voice)",
+                            "Name": "Preston Nyman",
+                            "DisplayOrder": 5,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Kiara(voice)",
+                            "Name": "Blue Ivy Carter",
+                            "DisplayOrder": 6,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Rafiki(voice)",
+                            "Name": "John Kani",
+                            "DisplayOrder": 7,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Kiros(voice)",
+                            "Name": "Mads Mikkelsen",
+                            "DisplayOrder": 8,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Pumbaa(voice)",
+                            "Name": "Seth Rogen",
+                            "DisplayOrder": 9,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Timon(voice)",
+                            "Name": "Billy Eichner",
+                            "DisplayOrder": 10,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Eshe(voice)",
+                            "Name": "Thandiwe Newton",
+                            "DisplayOrder": 12,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Obasi(voice)",
+                            "Name": "Lennie James",
+                            "DisplayOrder": 13,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Afia(voice)",
+                            "Name": "Anika Noni Rose",
+                            "DisplayOrder": 14,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Masego(voice)",
+                            "Name": "Keith David",
+                            "DisplayOrder": 15,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Mufasa Cub(voice)",
+                            "Name": "Braelyn Rankins",
+                            "DisplayOrder": 16,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Taka Cub(voice)",
+                            "Name": "Theo Somolu",
+                            "DisplayOrder": 17,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Simba(voice)",
+                            "Name": "Donald Glover",
+                            "DisplayOrder": 18,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Nala(voice) (as Beyoncé Knowles-Carter)",
+                            "Name": "Beyoncé Knowles",
+                            "DisplayOrder": 19,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Amara",
+                            "Name": "Folake Olowofoyeku",
+                            "DisplayOrder": 20,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Akua",
+                            "Name": "Joanna Jones",
+                            "DisplayOrder": 21,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Junia",
+                            "Name": "Thuso Mbedu",
+                            "DisplayOrder": 22,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Ajarry",
+                            "Name": "Sheila Atim",
+                            "DisplayOrder": 23,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Chigaru",
+                            "Name": "Abdul Salis",
+                            "DisplayOrder": 24,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Mosi",
+                            "Name": "Derrick L. McMillon",
+                            "DisplayOrder": 25,
+                            "Role": "Actor"
+                        }
+                    ],
+                    "Crew": [
+                        {
+                            "Name": "Barry Jenkins",
+                            "DisplayOrder": 1,
+                            "Role": "Director"
+                        },
+                        {
+                            "Name": "Jeff Nathanson",
+                            "DisplayOrder": 2,
+                            "Role": "Writer"
+                        },
+                        {
+                            "Name": "Linda Woolverton",
+                            "DisplayOrder": 3,
+                            "Role": "Writer"
+                        },
+                        {
+                            "Name": "Irene Mecchi",
+                            "DisplayOrder": 4,
+                            "Role": "Writer"
+                        },
+                        {
+                            "Name": "Jonathan Roberts",
+                            "DisplayOrder": 5,
+                            "Role": "Writer"
+                        },
+                        {
+                            "Name": "Peter M. Tobyansen",
+                            "DisplayOrder": 6,
+                            "Role": "Executive Producer"
+                        },
+                        {
+                            "Name": "Mark Ceryak",
+                            "DisplayOrder": 7,
+                            "Role": "Producer"
+                        },
+                        {
+                            "Name": "Genevieve Hofmeyr",
+                            "DisplayOrder": 8,
+                            "Role": "Producer"
+                        },
+                        {
+                            "Name": "Adele Romanski",
+                            "DisplayOrder": 9,
+                            "Role": "Producer"
+                        },
+                        {
+                            "Name": "James Laxton",
+                            "DisplayOrder": 10,
+                            "Role": "Cinematographer"
+                        },
+                        {
+                            "Name": "Joi McMillon",
+                            "DisplayOrder": 11,
+                            "Role": "Cinematographer"
+                        }
+                    ],
+                    "Ratings": [
+                        {
+                            "Authority": "AR-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "AU-Digital",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "AZ-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "BE-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "BG-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "BR-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "CZ-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "DE-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "DO-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "EE-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "ES-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "FI-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "FR-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "France: CNC",
+                            "Value": "12"
+                        },
+                        {
+                            "Authority": "GB-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "Germany: FSK",
+                            "Value": "FSK: 6"
+                        },
+                        {
+                            "Authority": "HU-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "IE-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "IL-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "IN-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "Ireland: IFCO",
+                            "Value": "G"
+                        },
+                        {
+                            "Authority": "IS-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "IT-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "Italy: MiBAC",
+                            "Value": "14"
+                        },
+                        {
+                            "Authority": "JP-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "KH-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "KZ-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "Mexico: RTC",
+                            "Value": "A"
+                        },
+                        {
+                            "Authority": "MPAA",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "MX-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "NL-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "NL-Theatrical_Wide_Release",
+                            "Value": "9"
+                        },
+                        {
+                            "Authority": "Norway Medietilsynet",
+                            "Value": "9"
+                        },
+                        {
+                            "Authority": "PL-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "PT-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "RO-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "SE-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "SG-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "SK-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "Sweden: Medierad",
+                            "Value": "11"
+                        },
+                        {
+                            "Authority": "TH-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "TR-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "TW-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "UA-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "US-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "VN-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "ZA-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        }
+                    ],
+                    "Assets": [
+                        {
+                            "Name": "One Sheet",
+                            "AssetType": "One Sheet",
+                            "FileType": "Image",
+                            "Location": "en-US/0079527photo.jpg",
+                            "Locale": "en-US"
+                        },
+                        {
+                            "Name": "0079527-Scene Art - Mufasa-The-Lion-King",
+                            "AssetType": "Scene Art",
+                            "FileType": "Image",
+                            "Location": "en-US/0079527-SceneArt-Mufasa-The-Lion-King.jpg",
+                            "Locale": "en-US"
+                        },
+                        {
+                            "Name": "Thumbnail",
+                            "AssetType": "Thumbnail",
+                            "FileType": "Image",
+                            "Location": "en-US/0079527small.jpg",
+                            "Locale": "en-US"
+                        },
+                        {
+                            "Name": "Trailer - MOV",
+                            "AssetType": "Trailer - MOV",
+                            "FileType": "Video",
+                            "Location": "en-US/0079527TrailerMov.mov",
+                            "Locale": "en-US"
+                        },
+                        {
+                            "Name": "Trailer - MP4",
+                            "AssetType": "Trailer - MP4",
+                            "FileType": "Video",
+                            "Location": "en-US/0079527TrailerMP4.mp4",
+                            "Locale": "en-US"
+                        }
+                    ],
+                    "Episodes": []
+                },
+                "raw": {
+                    "Title": "Mufasa: The Lion King",
+                    "PublicityMetadataLocation": "Publicity/0079527/0079527.FilmMetadata.json",
+                    "Identifiers": {
+                        "FilmNumber": "0079527"
+                    },
+                    "DRMKeyInfo": null,
+                    "EffectiveLicenseDates": {
+                        "LicenseStart": "2025-04-01T00:00:00",
+                        "LicenseEnd": "2025-07-01T00:00:00"
+                    },
+                    "ProtectionType": "Pro:Idiom",
+                    "FilmVersion": "CC",
+                    "Asset": {
+                        "MediaFileInfoLocation": "Content/2434994/1/1/0079527.MPG.MediaFileInfo.json",
+                        "Location": "Content/2434994/1/1/",
+                        "EmbeddedTracks": [
+                            {
+                                "TrackNumber": 0,
+                                "Type": "audio",
+                                "Description": "English (United States)",
+                                "IsoCode": "en-US",
+                                "Format": "AC-3",
+                                "NumberOfChannels": null
+                            },
+                            {
+                                "TrackNumber": 1,
+                                "Type": "closedcaption",
+                                "Description": "English (United States)",
+                                "IsoCode": "en-US",
+                                "Format": "EIA-608",
+                                "NumberOfChannels": null
+                            }
+                        ],
+                        "SidecarAssetTracks": [
+                            {
+                                "Location": "Content/2434994/1/1/79527_en-US_2398fps.srt",
+                                "Type": "closedcaption",
+                                "Description": "English (United States)",
+                                "IsoCode": "en-US",
+                                "Format": "srt",
+                                "NumberOfChannels": null
+                            },
+                            {
+                                "Location": "Content/2434994/1/1/79527_es-MX_2398fps.srt",
+                                "Type": "subtitle",
+                                "Description": "Spanish (Mexico)",
+                                "IsoCode": "es-MX",
+                                "Format": "srt",
+                                "NumberOfChannels": null
+                            },
+                            {
+                                "Location": "Content/2434994/1/1/79527_ja-JP_2398fps.srt",
+                                "Type": "subtitle",
+                                "Description": "Japanese (Japan)",
+                                "IsoCode": "ja-JP",
+                                "Format": "srt",
+                                "NumberOfChannels": null
+                            }
+                        ]
+                    },
+                    "StreamingManifests": null
+                },
+                "resolvedAssets": {
+                    "Title": "Mufasa: The Lion King",
+                    "SwankTitle": "MUFASA THE LION KING",
+                    "Type": "Movie",
+                    "OriginalType": "Movie",
+                    "ReleaseYear": 2024,
+                    "Runtime": 118,
+                    "Remove": false,
+                    "Color": "COLOR",
+                    "LastModified": "2025-03-11T07:10:44",
+                    "ParentProductNumber": null,
+                    "Studio": "Walt Disney Pictures",
+                    "Category": "Film",
+                    "Subcategory": null,
+                    "Rating": "PG",
+                    "SeasonNumber": null,
+                    "EpisodeNumber": null,
+                    "SequenceNumber": null,
+                    "EarliestAvailabilityDateSortBy": "1800-01-01T00:00:00",
+                    "Identifiers": [
+                        {
+                            "Name": "CosmoID",
+                            "Value": "53750605",
+                            "OriginalType": "String"
+                        },
+                        {
+                            "Name": "FilmMetadataID",
+                            "Value": "66103",
+                            "OriginalType": "Integer"
+                        },
+                        {
+                            "Name": "GtmsTitleId",
+                            "Value": "57811",
+                            "OriginalType": "bigint"
+                        },
+                        {
+                            "Name": "ProductID",
+                            "Value": "294729",
+                            "OriginalType": "Integer"
+                        },
+                        {
+                            "Name": "ProductNumber",
+                            "Value": "0079527",
+                            "OriginalType": "String"
+                        },
+                        {
+                            "Name": "SwankFilmID",
+                            "Value": "0000078914",
+                            "OriginalType": "String"
+                        }
+                    ],
+                    "Titles": [
+                        {
+                            "Locale": "en",
+                            "Text": "Mufasa: The Lion King",
+                            "SourceType": "MasterTitle"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "Mufasa: Le roi lion",
+                            "SourceType": "MasterTitle"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Mufasa: The Lion King",
+                            "SourceType": "MasterTitle"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "Mufasa: Le roi lion",
+                            "SourceType": "MasterTitle"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "Mufasa: The Lion King",
+                            "SourceType": "Default"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "Mufasa: Le roi lion",
+                            "SourceType": "Default"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Mufasa: The Lion King",
+                            "SourceType": "Default"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "Mufasa: Le roi lion",
+                            "SourceType": "Default"
+                        }
+                    ],
+                    "Synopses": [
+                        {
+                            "Locale": "en",
+                            "Text": "The story introduces Mufasa as an orphaned cub, lost and alone until he meets a sympathetic lion named Taka—the heir to a royal bloodline.",
+                            "SourceType": "PhoneSynopsis"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "The story introduces Mufasa as an orphaned cub, lost and alone until he meets a sympathetic lion named Taka—the heir to a royal bloodline.",
+                            "SourceType": "PhoneSynopsis"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "“Mufasa: The Lion King” enlists Rafiki to relay the legend of Mufasa to young lion cub Kiara, daughter of Simba and Nala, with Timon and Pumbaa lending their signature schtick. Told in flashbacks, the story introduces Mufasa as an orphaned cub, lost and alone until he meets a sympathetic lion named Taka—the heir to a royal bloodline. The chance meeting sets in motion an expansive journey of an extraordinary group of misfits searching for their destiny—their bonds will be tested as they work together to evade a threatening and deadly foe.",
+                            "SourceType": "PlotSynopsis"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "“Mufasa: The Lion King” enlists Rafiki to relay the legend of Mufasa to young lion cub Kiara, daughter of Simba and Nala, with Timon and Pumbaa lending their signature schtick. Told in flashbacks, the story introduces Mufasa as an orphaned cub, lost and alone until he meets a sympathetic lion named Taka—the heir to a royal bloodline. The chance meeting sets in motion an expansive journey of an extraordinary group of misfits searching for their destiny—their bonds will be tested as they work together to evade a threatening and deadly foe.",
+                            "SourceType": "PlotSynopsis"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "The story introduces Mufasa as an orphaned cub, lost and alone until he meets a sympathetic lion named Taka—the heir to a royal bloodline. The chance meeting sets in motion an expansive journey of an extraordinary group of misfits searching for their destiny—their bonds will be tested as they work together to evade a threatening and deadly foe.",
+                            "SourceType": "TabletSynopsis"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "The story introduces Mufasa as an orphaned cub, lost and alone until he meets a sympathetic lion named Taka—the heir to a royal bloodline. The chance meeting sets in motion an expansive journey of an extraordinary group of misfits searching for their destiny—their bonds will be tested as they work together to evade a threatening and deadly foe.",
+                            "SourceType": "TabletSynopsis"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "Mufasa, un lionceau perdu et abandonné de tous, rencontre un lion sympathique nommé Taka, héritier d'une lignée royale. Cette rencontre fortuite déclenche le vaste voyage d'un groupe de marginaux à la recherche de leur destin.",
+                            "SourceType": "TabletSynopsis"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "Mufasa, un lionceau perdu et abandonné de tous, rencontre un lion sympathique nommé Taka, héritier d'une lignée royale. Cette rencontre fortuite déclenche le vaste voyage d'un groupe de marginaux à la recherche de leur destin.",
+                            "SourceType": "TabletSynopsis"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "“Mufasa: The Lion King” enlists Rafiki to relay the legend of Mufasa to young lion cub Kiara, daughter of Simba and Nala, with Timon and Pumbaa lending their signature schtick. Told in flashbacks, the story introduces Mufasa as an orphaned cub, lost and alone until he meets a sympathetic lion named Taka—the heir to a royal bloodline. The chance meeting sets in motion an expansive journey of an extraordinary group of misfits searching for their destiny—their bonds will be tested as they work together to evade a threatening and deadly foe.",
+                            "SourceType": "WebSynopsis"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "“Mufasa: The Lion King” enlists Rafiki to relay the legend of Mufasa to young lion cub Kiara, daughter of Simba and Nala, with Timon and Pumbaa lending their signature schtick. Told in flashbacks, the story introduces Mufasa as an orphaned cub, lost and alone until he meets a sympathetic lion named Taka—the heir to a royal bloodline. The chance meeting sets in motion an expansive journey of an extraordinary group of misfits searching for their destiny—their bonds will be tested as they work together to evade a threatening and deadly foe.",
+                            "SourceType": "WebSynopsis"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "“Mufasa: The Lion King” enlists Rafiki to relay the legend of Mufasa to young lion cub Kiara, daughter of Simba and Nala, with Timon and Pumbaa lending their signature schtick. Told in flashbacks, the story introduces Mufasa as an orphaned cub, lost and alone until he meets a sympathetic lion named Taka—the heir to a royal bloodline. The chance meeting sets in motion an expansive journey of an extraordinary group of misfits searching for their destiny—their bonds will be tested as they work together to evade a threatening and deadly foe.",
+                            "SourceType": "Default"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "“Mufasa: The Lion King” enlists Rafiki to relay the legend of Mufasa to young lion cub Kiara, daughter of Simba and Nala, with Timon and Pumbaa lending their signature schtick. Told in flashbacks, the story introduces Mufasa as an orphaned cub, lost and alone until he meets a sympathetic lion named Taka—the heir to a royal bloodline. The chance meeting sets in motion an expansive journey of an extraordinary group of misfits searching for their destiny—their bonds will be tested as they work together to evade a threatening and deadly foe.",
+                            "SourceType": "Default"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "Mufasa, un lionceau perdu et abandonné de tous, rencontre un lion sympathique nommé Taka, héritier d'une lignée royale. Cette rencontre fortuite déclenche le vaste voyage d'un groupe de marginaux à la recherche de leur destin.",
+                            "SourceType": "Default"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "Mufasa, un lionceau perdu et abandonné de tous, rencontre un lion sympathique nommé Taka, héritier d'une lignée royale. Cette rencontre fortuite déclenche le vaste voyage d'un groupe de marginaux à la recherche de leur destin.",
+                            "SourceType": "Default"
+                        }
+                    ],
+                    "Genres": [
+                        {
+                            "Locale": "en",
+                            "Text": "Adventure"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "Animated"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "Children's/Family"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "Drama"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "Fantasy"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Action-Adventure"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Adventure"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Animated"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Animation"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Children's/Family"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Drama"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Family"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Fantasy"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Musical"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "Animation"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "Aventure"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "Drame"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "Enfants/Famille"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "Animation"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "Aventure"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "Drame"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "Enfants/Famille"
+                        }
+                    ],
+                    "Tags": [
+                        {
+                            "Locale": "de",
+                            "Text": "Animiert",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "de",
+                            "Text": "Drama",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "de",
+                            "Text": "Familie",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "de",
+                            "Text": "Fantasy",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "de",
+                            "Text": "Prequel",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "de-DE",
+                            "Text": "Animiert",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "de-DE",
+                            "Text": "Drama",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "de-DE",
+                            "Text": "Familie",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "de-DE",
+                            "Text": "Fantasy",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "de-DE",
+                            "Text": "Prequel",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "Adventure",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "Animated",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "Drama",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "Family",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "Fantasy",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en",
+                            "Text": "Prequel",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-GB",
+                            "Text": "animated",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-GB",
+                            "Text": "drama",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-GB",
+                            "Text": "family",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-GB",
+                            "Text": "fantasy",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-GB",
+                            "Text": "prequel",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Adventure",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "ANIMALS AS THE MAIN CHARACTERS",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Animated",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "BLOCKBUSTER MOVIES (NEWEST)",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "DC MANUAL REVIEW REQUIRED",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "DCKS-EXCLUDE",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Drama",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "DRAMAS",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Family",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Fantasy",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "FATHER's DAY",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "June Library Streaming",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "K12 MANUAL REVIEW REQUIRED",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "May Library Streaming",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "MOTHER's DAY",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "MUSICALS",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "MYTHS, LEGENDS, FAIRY TALES AND FANTASIES",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Prequel",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "SAFARI ADVENTURES",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "SEQUELS, TRILOGIES AND MOVIE FRANCHISES",
+                            "SourceType": "FilmGenre"
+                        },
+                        {
+                            "Locale": "es",
+                            "Text": "caricaturas/animado",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es",
+                            "Text": "drama",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es",
+                            "Text": "familia",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es",
+                            "Text": "fantasía",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es",
+                            "Text": "precuela",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es-ES",
+                            "Text": "caricaturas/animado",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es-ES",
+                            "Text": "drama",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es-ES",
+                            "Text": "familia",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es-ES",
+                            "Text": "fantasía",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es-ES",
+                            "Text": "precuela",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es-MX",
+                            "Text": "caricaturas/animado",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es-MX",
+                            "Text": "drama",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es-MX",
+                            "Text": "familia",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es-MX",
+                            "Text": "fantasía",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "es-MX",
+                            "Text": "precuela",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "dessin animé",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "Drame",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "famille",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "fantasy",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "fr",
+                            "Text": "préquel",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "dessin animé",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "Drame",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "famille",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "fantasy",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "fr-FR",
+                            "Text": "préquel",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "it",
+                            "Text": "Animazione",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "it",
+                            "Text": "Drammatico",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "it",
+                            "Text": "famiglia",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "it",
+                            "Text": "fantasy",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "it",
+                            "Text": "prequel",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "it-IT",
+                            "Text": "Animazione",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "it-IT",
+                            "Text": "Drammatico",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "it-IT",
+                            "Text": "famiglia",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "it-IT",
+                            "Text": "fantasy",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "it-IT",
+                            "Text": "prequel",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "pt",
+                            "Text": "animação",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "pt",
+                            "Text": "drama",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "pt",
+                            "Text": "família",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "pt",
+                            "Text": "fantasia",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "pt",
+                            "Text": "prequela",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "pt-PT",
+                            "Text": "animação",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "pt-PT",
+                            "Text": "drama",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "pt-PT",
+                            "Text": "família",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "pt-PT",
+                            "Text": "fantasia",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "pt-PT",
+                            "Text": "prequela",
+                            "SourceType": "Keyword"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Drama (Not R)",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Disneyownedstudios",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "MUSICALS (Not R)",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Adventure (Not R)",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Fantasy Movie",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Drama Movie",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Children's/Family (Not R)",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Family Friendly Movie",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Haspromomaterials",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Animated (Not R)",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Patient Education - Beforeposthomestart (Not R)",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Motorcoach - Beforeposthomestart (Not R)",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "Motorcoach - Newrelease (Not R)",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "K12 - Beforeposthomestart (Not R)",
+                            "SourceType": "Custom"
+                        },
+                        {
+                            "Locale": "en-US",
+                            "Text": "K12 - Newrelease (Not R)",
+                            "SourceType": "Custom"
+                        }
+                    ],
+                    "Cast": [
+                        {
+                            "PartName": "Mufasa(voice)",
+                            "Name": "Aaron Pierre",
+                            "DisplayOrder": 1,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Taka(voice)",
+                            "Name": "Kelvin Harrison Jr.",
+                            "DisplayOrder": 2,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Sarabi(voice)",
+                            "Name": "Tiffany Boone",
+                            "DisplayOrder": 3,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Young Rafiki(voice)",
+                            "Name": "Kagiso Lediga",
+                            "DisplayOrder": 4,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Zazu(voice)",
+                            "Name": "Preston Nyman",
+                            "DisplayOrder": 5,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Kiara(voice)",
+                            "Name": "Blue Ivy Carter",
+                            "DisplayOrder": 6,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Rafiki(voice)",
+                            "Name": "John Kani",
+                            "DisplayOrder": 7,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Kiros(voice)",
+                            "Name": "Mads Mikkelsen",
+                            "DisplayOrder": 8,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Pumbaa(voice)",
+                            "Name": "Seth Rogen",
+                            "DisplayOrder": 9,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Timon(voice)",
+                            "Name": "Billy Eichner",
+                            "DisplayOrder": 10,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Eshe(voice)",
+                            "Name": "Thandiwe Newton",
+                            "DisplayOrder": 12,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Obasi(voice)",
+                            "Name": "Lennie James",
+                            "DisplayOrder": 13,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Afia(voice)",
+                            "Name": "Anika Noni Rose",
+                            "DisplayOrder": 14,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Masego(voice)",
+                            "Name": "Keith David",
+                            "DisplayOrder": 15,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Mufasa Cub(voice)",
+                            "Name": "Braelyn Rankins",
+                            "DisplayOrder": 16,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Taka Cub(voice)",
+                            "Name": "Theo Somolu",
+                            "DisplayOrder": 17,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Simba(voice)",
+                            "Name": "Donald Glover",
+                            "DisplayOrder": 18,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Nala(voice) (as Beyoncé Knowles-Carter)",
+                            "Name": "Beyoncé Knowles",
+                            "DisplayOrder": 19,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Amara",
+                            "Name": "Folake Olowofoyeku",
+                            "DisplayOrder": 20,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Akua",
+                            "Name": "Joanna Jones",
+                            "DisplayOrder": 21,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Junia",
+                            "Name": "Thuso Mbedu",
+                            "DisplayOrder": 22,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Ajarry",
+                            "Name": "Sheila Atim",
+                            "DisplayOrder": 23,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Chigaru",
+                            "Name": "Abdul Salis",
+                            "DisplayOrder": 24,
+                            "Role": "Actor"
+                        },
+                        {
+                            "PartName": "Mosi",
+                            "Name": "Derrick L. McMillon",
+                            "DisplayOrder": 25,
+                            "Role": "Actor"
+                        }
+                    ],
+                    "Crew": [
+                        {
+                            "Name": "Barry Jenkins",
+                            "DisplayOrder": 1,
+                            "Role": "Director"
+                        },
+                        {
+                            "Name": "Jeff Nathanson",
+                            "DisplayOrder": 2,
+                            "Role": "Writer"
+                        },
+                        {
+                            "Name": "Linda Woolverton",
+                            "DisplayOrder": 3,
+                            "Role": "Writer"
+                        },
+                        {
+                            "Name": "Irene Mecchi",
+                            "DisplayOrder": 4,
+                            "Role": "Writer"
+                        },
+                        {
+                            "Name": "Jonathan Roberts",
+                            "DisplayOrder": 5,
+                            "Role": "Writer"
+                        },
+                        {
+                            "Name": "Peter M. Tobyansen",
+                            "DisplayOrder": 6,
+                            "Role": "Executive Producer"
+                        },
+                        {
+                            "Name": "Mark Ceryak",
+                            "DisplayOrder": 7,
+                            "Role": "Producer"
+                        },
+                        {
+                            "Name": "Genevieve Hofmeyr",
+                            "DisplayOrder": 8,
+                            "Role": "Producer"
+                        },
+                        {
+                            "Name": "Adele Romanski",
+                            "DisplayOrder": 9,
+                            "Role": "Producer"
+                        },
+                        {
+                            "Name": "James Laxton",
+                            "DisplayOrder": 10,
+                            "Role": "Cinematographer"
+                        },
+                        {
+                            "Name": "Joi McMillon",
+                            "DisplayOrder": 11,
+                            "Role": "Cinematographer"
+                        }
+                    ],
+                    "Ratings": [
+                        {
+                            "Authority": "AR-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "AU-Digital",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "AZ-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "BE-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "BG-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "BR-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "CZ-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "DE-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "DO-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "EE-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "ES-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "FI-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "FR-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "France: CNC",
+                            "Value": "12"
+                        },
+                        {
+                            "Authority": "GB-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "Germany: FSK",
+                            "Value": "FSK: 6"
+                        },
+                        {
+                            "Authority": "HU-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "IE-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "IL-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "IN-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "Ireland: IFCO",
+                            "Value": "G"
+                        },
+                        {
+                            "Authority": "IS-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "IT-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "Italy: MiBAC",
+                            "Value": "14"
+                        },
+                        {
+                            "Authority": "JP-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "KH-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "KZ-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "Mexico: RTC",
+                            "Value": "A"
+                        },
+                        {
+                            "Authority": "MPAA",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "MX-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "NL-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "NL-Theatrical_Wide_Release",
+                            "Value": "9"
+                        },
+                        {
+                            "Authority": "Norway Medietilsynet",
+                            "Value": "9"
+                        },
+                        {
+                            "Authority": "PL-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "PT-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "RO-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "SE-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "SG-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "SK-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "Sweden: Medierad",
+                            "Value": "11"
+                        },
+                        {
+                            "Authority": "TH-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "TR-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "TW-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "UA-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "US-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "VN-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        },
+                        {
+                            "Authority": "ZA-Theatrical_Wide_Release",
+                            "Value": "PG"
+                        }
+                    ],
+                    "Assets": [
+                        {
+                            "Name": "One Sheet",
+                            "AssetType": "One Sheet",
+                            "FileType": "Image",
+                            "Location": "en-US/0079527photo.jpg",
+                            "Locale": "en-US",
+                            "fullPath": "Publicity/0079527/en-US/0079527photo.jpg",
+                            "fullUrl": "http://192.168.100.117:8080/swank-Disk-02/lab/Publicity/0079527/en-US/0079527photo.jpg"
+                        },
+                        {
+                            "Name": "0079527-Scene Art - Mufasa-The-Lion-King",
+                            "AssetType": "Scene Art",
+                            "FileType": "Image",
+                            "Location": "en-US/0079527-SceneArt-Mufasa-The-Lion-King.jpg",
+                            "Locale": "en-US",
+                            "fullPath": "Publicity/0079527/en-US/0079527-SceneArt-Mufasa-The-Lion-King.jpg",
+                            "fullUrl": "http://192.168.100.117:8080/swank-Disk-02/lab/Publicity/0079527/en-US/0079527-SceneArt-Mufasa-The-Lion-King.jpg"
+                        },
+                        {
+                            "Name": "Thumbnail",
+                            "AssetType": "Thumbnail",
+                            "FileType": "Image",
+                            "Location": "en-US/0079527small.jpg",
+                            "Locale": "en-US",
+                            "fullPath": "Publicity/0079527/en-US/0079527small.jpg",
+                            "fullUrl": "http://192.168.100.117:8080/swank-Disk-02/lab/Publicity/0079527/en-US/0079527small.jpg"
+                        },
+                        {
+                            "Name": "Trailer - MOV",
+                            "AssetType": "Trailer - MOV",
+                            "FileType": "Video",
+                            "Location": "en-US/0079527TrailerMov.mov",
+                            "Locale": "en-US",
+                            "fullPath": "Publicity/0079527/en-US/0079527TrailerMov.mov",
+                            "fullUrl": "http://192.168.100.117:8080/swank-Disk-02/lab/Publicity/0079527/en-US/0079527TrailerMov.mov"
+                        },
+                        {
+                            "Name": "Trailer - MP4",
+                            "AssetType": "Trailer - MP4",
+                            "FileType": "Video",
+                            "Location": "en-US/0079527TrailerMP4.mp4",
+                            "Locale": "en-US",
+                            "fullPath": "Publicity/0079527/en-US/0079527TrailerMP4.mp4",
+                            "fullUrl": "http://192.168.100.117:8080/swank-Disk-02/lab/Publicity/0079527/en-US/0079527TrailerMP4.mp4"
+                        }
+                    ],
+                    "Episodes": []
+                },
+                "sidecarJsonData": [],
+                "source": {
+                    "feedUrl": "http://192.168.100.117:8080/swank-Disk-02/lab/Manifest.json",
+                    "baseUrl": "http://192.168.100.117:8080/swank-Disk-02/lab/"
+                },
+                "streamingManifests": null,
+                "title": "Mufasa: The Lion King",
+                "updatedAt": "2025-09-18T16:08:06.825Z",
+                "visible_on_tv": false
+            }
+        ],
+        "canAccessAllDocuments": true,
+        "pagination": {
+            "offset": 0,
+            "limit": 25,
+            "total": 1
+        }
+    }
+}
