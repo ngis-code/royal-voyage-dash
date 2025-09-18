@@ -18,8 +18,8 @@ import { LanguageSelector } from "@/components/LanguageSelector";
 
 const VideoOnDemand = () => {
   const { selectedLanguage, changeLanguage, getAvailableLanguages, getLocalizedContent } = useLanguage();
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedMovie, setSelectedMovie] = useState<VodItem | null>(null);
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   
   const { data: vodData, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['vod-items'],
@@ -168,6 +168,28 @@ const VideoOnDemand = () => {
     if (!vodItem.publicityMetadata.Crew) return [];
     return vodItem.publicityMetadata.Crew.slice(0, 10);
   };
+
+  const filteredMovies = vodData?.payload.documents.filter((vodItem: VodItem) => {
+    if (!searchQuery) return true;
+    
+    const title = getLocalizedTitle(vodItem).toLowerCase();
+    const studio = vodItem.publicityMetadata.Studio?.toLowerCase() || '';
+    const year = vodItem.publicityMetadata.ReleaseYear?.toString() || '';
+    const category = vodItem.publicityMetadata.Category?.toLowerCase() || '';
+    const director = getDirector(vodItem)?.toLowerCase() || '';
+    const cast = getMainCast(vodItem).join(' ').toLowerCase();
+    const genres = getLocalizedGenres(vodItem).map(g => g.Text.toLowerCase()).join(' ');
+    
+    const query = searchQuery.toLowerCase();
+    
+    return title.includes(query) || 
+           studio.includes(query) || 
+           year.includes(query) || 
+           category.includes(query) ||
+           director.includes(query) ||
+           cast.includes(query) ||
+           genres.includes(query);
+  }) || [];
 
   const getFileSize = (vodItem: VodItem) => {
     if (!vodItem.mediaFileInfo?.General?.FileSizeInMb) return null;
@@ -532,7 +554,7 @@ const VideoOnDemand = () => {
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">Video on Demand</h1>
           <p className="text-muted-foreground">
-            {vodData?.payload.documents.length || 0} movies available in your library
+            {searchQuery ? `${filteredMovies.length} of ${vodData?.payload.documents.length || 0}` : (vodData?.payload.documents.length || 0)} movies available in your library
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -597,283 +619,209 @@ const VideoOnDemand = () => {
             </Card>
           ) : (
             <div className="space-y-6">
-              {/* Movie Selector */}
+              {/* Search Bar */}
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Film className="w-5 h-5" />
-                    Select a Movie
+                    <Search className="w-5 h-5" />
+                    Search Movies
                   </CardTitle>
                   <CardDescription>
-                    Choose from {vodData?.payload.documents.length} available movies
+                    Filter through {vodData?.payload.documents.length} available movies
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        role="combobox"
-                        aria-expanded={isPopoverOpen}
-                        className="w-full justify-between h-12"
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                    <input
+                      type="text"
+                      placeholder="Search by title, director, cast, genre, studio, or year..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 border border-input rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery("")}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                       >
-                        {selectedMovie ? (
-                          <div className="flex items-center gap-3 truncate">
-                            <Film className="w-4 h-4 text-primary" />
-                            <span className="truncate">{getLocalizedTitle(selectedMovie)}</span>
-                            <Badge variant="secondary" className="ml-2">
-                              {selectedMovie.publicityMetadata.ReleaseYear}
-                            </Badge>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2 text-muted-foreground">
-                            <Search className="w-4 h-4" />
-                            Search and select a movie...
-                          </div>
-                        )}
-                        <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-full p-0" align="start">
-                      <Command>
-                        <CommandInput placeholder="Search movies..." className="h-9" />
-                        <CommandEmpty>No movies found.</CommandEmpty>
-                        <CommandList className="max-h-[300px]">
-                          <CommandGroup>
-                            {vodData?.payload.documents.map((vodItem: VodItem) => (
-                              <CommandItem
-                                key={vodItem._id}
-                                value={`${getLocalizedTitle(vodItem)} ${vodItem.publicityMetadata.ReleaseYear} ${vodItem.publicityMetadata.Studio}`}
-                                onSelect={() => {
-                                  setSelectedMovie(vodItem);
-                                  setIsPopoverOpen(false);
-                                }}
-                                className="flex items-center gap-3 p-3"
-                              >
-                                <Film className="w-4 h-4 text-muted-foreground" />
-                                <div className="flex-1 space-y-1">
-                                  <p className="text-sm font-medium leading-none">
-                                    {getLocalizedTitle(vodItem)}
-                                  </p>
-                                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                    <span>{vodItem.publicityMetadata.ReleaseYear}</span>
-                                    <span>•</span>
-                                    <span>{vodItem.publicityMetadata.Studio}</span>
-                                    <span>•</span>
-                                    <span>{formatRuntime(vodItem.publicityMetadata.Runtime)}</span>
-                                  </div>
-                                </div>
-                                <Badge variant="outline" className="text-xs">
-                                  {vodItem.publicityMetadata.Rating}
-                                </Badge>
-                              </CommandItem>
-                            ))}
-                          </CommandGroup>
-                        </CommandList>
-                      </Command>
-                    </PopoverContent>
-                  </Popover>
+                        ✕
+                      </button>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
 
-              {/* Selected Movie Details */}
-              {selectedMovie && (
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                  {/* Movie Card */}
-                  <div className="lg:col-span-1">
-                    <Card className="group overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 border-0 bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-sm">
-                      <div className="aspect-[2/3] relative overflow-hidden bg-gradient-to-br from-muted/20 to-muted/40">
-                        {(() => {
-                          const posterImage = getPosterImage(selectedMovie);
-                          return posterImage ? (
+              {/* Movies Grid */}
+              {filteredMovies.length === 0 && searchQuery ? (
+                <Card className="text-center py-12">
+                  <CardContent>
+                    <Search className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-xl font-semibold mb-2">No movies found</h3>
+                    <p className="text-muted-foreground mb-4">
+                      No movies match your search criteria. Try adjusting your search terms.
+                    </p>
+                    <Button variant="outline" onClick={() => setSearchQuery("")}>
+                      Clear search
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {filteredMovies.map((vodItem: VodItem) => {
+                    const posterImage = getPosterImage(vodItem);
+                    const mainCast = getMainCast(vodItem);
+                    const director = getDirector(vodItem);
+                    const fileSize = getFileSize(vodItem);
+                    const videoInfo = getVideoInfo(vodItem);
+                    const isAvailable = new Date(vodItem.effectiveLicenseDates.LicenseEnd) > new Date();
+                    
+                    return (
+                      <Card 
+                        key={vodItem._id} 
+                        className={`group overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 border-0 bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-sm hover:-translate-y-2 cursor-pointer ${
+                          selectedMovie?._id === vodItem._id ? 'ring-2 ring-primary' : ''
+                        }`}
+                        onClick={() => setSelectedMovie(vodItem)}
+                      >
+                        <div className="aspect-[2/3] relative overflow-hidden bg-gradient-to-br from-muted/20 to-muted/40">
+                          {posterImage ? (
                             <img 
                               src={`https://assets.swankmp.net/${posterImage.Location}`}
-                              alt={`${getLocalizedTitle(selectedMovie)} poster`}
-                              className="w-full h-full object-cover"
+                              alt={`${getLocalizedTitle(vodItem)} poster`}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                               onError={(e) => {
                                 e.currentTarget.style.display = 'none';
                                 e.currentTarget.nextElementSibling?.classList.remove('hidden');
                               }}
                             />
-                          ) : (
-                            <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center backdrop-blur-sm">
-                              <div className="text-center text-primary-foreground">
-                                <Film className="w-16 h-16 mx-auto mb-2 opacity-80" />
-                                <p className="text-sm font-medium px-4">No Poster Available</p>
-                              </div>
+                          ) : null}
+                          <div className={`absolute inset-0 bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center backdrop-blur-sm ${posterImage ? 'hidden' : ''}`}>
+                            <div className="text-center text-primary-foreground">
+                              <Film className="w-16 h-16 mx-auto mb-2 opacity-80" />
+                              <p className="text-sm font-medium px-4">No Poster Available</p>
                             </div>
-                          );
-                        })()}
-                        
-                        <div className="absolute top-4 left-4 right-4 flex justify-between">
-                          <Badge className={`backdrop-blur-md font-medium ${
-                            new Date(selectedMovie.effectiveLicenseDates.LicenseEnd) > new Date()
-                              ? 'bg-green-500/90 text-white border-0' 
-                              : 'bg-red-500/90 text-white border-0'
-                          }`}>
-                            {new Date(selectedMovie.effectiveLicenseDates.LicenseEnd) > new Date() ? 'Available' : 'Expired'}
-                          </Badge>
+                          </div>
                           
-                          <Badge className="bg-black/40 text-white border-white/20 backdrop-blur-md text-xs font-medium">
-                            {selectedMovie.publicityMetadata.Rating}
-                          </Badge>
-                        </div>
-                      </div>
-
-                      <CardHeader className="p-4">
-                        <CardTitle className="text-lg font-bold leading-tight line-clamp-2">
-                          {getLocalizedTitle(selectedMovie)}
-                        </CardTitle>
-                        <CardDescription className="space-y-2">
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Calendar className="w-3 h-3" />
-                            <span>{selectedMovie.publicityMetadata.ReleaseYear}</span>
-                            <Clock className="w-3 h-3 ml-2" />
-                            <span>{formatRuntime(selectedMovie.publicityMetadata.Runtime)}</span>
-                          </div>
-                          <Badge variant="outline" className="text-xs">
-                            {selectedMovie.publicityMetadata.Category}
-                          </Badge>
-                        </CardDescription>
-                      </CardHeader>
-                    </Card>
-                  </div>
-
-                  {/* Movie Information */}
-                  <div className="lg:col-span-3">
-                    <Card>
-                      <CardHeader className="flex flex-row items-center justify-between">
-                        <div>
-                          <CardTitle className="text-2xl">{getLocalizedTitle(selectedMovie)}</CardTitle>
-                          <CardDescription className="text-lg text-muted-foreground">
-                            {selectedMovie.publicityMetadata.Studio} • {selectedMovie.publicityMetadata.ReleaseYear}
-                          </CardDescription>
-                        </div>
-                        <div className="flex gap-2">
-                          <LanguageSelector
-                            availableLanguages={getAvailableLanguagesForMovie(selectedMovie)}
-                            selectedLanguage={selectedLanguage}
-                            onLanguageChange={changeLanguage}
-                            compact
-                          />
-                          <MovieDetailDialog vodItem={selectedMovie} />
-                        </div>
-                      </CardHeader>
-                      
-                      <CardContent className="space-y-6">
-                        {/* Synopsis */}
-                        <div>
-                          <h4 className="font-semibold mb-2">Synopsis</h4>
-                          <p className="text-muted-foreground leading-relaxed">
-                            {getLocalizedSynopsis(selectedMovie)}
-                          </p>
-                        </div>
-
-                        {/* Genres */}
-                        <div>
-                          <h4 className="font-semibold mb-2">Genres</h4>
-                          <div className="flex flex-wrap gap-2">
-                            {getLocalizedGenres(selectedMovie).map((genre, index) => (
-                              <Badge key={index} variant="secondary">
-                                {genre.Text}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* Cast & Crew */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          {(() => {
-                            const director = getDirector(selectedMovie);
-                            const mainCast = getMainCast(selectedMovie);
+                          {/* Status and Quality indicators */}
+                          <div className="absolute top-4 left-4 right-4 flex justify-between">
+                            <Badge className={`backdrop-blur-md font-medium ${
+                              isAvailable 
+                                ? 'bg-green-500/90 text-white border-0' 
+                                : 'bg-red-500/90 text-white border-0'
+                            }`}>
+                              {isAvailable ? 'Available' : 'Expired'}
+                            </Badge>
                             
-                            return (
-                              <>
-                                {director && (
-                                  <div>
-                                    <h4 className="font-semibold mb-2 flex items-center gap-2">
-                                      <Award className="w-4 h-4" />
-                                      Director
-                                    </h4>
-                                    <p className="text-muted-foreground">{director}</p>
-                                  </div>
-                                )}
-                                
-                                {mainCast.length > 0 && (
-                                  <div>
-                                    <h4 className="font-semibold mb-2 flex items-center gap-2">
-                                      <Users className="w-4 h-4" />
-                                      Main Cast
-                                    </h4>
-                                    <p className="text-muted-foreground">{mainCast.join(', ')}</p>
-                                  </div>
-                                )}
-                              </>
-                            );
-                          })()}
-                        </div>
-
-                        {/* Technical Information */}
-                        <div>
-                          <h4 className="font-semibold mb-2">Technical Information</h4>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                            {(() => {
-                              const videoInfo = getVideoInfo(selectedMovie);
-                              const fileSize = getFileSize(selectedMovie);
-                              
-                              return (
-                                <>
-                                  {videoInfo && (
-                                    <div>
-                                      <div className="font-medium text-foreground">Resolution</div>
-                                      <div className="text-muted-foreground">{videoInfo.resolution}</div>
-                                    </div>
-                                  )}
-                                  
-                                  {fileSize && (
-                                    <div>
-                                      <div className="font-medium text-foreground">File Size</div>
-                                      <div className="text-muted-foreground">{fileSize}</div>
-                                    </div>
-                                  )}
-                                  
-                                  <div>
-                                    <div className="font-medium text-foreground">Protection</div>
-                                    <div className="text-muted-foreground">{selectedMovie.protectionType}</div>
-                                  </div>
-                                  
-                                  <div>
-                                    <div className="font-medium text-foreground">Film Number</div>
-                                    <div className="text-muted-foreground">#{selectedMovie.identifiers.FilmNumber}</div>
-                                  </div>
-                                </>
-                              );
-                            })()}
+                            <Badge className="bg-black/40 text-white border-white/20 backdrop-blur-md text-xs font-medium">
+                              {vodItem.publicityMetadata.Rating}
+                            </Badge>
                           </div>
-                        </div>
 
-                        {/* License Information */}
-                        <div>
-                          <h4 className="font-semibold mb-2">License Information</h4>
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                              <div className="font-medium text-foreground">Available From</div>
-                              <div className="text-muted-foreground">
-                                {new Date(selectedMovie.effectiveLicenseDates.LicenseStart).toLocaleDateString()}
-                              </div>
-                            </div>
-                            <div>
-                              <div className="font-medium text-foreground">Available Until</div>
-                              <div className="text-muted-foreground">
-                                {new Date(selectedMovie.effectiveLicenseDates.LicenseEnd).toLocaleDateString()}
+                          {/* Hover overlay with technical info */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500">
+                            <div className="absolute bottom-4 left-4 right-4">
+                              <div className="flex flex-wrap gap-1 mb-2">
+                                {videoInfo && (
+                                  <Badge className="bg-primary/90 text-primary-foreground border-0 text-xs">
+                                    {videoInfo.resolution.split(' × ')[1]}p
+                                  </Badge>
+                                )}
+                                {fileSize && (
+                                  <Badge className="bg-secondary/90 text-secondary-foreground border-0 text-xs">
+                                    {fileSize}
+                                  </Badge>
+                                )}
+                                {hasTrailer(vodItem) && (
+                                  <Badge className="bg-green-500/90 text-white border-0 text-xs">
+                                    <Play className="w-2 h-2 mr-1" />
+                                    Trailer
+                                  </Badge>
+                                )}
                               </div>
                             </div>
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
-                  </div>
+
+                        <CardHeader className="p-4">
+                          <CardTitle className="text-lg font-bold leading-tight line-clamp-2 group-hover:text-primary transition-colors duration-300">
+                            {getLocalizedTitle(vodItem)}
+                          </CardTitle>
+                          <CardDescription className="space-y-2">
+                            <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                              <div className="flex items-center gap-1">
+                                <Calendar className="w-3 h-3" />
+                                <span>{vodItem.publicityMetadata.ReleaseYear}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                <span>{formatRuntime(vodItem.publicityMetadata.Runtime)}</span>
+                              </div>
+                            </div>
+                            
+                            {director && (
+                              <div className="text-sm text-muted-foreground line-clamp-1">
+                                <strong>Director:</strong> {director}
+                              </div>
+                            )}
+                            
+                            <div className="flex flex-wrap gap-1">
+                              {getLocalizedGenres(vodItem).slice(0, 2).map((genre, index) => (
+                                <Badge key={index} variant="outline" className="text-xs">
+                                  {genre.Text}
+                                </Badge>
+                              ))}
+                            </div>
+                          </CardDescription>
+                        </CardHeader>
+
+                        <CardContent className="p-4 pt-0">
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="font-semibold text-foreground">{vodItem.publicityMetadata.Studio}</span>
+                              <Badge variant="secondary" className="text-xs">
+                                {vodItem.publicityMetadata.Category}
+                              </Badge>
+                            </div>
+                            
+                            <MovieDetailDialog vodItem={vodItem} />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
                 </div>
+              )}
+
+              {/* Selected Movie Details */}
+              {selectedMovie && (
+                <Card className="mt-8">
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle className="text-2xl">{getLocalizedTitle(selectedMovie)}</CardTitle>
+                      <CardDescription className="text-lg">
+                        {selectedMovie.publicityMetadata.Studio} • {selectedMovie.publicityMetadata.ReleaseYear}
+                      </CardDescription>
+                    </div>
+                    <div className="flex gap-2">
+                      <LanguageSelector
+                        availableLanguages={getAvailableLanguagesForMovie(selectedMovie)}
+                        selectedLanguage={selectedLanguage}
+                        onLanguageChange={changeLanguage}
+                        compact
+                      />
+                      <Button variant="outline" onClick={() => setSelectedMovie(null)}>
+                        Clear Selection
+                      </Button>
+                    </div>
+                  </CardHeader>
+                  
+                  <CardContent>
+                    <p className="text-muted-foreground leading-relaxed">
+                      {getLocalizedSynopsis(selectedMovie)}
+                    </p>
+                  </CardContent>
+                </Card>
               )}
             </div>
           )}
