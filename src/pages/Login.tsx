@@ -34,7 +34,7 @@ const Login = () => {
     try {
       const deviceId = generateDeviceId();
       await login({
-        apikeyUserId: apikeyUserId.trim(),
+        apikeyUserId: `api_keys:${apikeyUserId.trim()}`,
         password: password.trim(),
         deviceId,
       });
@@ -77,7 +77,7 @@ const Login = () => {
               <Input
                 id="userId"
                 type="text"
-                placeholder="api_keys:your-user-id"
+                placeholder="your-user-id"
                 value={apikeyUserId}
                 onChange={(e) => setApikeyUserId(e.target.value)}
                 disabled={isLoading}
