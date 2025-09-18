@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Tv, Signal, Settings, Plus } from "lucide-react"
+import { Tv, Signal, Settings, Plus, RefreshCw } from "lucide-react"
 import { getChannels, getHealth, Channel } from "@/services/channelApi"
 import { useToast } from "@/hooks/use-toast"
 import { useNavigate } from "react-router-dom"
@@ -144,8 +144,17 @@ const Dashboard = () => {
       {/* System Information */}
       <div className="grid grid-cols-1 gap-6">
         <Card className="bg-gradient-card border-border shadow-card-shadow">
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-card-foreground">System Information</CardTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={fetchHealth}
+              disabled={healthLoading}
+              className="h-8 w-8 p-0"
+            >
+              <RefreshCw className={`h-4 w-4 ${healthLoading ? 'animate-spin' : ''}`} />
+            </Button>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-start space-x-3">
