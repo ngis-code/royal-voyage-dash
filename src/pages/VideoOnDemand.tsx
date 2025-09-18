@@ -570,125 +570,274 @@ const VideoOnDemand = () => {
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
               {vodData?.payload.documents.map((vodItem: VodItem) => {
                 const posterImage = getPosterImage(vodItem);
+                const mainCast = getMainCast(vodItem);
                 const director = getDirector(vodItem);
+                const fileSize = getFileSize(vodItem);
+                const videoInfo = getVideoInfo(vodItem);
+                const audioInfo = getAudioInfo(vodItem);
+                const availableLanguages = getAvailableLanguagesForMovie(vodItem);
+                const isAvailable = new Date(vodItem.effectiveLicenseDates.LicenseEnd) > new Date();
+                const hasSubtitles = vodItem.asset?.SidecarAssetTracks?.length > 0;
+                const audioTracks = vodItem.asset?.EmbeddedTracks?.filter(track => track.Type === 'audio') || [];
+                const subtitleTracks = vodItem.asset?.SidecarAssetTracks?.filter(track => track.Type === 'subtitle' || track.Type === 'closedcaption') || [];
                 
                 return (
-                  <Card key={vodItem._id} className="group overflow-hidden hover:shadow-elegant transition-all duration-300 border-border/50 hover:border-primary/20">
-                    {/* Movie Poster */}
-                    <div className="relative h-48 bg-gradient-to-br from-muted/50 to-muted overflow-hidden">
+                  <Card key={vodItem._id} className="group overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 border-0 bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-sm hover:-translate-y-2">
+                    <div className="aspect-[2/3] relative overflow-hidden bg-gradient-to-br from-muted/20 to-muted/40">
                       {posterImage ? (
                         <img 
                           src={`https://assets.swankmp.net/${posterImage.Location}`}
                           alt={`${getLocalizedTitle(vodItem)} poster`}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                           onError={(e) => {
                             e.currentTarget.style.display = 'none';
                             e.currentTarget.nextElementSibling?.classList.remove('hidden');
                           }}
                         />
                       ) : null}
-                      <div className={`absolute inset-0 flex items-center justify-center ${posterImage ? 'hidden' : ''}`}>
-                        <div className="text-center">
-                          <Film className="w-16 h-16 mx-auto text-muted-foreground/50 mb-2" />
-                          <p className="text-sm text-muted-foreground">No Poster Available</p>
+                      <div className={`absolute inset-0 bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center backdrop-blur-sm ${posterImage ? 'hidden' : ''}`}>
+                        <div className="text-center text-primary-foreground">
+                          <Film className="w-20 h-20 mx-auto mb-3 opacity-80" />
+                          <p className="text-sm font-medium">No Poster Available</p>
+                          <p className="text-xs opacity-80 line-clamp-2 px-4">{getLocalizedTitle(vodItem)}</p>
                         </div>
                       </div>
                       
-                      {/* Overlay with play button and trailer indicator */}
-                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                        <div className="text-center">
-                          <MovieDetailDialog vodItem={vodItem} />
-                          {hasTrailer(vodItem) && (
-                            <p className="text-xs text-white/80">Trailer Available</p>
-                          )}
+                      {/* Enhanced overlay with detailed info */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500">
+                        <div className="absolute bottom-6 left-6 right-6">
+                          <div className="space-y-3">
+                            <div className="flex flex-wrap gap-2">
+                              {videoInfo && (
+                                <Badge className="bg-gradient-to-r from-primary/90 to-primary/70 text-primary-foreground border-0 font-medium">
+                                  {videoInfo.resolution.split(' × ')[1]}p {videoInfo.format}
+                                </Badge>
+                              )}
+                              {fileSize && (
+                                <Badge className="bg-gradient-to-r from-secondary/90 to-secondary/70 text-secondary-foreground border-0">
+                                  {fileSize}
+                                </Badge>
+                              )}
+                              {audioInfo && (
+                                <Badge className="bg-gradient-to-r from-blue-500/90 to-blue-600/90 text-white border-0">
+                                  {audioInfo.format} {audioInfo.channels}ch
+                                </Badge>
+                              )}
+                              {hasTrailer(vodItem) && (
+                                <Badge className="bg-gradient-to-r from-green-500/90 to-green-600/90 text-white border-0">
+                                  <Play className="w-3 h-3 mr-1" />
+                                  Trailer
+                                </Badge>
+                              )}
+                            </div>
+                            
+                            <div className="flex items-center justify-between text-white/90 text-xs">
+                              <div className="flex items-center gap-3">
+                                {availableLanguages.length > 1 && (
+                                  <div className="flex items-center gap-1">
+                                    <Languages className="w-3 h-3" />
+                                    <span>{availableLanguages.length} audio</span>
+                                  </div>
+                                )}
+                                {hasSubtitles && (
+                                  <div className="flex items-center gap-1">
+                                    <Monitor className="w-3 h-3" />
+                                    <span>{subtitleTracks.length} subs</span>
+                                  </div>
+                                )}
+                                {vodItem.protectionType && (
+                                  <div className="flex items-center gap-1">
+                                    <Info className="w-3 h-3" />
+                                    <span>{vodItem.protectionType}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
 
-                      {/* Rating and Language badges */}
-                      <div className="absolute top-3 right-3 flex flex-col gap-2">
-                        <Badge variant="secondary" className="bg-black/70 text-white border-0">
+                      {/* Status and Quality indicators */}
+                      <div className="absolute top-4 left-4 right-4 flex justify-between">
+                        <div className="flex gap-2">
+                          <Badge className={`backdrop-blur-md font-medium ${
+                            isAvailable 
+                              ? 'bg-green-500/90 text-white border-0' 
+                              : 'bg-red-500/90 text-white border-0'
+                          }`}>
+                            {isAvailable ? 'Available' : 'Expired'}
+                          </Badge>
+                        </div>
+                        
+                        <Badge className="bg-black/40 text-white border-white/20 backdrop-blur-md text-xs font-medium">
                           {vodItem.publicityMetadata.Rating}
                         </Badge>
-                        {getAvailableLanguagesForMovie(vodItem).length > 1 && (
-                          <LanguageSelector
-                            availableLanguages={getAvailableLanguagesForMovie(vodItem)}
-                            selectedLanguage={selectedLanguage}
-                            onLanguageChange={changeLanguage}
-                            compact
-                          />
-                        )}
                       </div>
                     </div>
 
-                    <CardHeader className="pb-4">
-                      <CardTitle className="text-lg leading-tight mb-2 group-hover:text-primary transition-colors">
+                    <CardHeader className="p-6 pb-3">
+                      <CardTitle className="text-xl font-bold leading-tight line-clamp-2 group-hover:text-primary transition-colors duration-300">
                         {getLocalizedTitle(vodItem)}
                       </CardTitle>
-                      <CardDescription className="text-sm">
-                        {vodItem.publicityMetadata.Studio} • {vodItem.publicityMetadata.ReleaseYear}
+                      <CardDescription className="space-y-2">
+                        {/* Primary metadata */}
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="w-4 h-4" />
+                            <span className="font-medium">{vodItem.publicityMetadata.ReleaseYear}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-4 h-4" />
+                            <span>{formatRuntime(vodItem.publicityMetadata.Runtime)}</span>
+                          </div>
+                          <Badge variant="outline" className="font-medium">
+                            {vodItem.publicityMetadata.Category}
+                          </Badge>
+                        </div>
+                        
+                        {/* Creative talent */}
                         {director && (
-                          <span className="block text-xs mt-1">
-                            Directed by {director}
-                          </span>
+                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                            <Award className="w-4 h-4 text-amber-500" />
+                            <span><strong>Director:</strong> {director}</span>
+                          </div>
                         )}
-                        {getAvailableLanguagesForMovie(vodItem).length > 1 && (
-                          <div className="flex items-center gap-1 mt-2">
-                            <Languages className="w-3 h-3 text-muted-foreground" />
-                            <span className="text-xs text-muted-foreground">
-                              {getAvailableLanguagesForMovie(vodItem).length} languages
+                        
+                        {mainCast.length > 0 && (
+                          <div className="flex items-start gap-1 text-sm text-muted-foreground">
+                            <Users className="w-4 h-4 mt-0.5 text-blue-500" />
+                            <span className="line-clamp-2">
+                              <strong>Cast:</strong> {mainCast.join(', ')}
                             </span>
                           </div>
                         )}
                       </CardDescription>
                     </CardHeader>
-                    
-                    <CardContent className="space-y-4">
-                      <p className="text-sm text-muted-foreground line-clamp-3">
-                        {getLocalizedSynopsis(vodItem)}
-                      </p>
 
-                      <div className="flex flex-wrap gap-2">
-                        {getLocalizedGenres(vodItem).map((genre, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
-                            {genre.Text}
-                          </Badge>
-                        ))}
-                      </div>
-
-                      <div className="space-y-2 text-sm">
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Clock className="w-4 h-4" />
-                          <span>{formatRuntime(vodItem.publicityMetadata.Runtime)}</span>
-                        </div>
-                        
-                        <div className="flex items-center gap-2 text-muted-foreground">
-                          <Calendar className="w-4 h-4" />
-                          <span>
-                            Available until {new Date(vodItem.effectiveLicenseDates.LicenseEnd).toLocaleDateString()}
-                          </span>
+                    <CardContent className="p-6 pt-0">
+                      <div className="space-y-4">
+                        {/* Studio and technical specs */}
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="font-semibold text-foreground">{vodItem.publicityMetadata.Studio}</span>
+                          {videoInfo && (
+                            <Badge variant="secondary" className="font-medium">
+                              {videoInfo.resolution.split(' × ')[1]}p
+                            </Badge>
+                          )}
                         </div>
 
-                        {getMainCast(vodItem).length > 0 && (
-                          <div className="flex items-start gap-2 text-muted-foreground">
-                            <Users className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                            <span className="text-xs leading-relaxed">
-                              {getMainCast(vodItem).join(', ')}
-                            </span>
+                        {/* Genres */}
+                        <div className="flex flex-wrap gap-2">
+                          {getLocalizedGenres(vodItem).slice(0, 3).map((genre, index) => (
+                            <Badge key={index} variant="outline" className="text-xs font-medium hover:bg-primary/10 transition-colors">
+                              {genre.Text}
+                            </Badge>
+                          ))}
+                          {getLocalizedGenres(vodItem).length > 3 && (
+                            <Badge variant="outline" className="text-xs font-medium">
+                              +{getLocalizedGenres(vodItem).length - 3} more
+                            </Badge>
+                          )}
+                        </div>
+
+                        {/* Media features */}
+                        <div className="grid grid-cols-2 gap-4 text-xs">
+                          <div className="space-y-2">
+                            {availableLanguages.length > 1 && (
+                              <div className="flex items-center gap-1 text-muted-foreground">
+                                <Globe className="w-3 h-3 text-blue-500" />
+                                <span>{availableLanguages.length} languages</span>
+                              </div>
+                            )}
+                            {hasSubtitles && (
+                              <div className="flex items-center gap-1 text-muted-foreground">
+                                <Monitor className="w-3 h-3 text-green-500" />
+                                <span>{subtitleTracks.length} subtitle tracks</span>
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
+                          <div className="space-y-2">
+                            {fileSize && (
+                              <div className="flex items-center gap-1 text-muted-foreground">
+                                <HardDrive className="w-3 h-3 text-purple-500" />
+                                <span>{fileSize}</span>
+                              </div>
+                            )}
+                            {audioInfo && (
+                              <div className="flex items-center gap-1 text-muted-foreground">
+                                <Info className="w-3 h-3 text-orange-500" />
+                                <span>{audioInfo.format} {audioInfo.channels}ch</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
 
-                      <div className="flex items-center justify-between pt-2 border-t border-border">
-                        <div className="text-xs text-muted-foreground">
-                          Film #{vodItem.identifiers.FilmNumber}
+                        {/* Availability timeline with progress */}
+                        <div className="bg-gradient-to-r from-muted/50 to-muted/30 rounded-lg p-3">
+                          <div className="text-xs text-muted-foreground mb-2">
+                            <strong>License expires:</strong>
+                          </div>
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-medium">
+                              {new Date(vodItem.effectiveLicenseDates.LicenseEnd).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric'
+                              })}
+                            </span>
+                            <div className="flex items-center gap-1 text-xs">
+                              <div className={`w-2 h-2 rounded-full animate-pulse ${isAvailable ? 'bg-green-500' : 'bg-red-500'}`} />
+                              <span className={isAvailable ? 'text-green-600' : 'text-red-600'}>
+                                {isAvailable ? 'Active' : 'Expired'}
+                              </span>
+                            </div>
+                          </div>
+                          {/* License progress bar */}
+                          {(() => {
+                            const start = new Date(vodItem.effectiveLicenseDates.LicenseStart);
+                            const end = new Date(vodItem.effectiveLicenseDates.LicenseEnd);
+                            const now = new Date();
+                            const total = end.getTime() - start.getTime();
+                            const elapsed = now.getTime() - start.getTime();
+                            const progress = Math.max(0, Math.min(100, (elapsed / total) * 100));
+                            
+                            return (
+                              <div className="w-full bg-muted/50 rounded-full h-1.5">
+                                <div 
+                                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                                    isAvailable ? 'bg-gradient-to-r from-green-400 to-green-600' : 'bg-gradient-to-r from-red-400 to-red-600'
+                                  }`}
+                                  style={{ width: `${progress}%` }}
+                                />
+                              </div>
+                            );
+                          })()}
                         </div>
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Star className="w-3 h-3" />
-                          {vodItem.protectionType}
+
+                        {/* Synopsis preview */}
+                        <div className="bg-gradient-to-br from-background/50 to-muted/20 rounded-lg p-3">
+                          <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
+                            {getLocalizedSynopsis(vodItem)}
+                          </p>
                         </div>
+
+                        {/* Film metadata */}
+                        <div className="flex items-center justify-between pt-2 border-t border-border/50 text-xs text-muted-foreground">
+                          <span>Film #{vodItem.identifiers.FilmNumber}</span>
+                          {availableLanguages.length > 1 && (
+                            <LanguageSelector
+                              availableLanguages={availableLanguages}
+                              selectedLanguage={selectedLanguage}
+                              onLanguageChange={changeLanguage}
+                              compact
+                            />
+                          )}
+                        </div>
+
+                        <MovieDetailDialog vodItem={vodItem} />
                       </div>
                     </CardContent>
                   </Card>
