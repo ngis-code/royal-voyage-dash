@@ -141,60 +141,8 @@ const Dashboard = () => {
         </Card>
       </div>
 
-      {/* Channel Overview */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="bg-gradient-card border-border shadow-card-shadow">
-          <CardHeader>
-            <CardTitle className="text-card-foreground">Channel Overview</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <div className="space-y-3">
-                <div className="animate-pulse h-4 bg-muted rounded"></div>
-                <div className="animate-pulse h-4 bg-muted rounded"></div>
-                <div className="animate-pulse h-4 bg-muted rounded"></div>
-              </div>
-            ) : channels.length === 0 ? (
-              <div className="text-center py-6">
-                <Tv className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-                <p className="text-muted-foreground mb-4">No channels configured yet</p>
-                <Button 
-                  onClick={() => navigate('/channels')}
-                  className="bg-gradient-primary text-white"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Your First Channel
-                </Button>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {channels.slice(0, 3).map((channel) => (
-                  <div key={channel._id} className="flex items-center justify-between p-3 bg-background/50 rounded-lg">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-3 h-3 rounded-full ${
-                        channel.status === 'active' ? 'bg-success' : 'bg-muted'
-                      }`}></div>
-                      <span className="font-medium text-card-foreground">{channel.name}</span>
-                    </div>
-                    <span className="text-sm text-muted-foreground">
-                      {channel.channelType.toUpperCase()} • {channel.status}
-                    </span>
-                  </div>
-                ))}
-                {channels.length > 3 && (
-                  <Button 
-                    variant="outline" 
-                    className="w-full mt-3"
-                    onClick={() => navigate('/channels')}
-                  >
-                    View All {channels.length} Channels
-                  </Button>
-                )}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
+      {/* System Information */}
+      <div className="grid grid-cols-1 gap-6">
         <Card className="bg-gradient-card border-border shadow-card-shadow">
           <CardHeader>
             <CardTitle className="text-card-foreground">System Information</CardTitle>
