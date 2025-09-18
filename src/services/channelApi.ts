@@ -53,6 +53,21 @@ export interface CreateChannelRequest {
   rfBroadcastType?: string
 }
 
+export interface HealthResponse {
+  status: number;
+  payload: {
+    status: string;
+    timestamp: string;
+    services: {
+      mongo: { status: string };
+      redis: { status: string };
+    };
+    optionalServices: {
+      typesense: { status: string };
+    };
+  };
+}
+
 // Get all channels
 export const getChannels = async (): Promise<ChannelResponse> => {
   const response = await fetch(`${API_BASE_URL}/api/databases/list-documents`, {
@@ -126,3 +141,20 @@ export const deleteChannel = async (channelId: string): Promise<any> => {
 
   return response.json()
 }
+
+// Health check
+export const getHealth = async (): Promise<HealthResponse> => {
+  const response = await fetch(`${API_BASE_URL}/health`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error(`Health check failed: ${response.status}`);
+  }
+
+  return response.json();
+};
