@@ -73,6 +73,7 @@ export interface VodItem {
   _id: string
   _createdBy: string
   _permissions: string[]
+  visible_on_tv?: boolean
   asset: {
     MediaFileInfoLocation: string
     Location: string
@@ -327,6 +328,24 @@ export const importVod = async (url: string): Promise<any> => {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ url }),
+  })
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return response.json()
+}
+
+// Update a VOD item
+export const updateVodItem = async (vodItemId: string, vodData: Partial<{ visible_on_tv: boolean }>): Promise<any> => {
+  const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/vod_imports/${vodItemId}`, {
+    method: 'PUT',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(vodData),
   })
 
   if (!response.ok) {

@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getVodItems, VodItem, importVod, deleteVodItem } from "@/services/channelApi";
+import { getVodItems, VodItem, importVod, deleteVodItem, updateVodItem } from "@/services/channelApi";
 import { PermissionError } from "@/lib/apiErrorHandler";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, Clock, Star, Users, Film, Play, RefreshCw, Image, Info, Award, Globe, HardDrive, Monitor, Languages, Search, ChevronDown, Download, MoreVertical, Trash2 } from "lucide-react";
+import { Calendar, Clock, Star, Users, Film, Play, RefreshCw, Image, Info, Award, Globe, HardDrive, Monitor, Languages, Search, ChevronDown, Download, MoreVertical, Trash2, Edit, Tv } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -42,6 +42,7 @@ const VideoOnDemand = () => {
   const [isImporting, setIsImporting] = useState(false);
   const [vodItemToDelete, setVodItemToDelete] = useState<VodItem | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [isUpdatingVisibility, setIsUpdatingVisibility] = useState<string | null>(null);
   
   const { data: vodData, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['vod-items'],
@@ -141,6 +142,28 @@ const VideoOnDemand = () => {
     } finally {
       setVodItemToDelete(null);
       setDeleteDialogOpen(false);
+    }
+  };
+
+  const handleToggleVisibility = async (vodItem: VodItem) => {
+    setIsUpdatingVisibility(vodItem._id);
+    try {
+      await updateVodItem(vodItem._id, { 
+        visible_on_tv: !vodItem.visible_on_tv 
+      });
+      toast({
+        title: "Success",
+        description: `VOD item ${!vodItem.visible_on_tv ? 'enabled' : 'disabled'} on TV`,
+      });
+      refetch();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update VOD item. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingVisibility(null);
     }
   };
 
@@ -919,6 +942,16 @@ const VideoOnDemand = () => {
                                   <DropdownMenuItem 
                                     onClick={(e) => {
                                       e.stopPropagation();
+                                      handleToggleVisibility(vodItem);
+                                    }}
+                                    disabled={isUpdatingVisibility === vodItem._id}
+                                  >
+                                    <Tv className="w-4 h-4 mr-2" />
+                                    {vodItem.visible_on_tv ? 'Hide from TV' : 'Show on TV'}
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    onClick={(e) => {
+                                      e.stopPropagation();
                                       handleDeleteVod(vodItem);
                                     }}
                                     className="text-destructive"
@@ -930,9 +963,17 @@ const VideoOnDemand = () => {
                               </DropdownMenu>
                             </div>
                             
-                            <div className="flex items-center justify-center">
+                            <div className="flex items-center justify-between gap-2">
                               <Badge variant="secondary" className="text-xs">
                                 {vodItem.publicityMetadata.Category}
+                              </Badge>
+                              
+                              <Badge 
+                                variant={vodItem.visible_on_tv ? "default" : "outline"} 
+                                className="text-xs flex items-center gap-1"
+                              >
+                                <Tv className="w-3 h-3" />
+                                {vodItem.visible_on_tv ? 'On TV' : 'Hidden'}
                               </Badge>
                             </div>
                             
