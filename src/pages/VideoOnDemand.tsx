@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getVodItems, VodItem } from "@/services/channelApi";
+import { getVodItems, VodItem, importVod } from "@/services/channelApi";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar, Clock, Star, Users, Film, Play, RefreshCw, Image, Info, Award, Globe, HardDrive, Monitor, Languages, Search, ChevronDown } from "lucide-react";
+import { Calendar, Clock, Star, Users, Film, Play, RefreshCw, Image, Info, Award, Globe, HardDrive, Monitor, Languages, Search, ChevronDown, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -20,6 +21,8 @@ const VideoOnDemand = () => {
   const { selectedLanguage, changeLanguage, getAvailableLanguages, getLocalizedContent } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedMovie, setSelectedMovie] = useState<VodItem | null>(null);
+  const [importUrl, setImportUrl] = useState("");
+  const [isImporting, setIsImporting] = useState(false);
   
   const { data: vodData, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['vod-items'],
@@ -40,6 +43,39 @@ const VideoOnDemand = () => {
         description: "Failed to refresh VOD library. Please try again.",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleImportVod = async () => {
+    if (!importUrl.trim()) {
+      toast({
+        title: "Import URL required",
+        description: "Please enter a valid import URL.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsImporting(true);
+    try {
+      await importVod(importUrl);
+      toast({
+        title: "VOD import started",
+        description: "The import process has been initiated successfully.",
+      });
+      setImportUrl("");
+      // Refresh the VOD list after successful import
+      setTimeout(() => {
+        refetch();
+      }, 2000);
+    } catch (error) {
+      toast({
+        title: "Import failed",
+        description: "Failed to import VOD content. Please check the URL and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsImporting(false);
     }
   };
 
@@ -550,7 +586,7 @@ const VideoOnDemand = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <div className="flex items-center justify-between mb-8">
+       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">Video on Demand</h1>
           <p className="text-muted-foreground">
@@ -576,6 +612,26 @@ const VideoOnDemand = () => {
             Refresh
           </Button>
         </div>
+      </div>
+
+      {/* Import VOD Section */}
+      <div className="flex items-center gap-2 p-4 rounded-lg border bg-card mb-6">
+        <div className="flex-1">
+          <Input
+            placeholder="Enter import URL (e.g., http://172.27.16.32:8080/swank-Disk-02/lab/Manifest.json)"
+            value={importUrl}
+            onChange={(e) => setImportUrl(e.target.value)}
+            disabled={isImporting}
+          />
+        </div>
+        <Button 
+          onClick={handleImportVod}
+          disabled={isImporting || !importUrl.trim()}
+          className="gap-2"
+        >
+          <Download className={`w-4 h-4 ${isImporting ? 'animate-spin' : ''}`} />
+          {isImporting ? 'Importing...' : 'Import VOD'}
+        </Button>
       </div>
 
       {isLoading ? (

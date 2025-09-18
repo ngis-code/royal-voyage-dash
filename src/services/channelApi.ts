@@ -317,6 +317,24 @@ export const getVodItems = async (): Promise<VodResponse> => {
   return response.json()
 }
 
+// Import VOD from URL
+export const importVod = async (url: string): Promise<any> => {
+  const response = await fetch(`${API_BASE_URL}/api/services/request/import_vod/ingest`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+    },
+    body: JSON.stringify({ url }),
+  })
+
+  if (!response.ok) {
+    throw new Error(`Failed to import VOD: ${response.statusText}`)
+  }
+
+  return response.json()
+}
+
 // Health check
 export const getHealth = async (): Promise<HealthResponse> => {
   const response = await fetch(`${API_BASE_URL}/health`, {
