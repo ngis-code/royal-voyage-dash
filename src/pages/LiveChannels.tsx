@@ -41,11 +41,7 @@ const LiveChannels = () => {
   }, [toast])
 
   const getStatusBadge = (channel: Channel) => {
-    // Determine status based on channel data - you can customize this logic
-    const isActive = channel.channelType === "ip" 
-      ? (channel.ip && channel.port)
-      : (channel.majorNumber && channel.minorNumber)
-    if (isActive) {
+    if (channel.status === "active") {
       return <Badge className="bg-success text-success-foreground">Live</Badge>
     }
     return <Badge variant="destructive">Offline</Badge>
@@ -57,11 +53,7 @@ const LiveChannels = () => {
     return matchesSearch && matchesCategory
   })
 
-  const activeChannels = channels.filter(c => 
-    c.channelType === "ip" 
-      ? (c.ip && c.port)
-      : (c.majorNumber && c.minorNumber)
-  ).length
+  const activeChannels = channels.filter(c => c.status === "active").length
 
   const handleCreateChannel = () => {
     setEditingChannel(undefined)
@@ -224,8 +216,7 @@ const LiveChannels = () => {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-              {((channel.channelType === "ip" && channel.ip && channel.port) || 
-                (channel.channelType === "rf" && channel.majorNumber && channel.minorNumber)) && (
+              {channel.status === "active" && (
                 <div className="absolute bottom-3 left-3">
                   <div className="bg-black/70 px-2 py-1 rounded-md flex items-center space-x-1">
                     <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>

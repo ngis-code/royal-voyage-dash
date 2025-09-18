@@ -10,6 +10,7 @@ export interface Channel {
   createdAt: string
   description: string
   imgUrl: string
+  status: "active" | "inactive"
   // IP channel fields
   ip?: string
   ipBroadcastType?: string
@@ -41,6 +42,7 @@ export interface CreateChannelRequest {
   description: string
   imgUrl: string
   name: string
+  status: "active" | "inactive"
   // IP channel fields
   ip?: string
   ipBroadcastType?: string

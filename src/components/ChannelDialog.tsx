@@ -35,6 +35,7 @@ export const ChannelDialog = ({ open, onOpenChange, channel, onSuccess }: Channe
     channelType: channel?.channelType || "ip",
     description: channel?.description || "",
     imgUrl: channel?.imgUrl || "",
+    status: channel?.status || "active",
     // IP fields
     ip: channel?.ip || "",
     ipBroadcastType: channel?.ipBroadcastType || "udp",
@@ -56,6 +57,7 @@ export const ChannelDialog = ({ open, onOpenChange, channel, onSuccess }: Channe
         channelType: channel.channelType,
         description: channel.description,
         imgUrl: channel.imgUrl,
+        status: channel.status,
         // IP fields
         ip: channel.ip || "",
         ipBroadcastType: channel.ipBroadcastType || "udp",
@@ -73,6 +75,7 @@ export const ChannelDialog = ({ open, onOpenChange, channel, onSuccess }: Channe
         channelType: "ip",
         description: "",
         imgUrl: "",
+        status: "active",
         // IP fields
         ip: "",
         ipBroadcastType: "udp",
@@ -152,6 +155,33 @@ export const ChannelDialog = ({ open, onOpenChange, channel, onSuccess }: Channe
                 required
                 className="bg-card border-border"
               />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="channelType" className="text-foreground">Channel Type</Label>
+              <Select value={formData.channelType} onValueChange={(value) => handleChange('channelType', value as "ip" | "rf")}>
+                <SelectTrigger className="bg-card border-border">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border">
+                  <SelectItem value="ip">IP</SelectItem>
+                  <SelectItem value="rf">RF</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="status" className="text-foreground">Status</Label>
+              <Select value={formData.status} onValueChange={(value) => handleChange('status', value as "active" | "inactive")}>
+                <SelectTrigger className="bg-card border-border">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover border-border">
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
