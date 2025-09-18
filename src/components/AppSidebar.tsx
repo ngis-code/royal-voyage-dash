@@ -1,5 +1,6 @@
 import { Home, Tv } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
+import rcclLogo from "@/assets/rccl-logo.png"
 
 import {
   Sidebar,
@@ -44,15 +45,30 @@ export function AppSidebar() {
     <Sidebar className="border-r border-sidebar-border bg-sidebar">
       <SidebarContent className="bg-sidebar">
         {/* Header */}
-        <div className="p-6 border-b border-sidebar-border">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center shadow-glow">
-              <Tv className="w-5 h-5 text-white" />
+        <div className="p-6 border-b border-sidebar-border bg-gradient-to-r from-sidebar-background to-sidebar-accent/50">
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-professional border border-primary/20">
+                <img 
+                  src={rcclLogo} 
+                  alt="Royal Caribbean Logo" 
+                  className="w-8 h-8 object-contain"
+                />
+              </div>
+              <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-primary rounded-full flex items-center justify-center shadow-glow">
+                <Tv className="w-2.5 h-2.5 text-white" />
+              </div>
             </div>
             {!isCollapsed && (
-              <div>
-                <h2 className="text-lg font-bold text-sidebar-foreground">IPTV Control</h2>
-                <p className="text-xs text-muted-foreground">Royal Caribbean</p>
+              <div className="flex-1">
+                <div className="flex items-center space-x-2 mb-1">
+                  <h2 className="text-xl font-bold text-sidebar-foreground bg-gradient-to-r from-primary to-primary-glow bg-clip-text text-transparent">
+                    IPTV Control
+                  </h2>
+                  <div className="w-2 h-2 bg-gradient-primary rounded-full animate-pulse"></div>
+                </div>
+                <p className="text-sm font-medium text-primary/80 tracking-wide">Royal Caribbean</p>
+                <div className="w-full h-0.5 bg-gradient-to-r from-primary/50 via-primary to-transparent rounded-full mt-2"></div>
               </div>
             )}
           </div>
