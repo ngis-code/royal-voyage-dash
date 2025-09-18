@@ -68,6 +68,126 @@ export interface HealthResponse {
   };
 }
 
+export interface VodItem {
+  _id: string
+  _createdBy: string
+  _permissions: string[]
+  asset: {
+    MediaFileInfoLocation: string
+    Location: string
+    EmbeddedTracks: Array<{
+      TrackNumber: number
+      Type: string
+      Description: string
+      IsoCode: string
+      Format: string
+      NumberOfChannels: number | null
+    }>
+    SidecarAssetTracks: Array<{
+      Location: string
+      Type: string
+      Description: string
+      IsoCode: string
+      Format: string
+      NumberOfChannels: number | null
+    }>
+  }
+  createdAt: string
+  drmKeyInfo: any
+  effectiveLicenseDates: {
+    LicenseStart: string
+    LicenseEnd: string
+  }
+  filmVersion: string
+  identifiers: {
+    FilmNumber: string
+  }
+  lastIngestedAt: string
+  mediaFileInfo: {
+    General: {
+      SwankProductNumber: number
+      FilmVersion: string
+      FileSizeInMb: number
+      FileSizeBytes: number
+      DateCreated: string
+      DateModified: string
+      Location: string
+      Format: string
+      FileRuntime: string
+      BitRateMode: string
+      BitRate: string
+    }
+    VideoTracks: any[]
+    AudioTracks: any[]
+    SubtitleTracks: any[]
+    ClosedCaptionTracks: any[]
+  }
+  protectionType: string
+  publicityMetadata: {
+    Title: string
+    SwankTitle: string
+    Type: string
+    OriginalType: string
+    ReleaseYear: number
+    Runtime: number
+    Remove: boolean
+    Color: string
+    LastModified: string
+    ParentProductNumber: any
+    Studio: string
+    Category: string
+    Subcategory: any
+    Rating: string
+    SeasonNumber: any
+    EpisodeNumber: any
+    SequenceNumber: any
+    EarliestAvailabilityDateSortBy: string
+    Identifiers: Array<{
+      Name: string
+      Value: string
+      OriginalType: string
+    }>
+    Titles: Array<{
+      Locale: string
+      Text: string
+      SourceType: string
+    }>
+    Synopses: Array<{
+      Locale: string
+      Text: string
+      SourceType: string
+    }>
+    Genres: Array<{
+      Locale: string
+      Text: string
+    }>
+    Tags: Array<{
+      Locale: string
+      Text: string
+      SourceType: string
+    }>
+    Cast: Array<{
+      PartName: string
+      Name: string
+      DisplayOrder: number
+      Role: string
+    }>
+  }
+}
+
+export interface VodResponse {
+  status: number
+  payload: {
+    documents: VodItem[]
+    canAccessAllDocuments: boolean
+    pagination: {
+      offset: number
+      limit: number
+      total: number
+    }
+  }
+}
+
 // Get all channels
 export const getChannels = async (): Promise<ChannelResponse> => {
   const response = await fetch(`${API_BASE_URL}/api/databases/list-documents`, {
@@ -137,6 +257,27 @@ export const deleteChannel = async (channelId: string): Promise<any> => {
 
   if (!response.ok) {
     throw new Error(`Failed to delete channel: ${response.statusText}`)
+  }
+
+  return response.json()
+}
+
+// Get all VOD items
+export const getVodItems = async (): Promise<VodResponse> => {
+  const response = await fetch(`${API_BASE_URL}/api/databases/list-documents`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': API_KEY,
+    },
+    body: JSON.stringify({
+      databaseId: 'royaltv_main',
+      collectionId: 'vod_imports',
+    }),
+  })
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch VOD items: ${response.statusText}`)
   }
 
   return response.json()

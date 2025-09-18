@@ -1,4 +1,4 @@
-import { Home, Tv } from "lucide-react"
+import { Home, Tv, Film } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import rcclLogo from "@/assets/rccl-logo.png"
 
@@ -17,6 +17,7 @@ import {
 const menuItems = [
   { title: "Dashboard", url: "/", icon: Home },
   { title: "Live Channels", url: "/channels", icon: Tv },
+  { title: "Video on Demand", url: "/vod", icon: Film },
 ]
 
 export function AppSidebar() {
