@@ -172,8 +172,7 @@ const Dashboard = () => {
                 <p className="text-sm font-medium text-card-foreground">Search (Typesense)</p>
                 <p className="text-xs text-muted-foreground">
                   {healthLoading ? "Checking..." : (
-                    healthData?.optionalServices?.typesense?.status === 'up' ? "Connected and operational" : 
-                    healthData?.optionalServices?.typesense?.status === 'down' ? "Service unavailable" : "Optional service"
+                    healthData?.optionalServices?.typesense?.status === 'up' ? "Connected and operational" : "Optional service"
                   )}
                 </p>
               </div>
