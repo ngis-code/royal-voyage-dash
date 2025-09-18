@@ -1,4 +1,6 @@
 // Channel API service for IPTV system
+import { handleApiError } from '@/lib/apiErrorHandler';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 export interface Channel {
@@ -236,7 +238,7 @@ export const getChannels = async (): Promise<ChannelResponse> => {
   })
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch channels: ${response.statusText}`)
+    await handleApiError(response);
   }
 
   return response.json()
@@ -254,7 +256,7 @@ export const createChannel = async (channelData: CreateChannelRequest): Promise<
   })
 
   if (!response.ok) {
-    throw new Error(`Failed to create channel: ${response.statusText}`)
+    await handleApiError(response);
   }
 
   return response.json()
@@ -272,7 +274,7 @@ export const updateChannel = async (channelId: string, channelData: Partial<Crea
   })
 
   if (!response.ok) {
-    throw new Error(`Failed to update channel: ${response.statusText}`)
+    await handleApiError(response);
   }
 
   return response.json()
@@ -289,7 +291,7 @@ export const deleteChannel = async (channelId: string): Promise<any> => {
   })
 
   if (!response.ok) {
-    throw new Error(`Failed to delete channel: ${response.statusText}`)
+    await handleApiError(response);
   }
 
   return response.json()
@@ -310,7 +312,7 @@ export const getVodItems = async (): Promise<VodResponse> => {
   })
 
   if (!response.ok) {
-    throw new Error(`Failed to fetch VOD items: ${response.statusText}`)
+    await handleApiError(response);
   }
 
   return response.json()
@@ -328,7 +330,7 @@ export const importVod = async (url: string): Promise<any> => {
   })
 
   if (!response.ok) {
-    throw new Error(`Failed to import VOD: ${response.statusText}`)
+    await handleApiError(response);
   }
 
   return response.json()
@@ -342,7 +344,7 @@ export const getHealth = async (): Promise<HealthResponse> => {
   });
 
   if (!response.ok) {
-    throw new Error(`Health check failed: ${response.status}`);
+    await handleApiError(response);
   }
 
   return response.json();

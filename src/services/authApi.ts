@@ -1,4 +1,6 @@
 // Authentication API service
+import { handleApiError } from '@/lib/apiErrorHandler';
+
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 export interface LoginRequest {
@@ -36,7 +38,7 @@ export const login = async (loginData: LoginRequest): Promise<any> => {
   })
 
   if (!response.ok) {
-    throw new Error(`Login failed: ${response.statusText}`)
+    await handleApiError(response);
   }
 
   return response.json()
@@ -54,7 +56,7 @@ export const resetPassword = async (apiKey: string, password: string): Promise<a
   })
 
   if (!response.ok) {
-    throw new Error(`Password reset failed: ${response.statusText}`)
+    await handleApiError(response);
   }
 
   return response.json()
@@ -68,7 +70,7 @@ export const getAuthStatus = async (): Promise<AuthStatusResponse> => {
   })
 
   if (!response.ok) {
-    throw new Error(`Auth status check failed: ${response.statusText}`)
+    await handleApiError(response);
   }
 
   return response.json()
