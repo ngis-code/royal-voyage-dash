@@ -44,7 +44,7 @@ const LiveChannels = () => {
     if (channel.status === "active") {
       return <Badge className="bg-success text-success-foreground">Live</Badge>
     }
-    return <Badge variant="destructive">Offline</Badge>
+    return <Badge variant="destructive">Inactive</Badge>
   }
 
   const filteredChannels = channels.filter(channel => {
