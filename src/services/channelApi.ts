@@ -64,17 +64,13 @@ export const getChannels = async (): Promise<ChannelResponse> => {
 
 // Create a new channel
 export const createChannel = async (channelData: CreateChannelRequest): Promise<any> => {
-  const response = await fetch(`${API_BASE_URL}/api/databases/create-document`, {
+  const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/channels`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'x-api-key': API_KEY,
     },
-    body: JSON.stringify({
-      databaseId: 'royaltv_main',
-      collectionId: 'channels',
-      data: channelData,
-    }),
+    body: JSON.stringify(channelData),
   })
 
   if (!response.ok) {
@@ -86,18 +82,13 @@ export const createChannel = async (channelData: CreateChannelRequest): Promise<
 
 // Update a channel
 export const updateChannel = async (channelId: string, channelData: Partial<CreateChannelRequest>): Promise<any> => {
-  const response = await fetch(`${API_BASE_URL}/api/databases/update-document`, {
-    method: 'POST',
+  const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/channels/${channelId}`, {
+    method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
       'x-api-key': API_KEY,
     },
-    body: JSON.stringify({
-      databaseId: 'royaltv_main',
-      collectionId: 'channels',
-      documentId: channelId,
-      data: channelData,
-    }),
+    body: JSON.stringify(channelData),
   })
 
   if (!response.ok) {
@@ -109,17 +100,12 @@ export const updateChannel = async (channelId: string, channelData: Partial<Crea
 
 // Delete a channel
 export const deleteChannel = async (channelId: string): Promise<any> => {
-  const response = await fetch(`${API_BASE_URL}/api/databases/delete-document`, {
-    method: 'POST',
+  const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/channels/${channelId}`, {
+    method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
       'x-api-key': API_KEY,
     },
-    body: JSON.stringify({
-      databaseId: 'royaltv_main',
-      collectionId: 'channels',
-      documentId: channelId,
-    }),
   })
 
   if (!response.ok) {

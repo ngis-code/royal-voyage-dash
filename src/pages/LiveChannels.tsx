@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Plus, Search, Filter, MoreHorizontal, Play, Users, Signal, Tv } from "lucide-react"
+import { Plus, Search, Filter, MoreHorizontal, Signal, Tv, Trash2, Edit } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -10,35 +10,33 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast"
-import { getChannels, Channel } from "@/services/channelApi"
+import { getChannels, deleteChannel, Channel } from "@/services/channelApi"
+import { ChannelDialog } from "@/components/ChannelDialog"
 
 const LiveChannels = () => {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [channels, setChannels] = useState<Channel[]>([])
   const [loading, setLoading] = useState(true)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [editingChannel, setEditingChannel] = useState<Channel | undefined>()
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [channelToDelete, setChannelToDelete] = useState<Channel | undefined>()
   const { toast } = useToast()
 
   // Fetch channels from API
   useEffect(() => {
-    const fetchChannels = async () => {
-      try {
-        setLoading(true)
-        const response = await getChannels()
-        setChannels(response.payload.documents)
-      } catch (error) {
-        console.error('Failed to fetch channels:', error)
-        toast({
-          title: "Error",
-          description: "Failed to load channels. Please try again.",
-          variant: "destructive",
-        })
-      } finally {
-        setLoading(false)
-      }
-    }
-
     fetchChannels()
   }, [toast])
 
@@ -58,8 +56,60 @@ const LiveChannels = () => {
   })
 
   const activeChannels = channels.filter(c => c.ip && c.port).length
-  const totalViewers = activeChannels * 450 // Mock viewer calculation
-  const totalBandwidth = activeChannels * 5.2 // Mock bandwidth calculation
+
+  const handleCreateChannel = () => {
+    setEditingChannel(undefined)
+    setDialogOpen(true)
+  }
+
+  const handleEditChannel = (channel: Channel) => {
+    setEditingChannel(channel)
+    setDialogOpen(true)
+  }
+
+  const handleDeleteChannel = (channel: Channel) => {
+    setChannelToDelete(channel)
+    setDeleteDialogOpen(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!channelToDelete) return
+
+    try {
+      await deleteChannel(channelToDelete._id)
+      toast({
+        title: "Success",
+        description: "Channel deleted successfully",
+      })
+      fetchChannels()
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete channel",
+        variant: "destructive",
+      })
+    } finally {
+      setDeleteDialogOpen(false)
+      setChannelToDelete(undefined)
+    }
+  }
+
+  const fetchChannels = async () => {
+    try {
+      setLoading(true)
+      const response = await getChannels()
+      setChannels(response.payload.documents)
+    } catch (error) {
+      console.error('Failed to fetch channels:', error)
+      toast({
+        title: "Error",
+        description: "Failed to load channels. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -80,14 +130,14 @@ const LiveChannels = () => {
           <h1 className="text-3xl font-bold text-foreground">Live Channels</h1>
           <p className="text-muted-foreground mt-1">Manage and monitor your IPTV channel lineup</p>
         </div>
-        <Button className="bg-gradient-primary text-white shadow-glow hover:shadow-professional transition-all duration-300">
+        <Button onClick={handleCreateChannel} className="bg-gradient-primary text-white shadow-glow hover:shadow-professional transition-all duration-300">
           <Plus className="w-4 h-4 mr-2" />
           Add Channel
         </Button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="bg-gradient-card border-border shadow-card-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-card-foreground">Total Channels</CardTitle>
@@ -110,27 +160,6 @@ const LiveChannels = () => {
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-card border-border shadow-card-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-card-foreground">Total Viewers</CardTitle>
-            <Users className="h-4 w-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-card-foreground">{totalViewers.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">Across all channels</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-card border-border shadow-card-shadow">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-card-foreground">Bandwidth Usage</CardTitle>
-            <Play className="h-4 w-4 text-warning" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-card-foreground">{totalBandwidth.toFixed(1)} Mbps</div>
-            <p className="text-xs text-muted-foreground">Current usage</p>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Filters */}
@@ -160,8 +189,8 @@ const LiveChannels = () => {
                 alt={channel.name}
                 className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
                 onError={(e) => {
-                  // Fallback to a placeholder image if the channel image fails to load
-                  e.currentTarget.src = `https://picsum.photos/400/225?random=${channel._id}`
+                  // Set a default placeholder if image fails to load
+                  e.currentTarget.src = 'https://via.placeholder.com/400x225/1a1a1a/white?text=No+Image'
                 }}
               />
               <div className="absolute top-3 left-3">
@@ -175,9 +204,17 @@ const LiveChannels = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="bg-popover border-border">
-                    <DropdownMenuItem>Edit Channel</DropdownMenuItem>
-                    <DropdownMenuItem>View Analytics</DropdownMenuItem>
-                    <DropdownMenuItem className="text-destructive">Delete Channel</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleEditChannel(channel)}>
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit Channel
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={() => handleDeleteChannel(channel)}
+                      className="text-destructive"
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete Channel
+                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -236,6 +273,30 @@ const LiveChannels = () => {
           </Card>
         ))}
       </div>
+
+      <ChannelDialog 
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        channel={editingChannel}
+        onSuccess={fetchChannels}
+      />
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="bg-popover border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-foreground">Delete Channel</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              Are you sure you want to delete "{channelToDelete?.name}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="border-border">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
