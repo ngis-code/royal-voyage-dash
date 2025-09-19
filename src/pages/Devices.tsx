@@ -11,8 +11,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import { Pencil, Plus, Trash2, Wifi, AlertTriangle } from "lucide-react";
+import { Pencil, Plus, Trash2, Wifi, AlertTriangle, Search, X } from "lucide-react";
 import {
   listTvConfigurations,
   createTvConfiguration,
@@ -37,11 +39,25 @@ export default function Devices() {
   const [editingDevice, setEditingDevice] = useState<TvConfiguration | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deviceToDelete, setDeviceToDelete] = useState<TvConfiguration | null>(null);
+  const [macAddressFilter, setMacAddressFilter] = useState("");
+  const [roomIdFilter, setRoomIdFilter] = useState("");
   const queryClient = useQueryClient();
 
+  // Build filter object
+  const filter: Record<string, any> = {};
+  if (macAddressFilter.trim()) {
+    filter._id = macAddressFilter.trim();
+  }
+  if (roomIdFilter.trim()) {
+    filter.room_id = roomIdFilter.trim();
+  }
+
   const { data: devicesResponse, isLoading } = useQuery({
-    queryKey: ["tv-configurations"],
-    queryFn: () => listTvConfigurations({ sort: { createdAt: "desc" } }),
+    queryKey: ["tv-configurations", filter],
+    queryFn: () => listTvConfigurations({ 
+      sort: { createdAt: "desc" },
+      filter: Object.keys(filter).length > 0 ? filter : undefined
+    }),
   });
 
   const createMutation = useMutation({
@@ -130,6 +146,11 @@ export default function Devices() {
     }
   };
 
+  const clearFilters = () => {
+    setMacAddressFilter("");
+    setRoomIdFilter("");
+  };
+
   const devices = devicesResponse?.payload?.documents || [];
   const canAccessAll = devicesResponse?.payload?.canAccessAllDocuments ?? false;
 
@@ -161,6 +182,48 @@ export default function Devices() {
           </CardContent>
         </Card>
       )}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Search className="w-5 h-5" />
+            Filter Devices
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <Label htmlFor="macAddress">MAC Address</Label>
+              <Input
+                id="macAddress"
+                placeholder="Filter by MAC address..."
+                value={macAddressFilter}
+                onChange={(e) => setMacAddressFilter(e.target.value)}
+              />
+            </div>
+            <div className="flex-1">
+              <Label htmlFor="roomId">Room/Cabin ID</Label>
+              <Input
+                id="roomId"
+                placeholder="Filter by room/cabin ID..."
+                value={roomIdFilter}
+                onChange={(e) => setRoomIdFilter(e.target.value)}
+              />
+            </div>
+            <div className="flex items-end">
+              <Button
+                variant="outline"
+                onClick={clearFilters}
+                disabled={!macAddressFilter && !roomIdFilter}
+                className="flex items-center gap-2"
+              >
+                <X className="w-4 h-4" />
+                Clear
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -25,6 +26,12 @@ const formSchema = z.object({
   room_id: z.string().min(1, "Room ID is required"),
 });
 
+const editFormSchema = z.object({
+  macAddress: z.string().optional(),
+  serial_id: z.string().min(1, "Serial ID is required"),
+  room_id: z.string().min(1, "Room ID is required"),
+});
+
 type FormValues = z.infer<typeof formSchema>;
 
 interface TvConfigurationFormDialogProps {
@@ -42,14 +49,28 @@ export function TvConfigurationFormDialog({
   initialData,
   isLoading = false,
 }: TvConfigurationFormDialogProps) {
+  const isEditing = !!initialData;
+  const currentSchema = isEditing ? editFormSchema : formSchema;
+  
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(currentSchema),
     defaultValues: {
-      macAddress: initialData?._id || "",
-      serial_id: initialData?.serial_id || "",
-      room_id: initialData?.room_id || "",
+      macAddress: "",
+      serial_id: "",
+      room_id: "",
     },
   });
+
+  // Reset form when dialog opens with new data
+  React.useEffect(() => {
+    if (open) {
+      form.reset({
+        macAddress: initialData?._id || "",
+        serial_id: initialData?.serial_id || "",
+        room_id: initialData?.room_id || "",
+      });
+    }
+  }, [open, initialData, form]);
 
   const handleSubmit = async (values: FormValues) => {
     await onSubmit(values);

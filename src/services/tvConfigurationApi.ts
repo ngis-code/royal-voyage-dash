@@ -42,18 +42,27 @@ export async function listTvConfigurations(params: {
     ? Object.fromEntries(Object.entries(params.sort).map(([k, v]) => [k, v === 'asc' ? 1 : -1])) 
     : undefined;
 
+  const body: any = {
+    databaseId: "royaltv_main",
+    collectionId: "tv_configuration",
+    limit: params.limit ?? 25,
+    offset: params.offset ?? 0,
+  };
+
+  if (sortParameter) {
+    body.$sort = sortParameter;
+  }
+
+  // Add filter parameters directly to the body
+  if (params.filter) {
+    Object.assign(body, params.filter);
+  }
+
   const response = await fetch(`${API_BASE_URL}/api/databases/list-documents`, {
     method: 'POST',
     credentials: 'include',
     headers: getApiHeaders(),
-    body: JSON.stringify({
-      databaseId: "royaltv_main",
-      collectionId: "tv_configuration",
-      limit: params.limit ?? 25,
-      offset: params.offset ?? 0,
-      ...params.filter,
-      $sort: sortParameter
-    })
+    body: JSON.stringify(body)
   });
 
   if (!response.ok) {
