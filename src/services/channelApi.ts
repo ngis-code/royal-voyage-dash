@@ -224,6 +224,76 @@ export interface VodResponse {
   }
 }
 
+export interface CustomVideo {
+  _id: string
+  _permissions?: string[]
+  _createdBy?: string
+  createdAt?: string
+  updatedAt?: string
+  visible_on_tv: boolean
+  id: string
+  title: {
+    en: string
+    es: string
+    fr: string
+    de: string
+  }
+  description: {
+    en: string
+    es: string
+    fr: string
+    de: string
+  }
+  media: {
+    trailer_url?: string
+    full_video_url: string
+    poster_image_url?: string
+  }
+  rating: {
+    system: string
+    value: string
+  }
+}
+
+export interface CreateCustomVideoRequest {
+  id: string
+  title: {
+    en: string
+    es: string
+    fr: string
+    de: string
+  }
+  description: {
+    en: string
+    es: string
+    fr: string
+    de: string
+  }
+  media: {
+    trailer_url?: string
+    full_video_url: string
+    poster_image_url?: string
+  }
+  rating: {
+    system: string
+    value: string
+  }
+  visible_on_tv: boolean
+}
+
+export interface CustomVideoResponse {
+  status: number
+  payload: {
+    documents: CustomVideo[]
+    canAccessAllDocuments: boolean
+    pagination: {
+      offset: number
+      limit: number
+      total: number
+    }
+  }
+}
+
 // Get all channels
 export const getChannels = async (): Promise<ChannelResponse> => {
   const response = await fetch(`${API_BASE_URL}/api/databases/list-documents`, {
@@ -358,6 +428,80 @@ export const updateVodItem = async (vodItemId: string, vodData: Partial<{ visibl
 // Delete a VOD item
 export const deleteVodItem = async (vodItemId: string): Promise<any> => {
   const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/vod_imports/${vodItemId}`, {
+    method: 'DELETE',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  })
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return response.json()
+}
+
+// Get all custom videos
+export const getCustomVideos = async (): Promise<CustomVideoResponse> => {
+  const response = await fetch(`${API_BASE_URL}/api/databases/list-documents`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      databaseId: 'royaltv_main',
+      collectionId: 'custom_videos',
+    }),
+  })
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return response.json()
+}
+
+// Create a new custom video
+export const createCustomVideo = async (videoData: CreateCustomVideoRequest): Promise<any> => {
+  const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/custom_videos`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(videoData),
+  })
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return response.json()
+}
+
+// Update a custom video
+export const updateCustomVideo = async (videoId: string, videoData: Partial<CustomVideo>): Promise<any> => {
+  const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/custom_videos/${videoId}`, {
+    method: 'PUT',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(videoData),
+  })
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return response.json()
+}
+
+// Delete a custom video
+export const deleteCustomVideo = async (videoId: string): Promise<any> => {
+  const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/custom_videos/${videoId}`, {
     method: 'DELETE',
     credentials: 'include',
     headers: {

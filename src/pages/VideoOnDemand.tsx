@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getVodItems, VodItem, importVod, deleteVodItem, updateVodItem } from "@/services/channelApi";
+import { getVodItems, VodItem, importVod, deleteVodItem, updateVodItem, getCustomVideos, CustomVideo, createCustomVideo, deleteCustomVideo, updateCustomVideo, CreateCustomVideoRequest } from "@/services/channelApi";
 import { PermissionError } from "@/lib/apiErrorHandler";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -44,6 +44,20 @@ const VideoOnDemand = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [isUpdatingVisibility, setIsUpdatingVisibility] = useState<string | null>(null);
   
+  // Custom videos state
+  const [customVideoToDelete, setCustomVideoToDelete] = useState<CustomVideo | null>(null);
+  const [customDeleteDialogOpen, setCustomDeleteDialogOpen] = useState(false);
+  const [isUpdatingCustomVisibility, setIsUpdatingCustomVisibility] = useState<string | null>(null);
+  const [showAddCustomVideo, setShowAddCustomVideo] = useState(false);
+  const [newCustomVideo, setNewCustomVideo] = useState<CreateCustomVideoRequest>({
+    id: '',
+    title: { en: '', es: '', fr: '', de: '' },
+    description: { en: '', es: '', fr: '', de: '' },
+    media: { full_video_url: '' },
+    rating: { system: 'MPAA', value: '' },
+    visible_on_tv: true
+  });
+  
   const { data: vodData, isLoading, error, refetch, isFetching } = useQuery({
     queryKey: ['vod-items'],
     queryFn: getVodItems,
@@ -54,6 +68,18 @@ const VideoOnDemand = () => {
         return false;
       }
       // Don't retry more than 2 times for other errors
+      return failureCount < 2;
+    },
+  });
+
+  const { data: customVideoData, isLoading: customVideosLoading, refetch: refetchCustomVideos } = useQuery({
+    queryKey: ['custom-videos'],
+    queryFn: getCustomVideos,
+    refetchOnWindowFocus: false,
+    retry: (failureCount, error) => {
+      if (error instanceof PermissionError) {
+        return false;
+      }
       return failureCount < 2;
     },
   });
@@ -164,6 +190,91 @@ const VideoOnDemand = () => {
       });
     } finally {
       setIsUpdatingVisibility(null);
+    }
+  };
+
+  // Custom video handlers
+  const handleAddCustomVideo = async () => {
+    if (!newCustomVideo.id.trim() || !newCustomVideo.title.en.trim() || !newCustomVideo.media.full_video_url.trim()) {
+      toast({
+        title: "Required fields missing",
+        description: "Please fill in ID, English title, and video URL.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await createCustomVideo(newCustomVideo);
+      toast({
+        title: "Success",
+        description: "Custom video added successfully",
+      });
+      setNewCustomVideo({
+        id: '',
+        title: { en: '', es: '', fr: '', de: '' },
+        description: { en: '', es: '', fr: '', de: '' },
+        media: { full_video_url: '' },
+        rating: { system: 'MPAA', value: '' },
+        visible_on_tv: true
+      });
+      setShowAddCustomVideo(false);
+      refetchCustomVideos();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add custom video. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteCustomVideo = (customVideo: CustomVideo) => {
+    setCustomVideoToDelete(customVideo);
+    setCustomDeleteDialogOpen(true);
+  };
+
+  const confirmDeleteCustomVideo = async () => {
+    if (!customVideoToDelete) return;
+
+    try {
+      await deleteCustomVideo(customVideoToDelete._id);
+      toast({
+        title: "Success",
+        description: "Custom video deleted successfully",
+      });
+      refetchCustomVideos();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete custom video. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setCustomVideoToDelete(null);
+      setCustomDeleteDialogOpen(false);
+    }
+  };
+
+  const handleToggleCustomVideoVisibility = async (customVideo: CustomVideo) => {
+    setIsUpdatingCustomVisibility(customVideo._id);
+    try {
+      await updateCustomVideo(customVideo._id, { 
+        visible_on_tv: !customVideo.visible_on_tv 
+      });
+      toast({
+        title: "Success",
+        description: `Custom video ${!customVideo.visible_on_tv ? 'enabled' : 'disabled'} on TV`,
+      });
+      refetchCustomVideos();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update custom video. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingCustomVisibility(null);
     }
   };
 
@@ -683,14 +794,12 @@ const VideoOnDemand = () => {
 
   return (
     <div className="container mx-auto p-6">
-       <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-3xl font-bold text-foreground mb-2">Video on Demand</h1>
-          <p className="text-muted-foreground">
-            {searchQuery ? `${filteredMovies.length} of ${vodData?.payload.documents.length || 0}` : (vodData?.payload.documents.length || 0)} movies available in your library
-          </p>
+          <p className="text-muted-foreground">Manage your VOD library and import new content</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           {vodData?.payload.documents && vodData.payload.documents.length > 0 && (
             <LanguageSelector
               availableLanguages={getAvailableLanguages(
@@ -711,330 +820,634 @@ const VideoOnDemand = () => {
         </div>
       </div>
 
-      {/* Import VOD Section */}
-      <div className="flex items-center gap-2 p-4 rounded-lg border bg-card mb-6">
-        <div className="flex-1">
-          <Input
-            placeholder="Enter import URL (e.g., http://172.27.16.32:8080/swank-Disk-02/lab/Manifest.json)"
-            value={importUrl}
-            onChange={(e) => setImportUrl(e.target.value)}
-            disabled={isImporting}
-          />
-        </div>
-        <Button 
-          onClick={handleImportVod}
-          disabled={isImporting || !importUrl.trim()}
-          className="gap-2"
-        >
-          <Download className={`w-4 h-4 ${isImporting ? 'animate-spin' : ''}`} />
-          {isImporting ? 'Importing...' : 'Import VOD'}
-        </Button>
-      </div>
+      <Tabs defaultValue="swank" className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="swank">Swank Videos</TabsTrigger>
+          <TabsTrigger value="custom">Custom Videos</TabsTrigger>
+        </TabsList>
 
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, index) => (
-            <Card key={index} className="overflow-hidden">
-              <CardHeader>
-                <Skeleton className="h-6 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Skeleton className="h-20 w-full" />
-                <div className="flex gap-2">
-                  <Skeleton className="h-6 w-16" />
-                  <Skeleton className="h-6 w-20" />
-                  <Skeleton className="h-6 w-18" />
-                </div>
-                <div className="flex justify-between items-center">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-4 w-16" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <>
-          {vodData?.payload.documents.length === 0 ? (
-            <Card className="text-center py-12">
-              <CardContent>
-                <Film className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-xl font-semibold mb-2">No Movies Found</h3>
-                <p className="text-muted-foreground mb-4">
-                  Your VOD library is empty. Import content to get started.
-                </p>
-                <Button className="gap-2">
-                  <Play className="w-4 h-4" />
-                  Import Content
-                </Button>
-              </CardContent>
-            </Card>
+        <TabsContent value="swank" className="space-y-6">
+          {/* Import VOD Section */}
+          <div className="flex items-center gap-2 p-4 rounded-lg border bg-card">
+            <div className="flex-1">
+              <Input
+                placeholder="Enter import URL (e.g., http://172.27.16.32:8080/swank-Disk-02/lab/Manifest.json)"
+                value={importUrl}
+                onChange={(e) => setImportUrl(e.target.value)}
+                disabled={isImporting}
+              />
+            </div>
+            <Button 
+              onClick={handleImportVod}
+              disabled={isImporting || !importUrl.trim()}
+              className="gap-2"
+            >
+              <Download className={`w-4 h-4 ${isImporting ? 'animate-spin' : ''}`} />
+              {isImporting ? 'Importing...' : 'Import VOD'}
+            </Button>
+          </div>
+
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, index) => (
+                <Card key={index} className="overflow-hidden">
+                  <CardHeader>
+                    <Skeleton className="h-6 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <Skeleton className="h-20 w-full" />
+                    <div className="flex gap-2">
+                      <Skeleton className="h-6 w-16" />
+                      <Skeleton className="h-6 w-20" />
+                      <Skeleton className="h-6 w-18" />
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-4 w-16" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           ) : (
-            <div className="space-y-6">
-              {/* Search Bar */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Search className="w-5 h-5" />
-                    Search Movies
-                  </CardTitle>
-                  <CardDescription>
-                    Filter through {vodData?.payload.documents.length} available movies
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                    <input
-                      type="text"
-                      placeholder="Search by title, director, cast, genre, studio, or year..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full pl-10 pr-4 py-3 border border-input rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                    />
-                    {searchQuery && (
-                      <button
-                        onClick={() => setSearchQuery("")}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                      >
-                        ✕
-                      </button>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Movies Grid */}
-              {filteredMovies.length === 0 && searchQuery ? (
+            <>
+              {vodData?.payload.documents.length === 0 ? (
                 <Card className="text-center py-12">
                   <CardContent>
-                    <Search className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">No movies found</h3>
+                    <Film className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-xl font-semibold mb-2">No Movies Found</h3>
                     <p className="text-muted-foreground mb-4">
-                      No movies match your search criteria. Try adjusting your search terms.
+                      Your VOD library is empty. Import content to get started.
                     </p>
-                    <Button variant="outline" onClick={() => setSearchQuery("")}>
-                      Clear search
+                    <Button className="gap-2">
+                      <Play className="w-4 h-4" />
+                      Import Content
                     </Button>
                   </CardContent>
                 </Card>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {filteredMovies.map((vodItem: VodItem) => {
-                    const posterImage = getPosterImage(vodItem);
-                    const mainCast = getMainCast(vodItem);
-                    const director = getDirector(vodItem);
-                    const fileSize = getFileSize(vodItem);
-                    const videoInfo = getVideoInfo(vodItem);
-                    const isAvailable = new Date(vodItem.effectiveLicenseDates.LicenseEnd) > new Date();
-                    
-                    return (
-                      <Card 
-                        key={vodItem._id} 
-                        className={`group overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 border-0 bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-sm hover:-translate-y-2 cursor-pointer ${
-                          selectedMovie?._id === vodItem._id ? 'ring-2 ring-primary' : ''
-                        }`}
-                        onClick={() => setSelectedMovie(vodItem)}
-                      >
-                        <div className="aspect-[2/3] relative overflow-hidden bg-gradient-to-br from-muted/20 to-muted/40">
-                          {posterImage ? (
-                            <img 
-                              src={`https://assets.swankmp.net/${posterImage.Location}`}
-                              alt={`${getLocalizedTitle(vodItem)} poster`}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                              onError={(e) => {
-                                e.currentTarget.style.display = 'none';
-                                e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                              }}
-                            />
-                          ) : null}
-                          <div className={`absolute inset-0 bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center backdrop-blur-sm ${posterImage ? 'hidden' : ''}`}>
-                            <div className="text-center text-primary-foreground">
-                              <Film className="w-16 h-16 mx-auto mb-2 opacity-80" />
-                              <p className="text-sm font-medium px-4">No Poster Available</p>
-                            </div>
-                          </div>
-                          
-                          {/* Status and Quality indicators */}
-                          <div className="absolute top-4 left-4 right-4 flex justify-between">
-                            <Badge className={`backdrop-blur-md font-medium ${
-                              isAvailable 
-                                ? 'bg-green-500/90 text-white border-0' 
-                                : 'bg-red-500/90 text-white border-0'
-                            }`}>
-                              {isAvailable ? 'Available' : 'Expired'}
-                            </Badge>
-                            
-                            <Badge className="bg-black/40 text-white border-white/20 backdrop-blur-md text-xs font-medium">
-                              {vodItem.publicityMetadata.Rating}
-                            </Badge>
-                          </div>
+                <div className="space-y-6">
+                  {/* Search Bar */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Search className="w-5 h-5" />
+                        Search Movies
+                      </CardTitle>
+                      <CardDescription>
+                        Filter through {vodData?.payload.documents.length} available movies
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                        <input
+                          type="text"
+                          placeholder="Search by title, director, cast, genre, studio, or year..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                          className="w-full pl-10 pr-4 py-3 border border-input rounded-md bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                        />
+                        {searchQuery && (
+                          <button
+                            onClick={() => setSearchQuery("")}
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
 
-                          {/* Hover overlay with technical info */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500">
-                            <div className="absolute bottom-4 left-4 right-4">
-                              <div className="flex flex-wrap gap-1 mb-2">
-                                {videoInfo && (
-                                  <Badge className="bg-primary/90 text-primary-foreground border-0 text-xs">
-                                    {videoInfo.resolution.split(' × ')[1]}p
-                                  </Badge>
-                                )}
-                                {fileSize && (
-                                  <Badge className="bg-secondary/90 text-secondary-foreground border-0 text-xs">
-                                    {fileSize}
-                                  </Badge>
-                                )}
-                                {hasTrailer(vodItem) && (
-                                  <Badge className="bg-green-500/90 text-white border-0 text-xs">
-                                    <Play className="w-2 h-2 mr-1" />
-                                    Trailer
-                                  </Badge>
-                                )}
+                  {/* Movies Grid */}
+                  {filteredMovies.length === 0 && searchQuery ? (
+                    <Card className="text-center py-12">
+                      <CardContent>
+                        <Search className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+                        <h3 className="text-xl font-semibold mb-2">No movies found</h3>
+                        <p className="text-muted-foreground mb-4">
+                          No movies match your search criteria. Try adjusting your search terms.
+                        </p>
+                        <Button variant="outline" onClick={() => setSearchQuery("")}>
+                          Clear search
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                      {filteredMovies.map((vodItem: VodItem) => {
+                        const posterImage = getPosterImage(vodItem);
+                        const mainCast = getMainCast(vodItem);
+                        const director = getDirector(vodItem);
+                        const fileSize = getFileSize(vodItem);
+                        const videoInfo = getVideoInfo(vodItem);
+                        const isAvailable = new Date(vodItem.effectiveLicenseDates.LicenseEnd) > new Date();
+                        
+                        return (
+                          <Card 
+                            key={vodItem._id} 
+                            className={`group overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 border-0 bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-sm hover:-translate-y-2 cursor-pointer ${
+                              selectedMovie?._id === vodItem._id ? 'ring-2 ring-primary' : ''
+                            }`}
+                            onClick={() => setSelectedMovie(vodItem)}
+                          >
+                            <div className="aspect-[2/3] relative overflow-hidden bg-gradient-to-br from-muted/20 to-muted/40">
+                              {posterImage ? (
+                                <img 
+                                  src={`https://assets.swankmp.net/${posterImage.Location}`}
+                                  alt={`${getLocalizedTitle(vodItem)} poster`}
+                                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                                  onError={(e) => {
+                                    e.currentTarget.style.display = 'none';
+                                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                                  }}
+                                />
+                              ) : null}
+                              <div className={`absolute inset-0 bg-gradient-to-br from-primary/30 to-secondary/30 flex items-center justify-center backdrop-blur-sm ${posterImage ? 'hidden' : ''}`}>
+                                <div className="text-center text-primary-foreground">
+                                  <Film className="w-16 h-16 mx-auto mb-2 opacity-80" />
+                                  <p className="text-sm font-medium px-4">No Poster Available</p>
+                                </div>
                               </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <CardHeader className="p-4">
-                          <CardTitle className="text-lg font-bold leading-tight line-clamp-2 group-hover:text-primary transition-colors duration-300">
-                            {getLocalizedTitle(vodItem)}
-                          </CardTitle>
-                          <CardDescription className="space-y-2">
-                            <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                              <div className="flex items-center gap-1">
-                                <Calendar className="w-3 h-3" />
-                                <span>{vodItem.publicityMetadata.ReleaseYear}</span>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <Clock className="w-3 h-3" />
-                                <span>{formatRuntime(vodItem.publicityMetadata.Runtime)}</span>
-                              </div>
-                            </div>
-                            
-                            {director && (
-                              <div className="text-sm text-muted-foreground line-clamp-1">
-                                <strong>Director:</strong> {director}
-                              </div>
-                            )}
-                            
-                            <div className="flex flex-wrap gap-1">
-                              {getLocalizedGenres(vodItem).slice(0, 2).map((genre, index) => (
-                                <Badge key={index} variant="outline" className="text-xs">
-                                  {genre.Text}
-                                </Badge>
-                              ))}
-                            </div>
-                          </CardDescription>
-                        </CardHeader>
-
-                        <CardContent className="p-4 pt-0">
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="font-semibold text-foreground">{vodItem.publicityMetadata.Studio}</span>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                                    <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem 
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleToggleVisibility(vodItem);
-                                    }}
-                                    disabled={isUpdatingVisibility === vodItem._id}
-                                  >
-                                    <Tv className="w-4 h-4 mr-2" />
-                                    {vodItem.visible_on_tv ? 'Hide from TV' : 'Show on TV'}
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem 
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleDeleteVod(vodItem);
-                                    }}
-                                    className="text-destructive"
-                                  >
-                                    <Trash2 className="w-4 h-4 mr-2" />
-                                    Delete VOD Item
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                            
-                            <div className="flex items-center justify-between gap-2">
-                              <Badge variant="secondary" className="text-xs">
-                                {vodItem.publicityMetadata.Category}
-                              </Badge>
                               
-                              <Badge 
-                                variant={vodItem.visible_on_tv ? "default" : "outline"} 
-                                className="text-xs flex items-center gap-1"
-                              >
-                                <Tv className="w-3 h-3" />
-                                {vodItem.visible_on_tv ? 'On TV' : 'Hidden'}
-                              </Badge>
+                              {/* Status and Quality indicators */}
+                              <div className="absolute top-4 left-4 right-4 flex justify-between">
+                                <Badge className={`backdrop-blur-md font-medium ${
+                                  isAvailable 
+                                    ? 'bg-green-500/90 text-white border-0' 
+                                    : 'bg-red-500/90 text-white border-0'
+                                }`}>
+                                  {isAvailable ? 'Available' : 'Expired'}
+                                </Badge>
+                                
+                                <Badge className="bg-black/40 text-white border-white/20 backdrop-blur-md text-xs font-medium">
+                                  {vodItem.publicityMetadata.Rating}
+                                </Badge>
+                              </div>
+
+                              {/* Hover overlay with technical info */}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500">
+                                <div className="absolute bottom-4 left-4 right-4">
+                                  <div className="flex flex-wrap gap-1 mb-2">
+                                    {videoInfo && (
+                                      <Badge className="bg-primary/90 text-primary-foreground border-0 text-xs">
+                                        {videoInfo.resolution.split(' × ')[1]}p
+                                      </Badge>
+                                    )}
+                                    {fileSize && (
+                                      <Badge className="bg-secondary/90 text-secondary-foreground border-0 text-xs">
+                                        {fileSize}
+                                      </Badge>
+                                    )}
+                                    {hasTrailer(vodItem) && (
+                                      <Badge className="bg-green-500/90 text-white border-0 text-xs">
+                                        <Play className="w-2 h-2 mr-1" />
+                                        Trailer
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
                             </div>
-                            
-                            <MovieDetailDialog vodItem={vodItem} />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
+
+                            <CardHeader className="p-4">
+                              <CardTitle className="text-lg font-bold leading-tight line-clamp-2 group-hover:text-primary transition-colors duration-300">
+                                {getLocalizedTitle(vodItem)}
+                              </CardTitle>
+                              <CardDescription className="space-y-2">
+                                <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                                  <div className="flex items-center gap-1">
+                                    <Calendar className="w-3 h-3" />
+                                    <span>{vodItem.publicityMetadata.ReleaseYear}</span>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <Clock className="w-3 h-3" />
+                                    <span>{formatRuntime(vodItem.publicityMetadata.Runtime)}</span>
+                                  </div>
+                                </div>
+                                
+                                {director && (
+                                  <div className="text-sm text-muted-foreground line-clamp-1">
+                                    <strong>Director:</strong> {director}
+                                  </div>
+                                )}
+                                
+                                <div className="flex flex-wrap gap-1">
+                                  {getLocalizedGenres(vodItem).slice(0, 2).map((genre, index) => (
+                                    <Badge key={index} variant="outline" className="text-xs">
+                                      {genre.Text}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </CardDescription>
+                            </CardHeader>
+
+                            <CardContent className="p-4 pt-0">
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between text-sm">
+                                  <span className="font-semibold text-foreground">{vodItem.publicityMetadata.Studio}</span>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                        <MoreVertical className="h-4 w-4" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                      <DropdownMenuItem 
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleToggleVisibility(vodItem);
+                                        }}
+                                        disabled={isUpdatingVisibility === vodItem._id}
+                                      >
+                                        <Tv className="w-4 h-4 mr-2" />
+                                        {vodItem.visible_on_tv ? 'Hide from TV' : 'Show on TV'}
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem 
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleDeleteVod(vodItem);
+                                        }}
+                                        className="text-destructive"
+                                      >
+                                        <Trash2 className="w-4 h-4 mr-2" />
+                                        Delete VOD Item
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
+                                
+                                <div className="flex items-center justify-between gap-2">
+                                  <Badge variant="secondary" className="text-xs">
+                                    {vodItem.publicityMetadata.Category}
+                                  </Badge>
+                                  
+                                  <Badge 
+                                    variant={vodItem.visible_on_tv ? "default" : "outline"} 
+                                    className="text-xs flex items-center gap-1"
+                                  >
+                                    <Tv className="w-3 h-3" />
+                                    {vodItem.visible_on_tv ? 'On TV' : 'Hidden'}
+                                  </Badge>
+                                </div>
+                                
+                                <MovieDetailDialog vodItem={vodItem} />
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* Selected Movie Details */}
+                  {selectedMovie && (
+                    <Card className="mt-8">
+                      <CardHeader className="flex flex-row items-center justify-between">
+                        <div>
+                          <CardTitle className="text-2xl">{getLocalizedTitle(selectedMovie)}</CardTitle>
+                          <CardDescription className="text-lg">
+                            {selectedMovie.publicityMetadata.Studio} • {selectedMovie.publicityMetadata.ReleaseYear}
+                          </CardDescription>
+                        </div>
+                        <div className="flex gap-2">
+                          <LanguageSelector
+                            availableLanguages={getAvailableLanguagesForMovie(selectedMovie)}
+                            selectedLanguage={selectedLanguage}
+                            onLanguageChange={changeLanguage}
+                            compact
+                          />
+                          <Button variant="outline" onClick={() => setSelectedMovie(null)}>
+                            Clear Selection
+                          </Button>
+                        </div>
+                      </CardHeader>
+                      
+                      <CardContent>
+                        <p className="text-muted-foreground leading-relaxed">
+                          {getLocalizedSynopsis(selectedMovie)}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Delete Confirmation Dialog */}
+          <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete VOD Item</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to delete "{vodItemToDelete ? getLocalizedTitle(vodItemToDelete) : ''}"? 
+                  This action cannot be undone and will permanently remove the VOD item from your library.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction 
+                  onClick={confirmDelete}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </TabsContent>
+
+        <TabsContent value="custom" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="flex items-center gap-2">
+                    <Film className="w-5 h-5" />
+                    Custom Videos
+                  </CardTitle>
+                  <CardDescription>
+                    Add and manage your custom video content
+                  </CardDescription>
+                </div>
+                <Button 
+                  onClick={() => setShowAddCustomVideo(true)}
+                  className="gap-2"
+                >
+                  <Film className="w-4 h-4" />
+                  Add Custom Video
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {showAddCustomVideo && (
+                <div className="border rounded-lg p-4 mb-6 space-y-4">
+                  <h3 className="font-semibold">Add New Custom Video</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Video ID</label>
+                      <Input
+                        placeholder="e.g., movie_001"
+                        value={newCustomVideo.id}
+                        onChange={(e) => setNewCustomVideo({...newCustomVideo, id: e.target.value})}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Video URL</label>
+                      <Input
+                        placeholder="https://example.com/video.mp4"
+                        value={newCustomVideo.media.full_video_url}
+                        onChange={(e) => setNewCustomVideo({
+                          ...newCustomVideo, 
+                          media: {...newCustomVideo.media, full_video_url: e.target.value}
+                        })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Title (English)</label>
+                      <Input
+                        placeholder="Movie title"
+                        value={newCustomVideo.title.en}
+                        onChange={(e) => setNewCustomVideo({
+                          ...newCustomVideo, 
+                          title: {...newCustomVideo.title, en: e.target.value}
+                        })}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Title (Spanish)</label>
+                      <Input
+                        placeholder="Título en español"
+                        value={newCustomVideo.title.es}
+                        onChange={(e) => setNewCustomVideo({
+                          ...newCustomVideo, 
+                          title: {...newCustomVideo.title, es: e.target.value}
+                        })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Title (French)</label>
+                      <Input
+                        placeholder="Titre français"
+                        value={newCustomVideo.title.fr}
+                        onChange={(e) => setNewCustomVideo({
+                          ...newCustomVideo, 
+                          title: {...newCustomVideo.title, fr: e.target.value}
+                        })}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Title (German)</label>
+                      <Input
+                        placeholder="Deutscher Titel"
+                        value={newCustomVideo.title.de}
+                        onChange={(e) => setNewCustomVideo({
+                          ...newCustomVideo, 
+                          title: {...newCustomVideo.title, de: e.target.value}
+                        })}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Description (English)</label>
+                    <Input
+                      placeholder="Movie description"
+                      value={newCustomVideo.description.en}
+                      onChange={(e) => setNewCustomVideo({
+                        ...newCustomVideo, 
+                        description: {...newCustomVideo.description, en: e.target.value}
+                      })}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Trailer URL (Optional)</label>
+                      <Input
+                        placeholder="https://example.com/trailer.mp4"
+                        value={newCustomVideo.media.trailer_url || ''}
+                        onChange={(e) => setNewCustomVideo({
+                          ...newCustomVideo, 
+                          media: {...newCustomVideo.media, trailer_url: e.target.value}
+                        })}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Poster URL (Optional)</label>
+                      <Input
+                        placeholder="https://example.com/poster.jpg"
+                        value={newCustomVideo.media.poster_image_url || ''}
+                        onChange={(e) => setNewCustomVideo({
+                          ...newCustomVideo, 
+                          media: {...newCustomVideo.media, poster_image_url: e.target.value}
+                        })}
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Rating</label>
+                      <Input
+                        placeholder="PG-13"
+                        value={newCustomVideo.rating.value}
+                        onChange={(e) => setNewCustomVideo({
+                          ...newCustomVideo, 
+                          rating: {...newCustomVideo.rating, value: e.target.value}
+                        })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button onClick={handleAddCustomVideo}>Add Video</Button>
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setShowAddCustomVideo(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
                 </div>
               )}
 
-              {/* Selected Movie Details */}
-              {selectedMovie && (
-                <Card className="mt-8">
-                  <CardHeader className="flex flex-row items-center justify-between">
-                    <div>
-                      <CardTitle className="text-2xl">{getLocalizedTitle(selectedMovie)}</CardTitle>
-                      <CardDescription className="text-lg">
-                        {selectedMovie.publicityMetadata.Studio} • {selectedMovie.publicityMetadata.ReleaseYear}
-                      </CardDescription>
-                    </div>
-                    <div className="flex gap-2">
-                      <LanguageSelector
-                        availableLanguages={getAvailableLanguagesForMovie(selectedMovie)}
-                        selectedLanguage={selectedLanguage}
-                        onLanguageChange={changeLanguage}
-                        compact
-                      />
-                      <Button variant="outline" onClick={() => setSelectedMovie(null)}>
-                        Clear Selection
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent>
-                    <p className="text-muted-foreground leading-relaxed">
-                      {getLocalizedSynopsis(selectedMovie)}
-                    </p>
-                  </CardContent>
-                </Card>
+              {customVideosLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {[1, 2, 3, 4].map((i) => (
+                    <Card key={i} className="overflow-hidden">
+                      <Skeleton className="h-48 w-full" />
+                      <CardContent className="p-4">
+                        <Skeleton className="h-4 w-3/4 mb-2" />
+                        <Skeleton className="h-4 w-1/2" />
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : customVideoData?.payload.documents.length === 0 ? (
+                <div className="text-center py-12">
+                  <Film className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No custom videos yet</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Add your first custom video to get started
+                  </p>
+                  <Button onClick={() => setShowAddCustomVideo(true)} className="gap-2">
+                    <Film className="w-4 h-4" />
+                    Add Custom Video
+                  </Button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {customVideoData?.payload.documents.map((customVideo: CustomVideo) => (
+                    <Card key={customVideo._id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group">
+                      <div className="relative aspect-video bg-gradient-to-br from-muted/50 to-muted">
+                        {customVideo.media.poster_image_url ? (
+                          <img 
+                            src={customVideo.media.poster_image_url}
+                            alt={`${customVideo.title.en} poster`}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                            }}
+                          />
+                        ) : null}
+                        <div className={`absolute inset-0 flex items-center justify-center ${customVideo.media.poster_image_url ? 'hidden' : ''}`}>
+                          <Film className="w-12 h-12 text-muted-foreground/50" />
+                        </div>
+                        
+                        <div className="absolute top-2 right-2">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="secondary"
+                                size="sm"
+                                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <MoreVertical className="w-4 h-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleToggleCustomVideoVisibility(customVideo);
+                                }}
+                                disabled={isUpdatingCustomVisibility === customVideo._id}
+                              >
+                                <Tv className="w-4 h-4 mr-2" />
+                                {customVideo.visible_on_tv ? 'Hide from TV' : 'Show on TV'}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteCustomVideo(customVideo);
+                                }}
+                                className="text-destructive"
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete Video
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </div>
+                      
+                      <CardContent className="p-4">
+                        <div className="space-y-2">
+                          <h3 className="font-semibold text-lg leading-tight line-clamp-2">
+                            {customVideo.title.en || customVideo.title.es || customVideo.title.fr || customVideo.title.de}
+                          </h3>
+                          
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {customVideo.description.en || customVideo.description.es || customVideo.description.fr || customVideo.description.de || 'No description available'}
+                          </p>
+                          
+                          <div className="flex items-center gap-2 pt-2">
+                            <Badge variant="secondary">
+                              {customVideo.rating.value}
+                            </Badge>
+                            <Badge variant={customVideo.visible_on_tv ? "default" : "outline"}>
+                              {customVideo.visible_on_tv ? 'On TV' : 'Hidden'}
+                            </Badge>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               )}
-            </div>
-          )}
-        </>
-      )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      {/* Custom Video Delete Dialog */}
+      <AlertDialog open={customDeleteDialogOpen} onOpenChange={setCustomDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete VOD Item</AlertDialogTitle>
+            <AlertDialogTitle>Delete Custom Video</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{vodItemToDelete ? getLocalizedTitle(vodItemToDelete) : ''}"? 
-              This action cannot be undone and will permanently remove the VOD item from your library.
+              Are you sure you want to delete "{customVideoToDelete?.title.en}"? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={confirmDelete}
+            <AlertDialogAction
+              onClick={confirmDeleteCustomVideo}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Delete
