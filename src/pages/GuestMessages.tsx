@@ -290,13 +290,25 @@ const GuestMessages = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div>
-                          <div className="font-medium">{message.subject}</div>
-                          {message.description && (
-                            <div className="text-sm text-muted-foreground truncate max-w-xs">
-                              {message.description}
-                            </div>
+                        <div className="flex items-center gap-3">
+                          {message.mediaUrl && message.mediaType === 'image' && (
+                            <img 
+                              src={message.mediaUrl} 
+                              alt="Message media" 
+                              className="w-12 h-12 object-cover rounded border flex-shrink-0"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
                           )}
+                          <div>
+                            <div className="font-medium">{message.subject}</div>
+                            {message.description && (
+                              <div className="text-sm text-muted-foreground truncate max-w-xs">
+                                {message.description}
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>

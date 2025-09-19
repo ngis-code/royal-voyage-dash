@@ -193,6 +193,18 @@ export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: Messa
                   onChange={(e) => setFormData({ ...formData, mediaUrl: e.target.value })}
                   placeholder="https://example.com/image.jpg"
                 />
+                {formData.mediaUrl && formData.mediaType === 'image' && (
+                  <div className="mt-2">
+                    <img 
+                      src={formData.mediaUrl} 
+                      alt="Preview" 
+                      className="max-w-xs max-h-32 object-cover rounded border"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
               </div>
 
               {formData.mediaUrl && (
