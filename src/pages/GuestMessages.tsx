@@ -450,8 +450,7 @@ const GuestMessages = () => {
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
-                        
-                        {message.deleteable && (
+
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button variant="ghost" size="sm">
@@ -473,7 +472,7 @@ const GuestMessages = () => {
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
-                        )}
+
                         </div>
                       </TableCell>
                     </TableRow>
