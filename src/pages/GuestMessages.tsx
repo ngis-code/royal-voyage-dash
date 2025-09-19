@@ -105,10 +105,10 @@ const GuestMessages = () => {
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'action': return 'bg-primary/10 text-primary border-primary/20';
-      case 'survey': return 'bg-secondary/10 text-secondary border-secondary/20';
-      case 'notification': return 'bg-muted/10 text-muted-foreground border-muted/20';
-      default: return 'bg-muted/10 text-muted-foreground border-muted/20';
+      case 'action': return 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800';
+      case 'survey': return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800';
+      case 'notification': return 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-800';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700';
     }
   };
 
@@ -389,16 +389,37 @@ const GuestMessages = () => {
                                 {selectedMessage.mediaUrl && (
                                   <div>
                                     <h4 className="font-medium mb-2">Media</h4>
-                                    <div className="bg-muted/20 p-3 rounded-md">
-                                      <p className="text-sm">
-                                        <span className="font-medium">Type:</span> {selectedMessage.mediaType || 'Unknown'}
-                                      </p>
-                                      <p className="text-sm">
-                                        <span className="font-medium">Orientation:</span> {selectedMessage.mediaOrientation || 'Not specified'}
-                                      </p>
-                                      <p className="text-sm break-all">
-                                        <span className="font-medium">URL:</span> {selectedMessage.mediaUrl}
-                                      </p>
+                                    <div className="bg-muted/20 p-3 rounded-md space-y-3">
+                                      {selectedMessage.mediaType === 'image' ? (
+                                        <img 
+                                          src={selectedMessage.mediaUrl} 
+                                          alt="Message media" 
+                                          className="max-w-full max-h-64 object-cover rounded border"
+                                          onError={(e) => {
+                                            e.currentTarget.style.display = 'none';
+                                          }}
+                                        />
+                                      ) : selectedMessage.mediaType === 'video' ? (
+                                        <video 
+                                          src={selectedMessage.mediaUrl} 
+                                          className="max-w-full max-h-64 rounded border"
+                                          controls
+                                          onError={(e) => {
+                                            e.currentTarget.style.display = 'none';
+                                          }}
+                                        />
+                                      ) : null}
+                                      <div className="text-sm space-y-1">
+                                        <p>
+                                          <span className="font-medium">Type:</span> {selectedMessage.mediaType || 'Unknown'}
+                                        </p>
+                                        <p>
+                                          <span className="font-medium">Orientation:</span> {selectedMessage.mediaOrientation || 'Not specified'}
+                                        </p>
+                                        <p className="break-all">
+                                          <span className="font-medium">URL:</span> {selectedMessage.mediaUrl}
+                                        </p>
+                                      </div>
                                     </div>
                                   </div>
                                 )}
