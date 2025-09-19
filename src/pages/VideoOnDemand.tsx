@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getVodItems, VodItem, importVod, deleteVodItem, updateVodItem, getCustomVideos, CustomVideo, createCustomVideo, deleteCustomVideo, updateCustomVideo, CreateCustomVideoRequest } from "@/services/channelApi";
+import { getVodItems, VodItem, importVod, deleteVodItem, updateVodItem, createCustomVideo, CreateCustomVideoRequest } from "@/services/channelApi";
 import { PermissionError } from "@/lib/apiErrorHandler";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -45,12 +45,13 @@ const VideoOnDemand = () => {
   const [isUpdatingVisibility, setIsUpdatingVisibility] = useState<string | null>(null);
   
   // Custom videos state
-  const [customVideoToDelete, setCustomVideoToDelete] = useState<CustomVideo | null>(null);
+  const [customVideoToDelete, setCustomVideoToDelete] = useState<VodItem | null>(null);
   const [customDeleteDialogOpen, setCustomDeleteDialogOpen] = useState(false);
   const [isUpdatingCustomVisibility, setIsUpdatingCustomVisibility] = useState<string | null>(null);
   const [showAddCustomVideo, setShowAddCustomVideo] = useState(false);
   const [newCustomVideo, setNewCustomVideo] = useState<CreateCustomVideoRequest>({
     id: '',
+    custom_import: true,
     title: { en: '', es: '', fr: '', de: '' },
     description: { en: '', es: '', fr: '', de: '' },
     media: { full_video_url: '' },
@@ -72,17 +73,6 @@ const VideoOnDemand = () => {
     },
   });
 
-  const { data: customVideoData, isLoading: customVideosLoading, refetch: refetchCustomVideos } = useQuery({
-    queryKey: ['custom-videos'],
-    queryFn: getCustomVideos,
-    refetchOnWindowFocus: false,
-    retry: (failureCount, error) => {
-      if (error instanceof PermissionError) {
-        return false;
-      }
-      return failureCount < 2;
-    },
-  });
 
   const handleRefresh = async () => {
     try {
@@ -212,6 +202,7 @@ const VideoOnDemand = () => {
       });
       setNewCustomVideo({
         id: '',
+        custom_import: true,
         title: { en: '', es: '', fr: '', de: '' },
         description: { en: '', es: '', fr: '', de: '' },
         media: { full_video_url: '' },
@@ -219,7 +210,7 @@ const VideoOnDemand = () => {
         visible_on_tv: true
       });
       setShowAddCustomVideo(false);
-      refetchCustomVideos();
+      refetch();
     } catch (error) {
       toast({
         title: "Error",
@@ -229,7 +220,7 @@ const VideoOnDemand = () => {
     }
   };
 
-  const handleDeleteCustomVideo = (customVideo: CustomVideo) => {
+  const handleDeleteCustomVideo = (customVideo: VodItem) => {
     setCustomVideoToDelete(customVideo);
     setCustomDeleteDialogOpen(true);
   };
@@ -238,12 +229,12 @@ const VideoOnDemand = () => {
     if (!customVideoToDelete) return;
 
     try {
-      await deleteCustomVideo(customVideoToDelete._id);
+      await deleteVodItem(customVideoToDelete._id);
       toast({
         title: "Success",
         description: "Custom video deleted successfully",
       });
-      refetchCustomVideos();
+      refetch();
     } catch (error) {
       toast({
         title: "Error",
@@ -256,17 +247,17 @@ const VideoOnDemand = () => {
     }
   };
 
-  const handleToggleCustomVideoVisibility = async (customVideo: CustomVideo) => {
+  const handleToggleCustomVideoVisibility = async (customVideo: VodItem) => {
     setIsUpdatingCustomVisibility(customVideo._id);
     try {
-      await updateCustomVideo(customVideo._id, { 
+      await updateVodItem(customVideo._id, { 
         visible_on_tv: !customVideo.visible_on_tv 
       });
       toast({
         title: "Success",
         description: `Custom video ${!customVideo.visible_on_tv ? 'enabled' : 'disabled'} on TV`,
       });
-      refetchCustomVideos();
+      refetch();
     } catch (error) {
       toast({
         title: "Error",
@@ -285,35 +276,55 @@ const VideoOnDemand = () => {
   };
 
   const getLocalizedTitle = (vodItem: VodItem) => {
-    const localizedTitle = getLocalizedContent(
-      vodItem.publicityMetadata.Titles, 
-      'en', 
-      'MasterTitle'
-    ) || getLocalizedContent(vodItem.publicityMetadata.Titles, 'en', 'Default');
-    return localizedTitle?.Text || vodItem.publicityMetadata.Title;
+    // Handle custom videos
+    if (vodItem.custom_import && vodItem.title) {
+      return vodItem.title.en || vodItem.title.es || vodItem.title.fr || vodItem.title.de || 'Untitled';
+    }
+    
+    // Handle Swank videos
+    if (vodItem.publicityMetadata) {
+      const localizedTitle = getLocalizedContent(
+        vodItem.publicityMetadata.Titles, 
+        'en', 
+        'MasterTitle'
+      ) || getLocalizedContent(vodItem.publicityMetadata.Titles, 'en', 'Default');
+      return localizedTitle?.Text || vodItem.publicityMetadata.Title;
+    }
+    
+    return 'Untitled';
   };
 
   const getLocalizedSynopsis = (vodItem: VodItem) => {
-    // Prefer TabletSynopsis for better display, then Default, then any available
-    const tabletSynopsis = getLocalizedContent(
-      vodItem.publicityMetadata.Synopses, 
-      'en', 
-      'TabletSynopsis'
-    );
+    // Handle custom videos
+    if (vodItem.custom_import && vodItem.description) {
+      return vodItem.description.en || vodItem.description.es || vodItem.description.fr || vodItem.description.de || 'No description available';
+    }
     
-    if (tabletSynopsis) return tabletSynopsis.Text;
+    // Handle Swank videos
+    if (vodItem.publicityMetadata?.Synopses) {
+      // Prefer TabletSynopsis for better display, then Default, then any available
+      const tabletSynopsis = getLocalizedContent(
+        vodItem.publicityMetadata.Synopses, 
+        'en', 
+        'TabletSynopsis'
+      );
+      
+      if (tabletSynopsis) return tabletSynopsis.Text;
+      
+      const defaultSynopsis = getLocalizedContent(
+        vodItem.publicityMetadata.Synopses, 
+        'en', 
+        'Default'
+      );
+      
+      if (defaultSynopsis) return defaultSynopsis.Text;
+      
+      // Fallback to any available synopsis
+      const anySynopsis = getLocalizedContent(vodItem.publicityMetadata.Synopses, 'en');
+      return anySynopsis?.Text || 'No synopsis available';
+    }
     
-    const defaultSynopsis = getLocalizedContent(
-      vodItem.publicityMetadata.Synopses, 
-      'en', 
-      'Default'
-    );
-    
-    if (defaultSynopsis) return defaultSynopsis.Text;
-    
-    // Fallback to any available synopsis
-    const anySynopsis = getLocalizedContent(vodItem.publicityMetadata.Synopses, 'en');
-    return anySynopsis?.Text || 'No synopsis available';
+    return 'No synopsis available';
   };
 
   const getLocalizedGenres = (vodItem: VodItem) => {
@@ -404,13 +415,19 @@ const VideoOnDemand = () => {
     return vodItem.publicityMetadata.Crew.slice(0, 10);
   };
 
-  const filteredMovies = vodData?.payload.documents.filter((vodItem: VodItem) => {
+  // Filter Swank videos (non-custom)
+  const swankMovies = vodData?.payload.documents.filter((vodItem: VodItem) => !vodItem.custom_import) || [];
+  
+  // Filter custom videos
+  const customVideos = vodData?.payload.documents.filter((vodItem: VodItem) => vodItem.custom_import) || [];
+  
+  const filteredSwankMovies = swankMovies.filter((vodItem: VodItem) => {
     if (!searchQuery) return true;
     
     const title = getLocalizedTitle(vodItem).toLowerCase();
-    const studio = vodItem.publicityMetadata.Studio?.toLowerCase() || '';
-    const year = vodItem.publicityMetadata.ReleaseYear?.toString() || '';
-    const category = vodItem.publicityMetadata.Category?.toLowerCase() || '';
+    const studio = vodItem.publicityMetadata?.Studio?.toLowerCase() || '';
+    const year = vodItem.publicityMetadata?.ReleaseYear?.toString() || '';
+    const category = vodItem.publicityMetadata?.Category?.toLowerCase() || '';
     const director = getDirector(vodItem)?.toLowerCase() || '';
     const cast = getMainCast(vodItem).join(' ').toLowerCase();
     const genres = getLocalizedGenres(vodItem).map(g => g.Text.toLowerCase()).join(' ');
@@ -424,7 +441,21 @@ const VideoOnDemand = () => {
            director.includes(query) ||
            cast.includes(query) ||
            genres.includes(query);
-  }) || [];
+  });
+
+  const filteredCustomVideos = customVideos.filter((vodItem: VodItem) => {
+    if (!searchQuery) return true;
+    
+    const title = getLocalizedTitle(vodItem).toLowerCase();
+    const rating = vodItem.rating?.value?.toLowerCase() || '';
+    const description = getLocalizedSynopsis(vodItem).toLowerCase();
+    
+    const query = searchQuery.toLowerCase();
+    
+    return title.includes(query) || 
+           rating.includes(query) || 
+           description.includes(query);
+  });
 
   const getFileSize = (vodItem: VodItem) => {
     if (!vodItem.mediaFileInfo?.General?.FileSizeInMb) return null;
@@ -800,13 +831,13 @@ const VideoOnDemand = () => {
           <p className="text-muted-foreground">Manage your VOD library and import new content</p>
         </div>
         <div className="flex items-center gap-4">
-          {vodData?.payload.documents && vodData.payload.documents.length > 0 && (
+          {swankMovies.length > 0 && (
             <LanguageSelector
               availableLanguages={getAvailableLanguages(
-                vodData.payload.documents.flatMap(movie => [
-                  ...movie.publicityMetadata.Titles,
-                  ...movie.publicityMetadata.Synopses,
-                  ...movie.publicityMetadata.Genres
+                swankMovies.flatMap(movie => [
+                  ...(movie.publicityMetadata?.Titles || []),
+                  ...(movie.publicityMetadata?.Synopses || []),
+                  ...(movie.publicityMetadata?.Genres || [])
                 ]).map(item => ({ Locale: item.Locale }))
               )}
               selectedLanguage={selectedLanguage}
@@ -896,7 +927,7 @@ const VideoOnDemand = () => {
                         Search Movies
                       </CardTitle>
                       <CardDescription>
-                        Filter through {vodData?.payload.documents.length} available movies
+                        Filter through {swankMovies.length} available Swank movies
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -922,13 +953,13 @@ const VideoOnDemand = () => {
                   </Card>
 
                   {/* Movies Grid */}
-                  {filteredMovies.length === 0 && searchQuery ? (
+                  {filteredSwankMovies.length === 0 && searchQuery ? (
                     <Card className="text-center py-12">
                       <CardContent>
                         <Search className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                        <h3 className="text-xl font-semibold mb-2">No movies found</h3>
+                        <h3 className="text-xl font-semibold mb-2">No Swank movies found</h3>
                         <p className="text-muted-foreground mb-4">
-                          No movies match your search criteria. Try adjusting your search terms.
+                          No Swank movies match your search criteria. Try adjusting your search terms.
                         </p>
                         <Button variant="outline" onClick={() => setSearchQuery("")}>
                           Clear search
@@ -937,13 +968,13 @@ const VideoOnDemand = () => {
                     </Card>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                      {filteredMovies.map((vodItem: VodItem) => {
+                      {filteredSwankMovies.map((vodItem: VodItem) => {
                         const posterImage = getPosterImage(vodItem);
                         const mainCast = getMainCast(vodItem);
                         const director = getDirector(vodItem);
                         const fileSize = getFileSize(vodItem);
                         const videoInfo = getVideoInfo(vodItem);
-                        const isAvailable = new Date(vodItem.effectiveLicenseDates.LicenseEnd) > new Date();
+                        const isAvailable = vodItem.effectiveLicenseDates ? new Date(vodItem.effectiveLicenseDates.LicenseEnd) > new Date() : true;
                         
                         return (
                           <Card 
@@ -1047,7 +1078,7 @@ const VideoOnDemand = () => {
                             <CardContent className="p-4 pt-0">
                               <div className="space-y-2">
                                 <div className="flex items-center justify-between text-sm">
-                                  <span className="font-semibold text-foreground">{vodItem.publicityMetadata.Studio}</span>
+                                  <span className="font-semibold text-foreground">{vodItem.publicityMetadata?.Studio || 'Unknown Studio'}</span>
                                   <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -1081,7 +1112,7 @@ const VideoOnDemand = () => {
                                 
                                 <div className="flex items-center justify-between gap-2">
                                   <Badge variant="secondary" className="text-xs">
-                                    {vodItem.publicityMetadata.Category}
+                                    {vodItem.publicityMetadata?.Category || 'Movie'}
                                   </Badge>
                                   
                                   <Badge 
@@ -1324,7 +1355,7 @@ const VideoOnDemand = () => {
                 </div>
               )}
 
-              {customVideosLoading ? (
+              {isLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                   {[1, 2, 3, 4].map((i) => (
                     <Card key={i} className="overflow-hidden">
@@ -1336,7 +1367,7 @@ const VideoOnDemand = () => {
                     </Card>
                   ))}
                 </div>
-              ) : customVideoData?.payload.documents.length === 0 ? (
+              ) : customVideos.length === 0 ? (
                 <div className="text-center py-12">
                   <Film className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
                   <h3 className="text-lg font-semibold mb-2">No custom videos yet</h3>
@@ -1350,13 +1381,13 @@ const VideoOnDemand = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                  {customVideoData?.payload.documents.map((customVideo: CustomVideo) => (
+                  {filteredCustomVideos.map((customVideo: VodItem) => (
                     <Card key={customVideo._id} className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group">
                       <div className="relative aspect-video bg-gradient-to-br from-muted/50 to-muted">
-                        {customVideo.media.poster_image_url ? (
+                        {customVideo.media?.poster_image_url ? (
                           <img 
                             src={customVideo.media.poster_image_url}
-                            alt={`${customVideo.title.en} poster`}
+                            alt={`${customVideo.title?.en} poster`}
                             className="w-full h-full object-cover"
                             onError={(e) => {
                               e.currentTarget.style.display = 'none';
@@ -1364,7 +1395,7 @@ const VideoOnDemand = () => {
                             }}
                           />
                         ) : null}
-                        <div className={`absolute inset-0 flex items-center justify-center ${customVideo.media.poster_image_url ? 'hidden' : ''}`}>
+                        <div className={`absolute inset-0 flex items-center justify-center ${customVideo.media?.poster_image_url ? 'hidden' : ''}`}>
                           <Film className="w-12 h-12 text-muted-foreground/50" />
                         </div>
                         
@@ -1409,16 +1440,16 @@ const VideoOnDemand = () => {
                       <CardContent className="p-4">
                         <div className="space-y-2">
                           <h3 className="font-semibold text-lg leading-tight line-clamp-2">
-                            {customVideo.title.en || customVideo.title.es || customVideo.title.fr || customVideo.title.de}
+                            {getLocalizedTitle(customVideo)}
                           </h3>
                           
                           <p className="text-sm text-muted-foreground line-clamp-2">
-                            {customVideo.description.en || customVideo.description.es || customVideo.description.fr || customVideo.description.de || 'No description available'}
+                            {getLocalizedSynopsis(customVideo)}
                           </p>
                           
                           <div className="flex items-center gap-2 pt-2">
                             <Badge variant="secondary">
-                              {customVideo.rating.value}
+                              {customVideo.rating?.value || 'Not Rated'}
                             </Badge>
                             <Badge variant={customVideo.visible_on_tv ? "default" : "outline"}>
                               {customVideo.visible_on_tv ? 'On TV' : 'Hidden'}
@@ -1441,7 +1472,7 @@ const VideoOnDemand = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Custom Video</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{customVideoToDelete?.title.en}"? This action cannot be undone.
+              Are you sure you want to delete "{customVideoToDelete ? getLocalizedTitle(customVideoToDelete) : ''}"? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
