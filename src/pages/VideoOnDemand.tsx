@@ -30,6 +30,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "@/hooks/use-toast";
 import { useLanguage } from "@/hooks/useLanguage";
 import { LanguageSelector } from "@/components/LanguageSelector";
@@ -73,7 +74,6 @@ const VideoOnDemand = () => {
       return failureCount < 2;
     },
   });
-
 
   const handleRefresh = async () => {
     try {
@@ -271,6 +271,25 @@ const VideoOnDemand = () => {
     }
   };
 
+  const handleToggleCrewVisibility = async (vodItem: VodItem) => {
+    try {
+      await updateVodItem(vodItem._id, { 
+        visible_crew_only: !vodItem.visible_crew_only 
+      });
+      toast({
+        title: "Success",
+        description: `Video ${!vodItem.visible_crew_only ? 'restricted to crew only' : 'made public'}`,
+      });
+      refetch();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update video. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const formatRuntime = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
@@ -330,6 +349,8 @@ const VideoOnDemand = () => {
   };
 
   const getLocalizedGenres = (vodItem: VodItem) => {
+    if (!vodItem.publicityMetadata?.Genres) return [];
+    
     const availableGenres = vodItem.publicityMetadata.Genres;
     
     // Get unique genres to avoid duplicates
@@ -359,6 +380,8 @@ const VideoOnDemand = () => {
   };
 
   const getAvailableLanguagesForMovie = (vodItem: VodItem) => {
+    if (!vodItem.publicityMetadata) return [];
+    
     const allLocales = new Set([
       ...vodItem.publicityMetadata.Titles.map(t => t.Locale),
       ...vodItem.publicityMetadata.Synopses.map(s => s.Locale),
@@ -368,6 +391,7 @@ const VideoOnDemand = () => {
   };
 
   const getMainCast = (vodItem: VodItem) => {
+    if (!vodItem.publicityMetadata?.Cast) return [];
     return vodItem.publicityMetadata.Cast
       .filter(actor => actor.Role === 'Actor')
       .slice(0, 3)
@@ -375,7 +399,7 @@ const VideoOnDemand = () => {
   };
 
   const getDirector = (vodItem: VodItem) => {
-    if (!vodItem.publicityMetadata.Crew) return null;
+    if (!vodItem.publicityMetadata?.Crew) return null;
     const director = vodItem.publicityMetadata.Crew.find(
       crew => crew.Role === 'Director'
     );
@@ -383,7 +407,7 @@ const VideoOnDemand = () => {
   };
 
   const getPosterImage = (vodItem: VodItem) => {
-    if (!vodItem.publicityMetadata.Assets) return null;
+    if (!vodItem.publicityMetadata?.Assets) return null;
     
     // Look for One Sheet (poster) first, then Thumbnail
     const poster = vodItem.publicityMetadata.Assets.find(
@@ -400,20 +424,21 @@ const VideoOnDemand = () => {
   };
 
   const hasTrailer = (vodItem: VodItem) => {
-    if (!vodItem.publicityMetadata.Assets) return false;
+    if (!vodItem.publicityMetadata?.Assets) return false;
     return vodItem.publicityMetadata.Assets.some(
       asset => asset.AssetType.includes('Trailer') && asset.FileType === 'Video'
     );
   };
 
   const getAllCast = (vodItem: VodItem) => {
+    if (!vodItem.publicityMetadata?.Cast) return [];
     return vodItem.publicityMetadata.Cast
       .filter(actor => actor.Role === 'Actor')
       .slice(0, 10);
   };
 
   const getAllCrew = (vodItem: VodItem) => {
-    if (!vodItem.publicityMetadata.Crew) return [];
+    if (!vodItem.publicityMetadata?.Crew) return [];
     return vodItem.publicityMetadata.Crew.slice(0, 10);
   };
 
@@ -539,7 +564,7 @@ const VideoOnDemand = () => {
               
               <div className="space-y-2">
                 <Badge variant="secondary" className="w-full justify-center">
-                  {vodItem.publicityMetadata.Rating}
+                  {vodItem.publicityMetadata?.Rating || vodItem.rating?.value}
                 </Badge>
                 {hasTrailer(vodItem) && (
                   <Button variant="outline" className="w-full gap-2">
@@ -553,226 +578,25 @@ const VideoOnDemand = () => {
             {/* Movie Details */}
             <div className="md:col-span-2">
               <ScrollArea className="h-[60vh]">
-                <Tabs defaultValue="overview" className="w-full">
-                  <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="cast">Cast & Crew</TabsTrigger>
-                    <TabsTrigger value="technical">Technical</TabsTrigger>
-                    <TabsTrigger value="assets">Assets</TabsTrigger>
-                  </TabsList>
+                <div className="space-y-4">
+                  <div>
+                    <h4 className="font-medium text-foreground mb-2">Synopsis</h4>
+                    <p className="text-sm text-muted-foreground leading-relaxed">
+                      {getLocalizedSynopsis(vodItem)}
+                    </p>
+                  </div>
 
-                  <TabsContent value="overview" className="space-y-4 mt-6">
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <div className="font-medium text-foreground">Studio</div>
-                        <div className="text-muted-foreground">{vodItem.publicityMetadata.Studio}</div>
-                      </div>
-                      <div>
-                        <div className="font-medium text-foreground">Release Year</div>
-                        <div className="text-muted-foreground">{vodItem.publicityMetadata.ReleaseYear}</div>
-                      </div>
-                      <div>
-                        <div className="font-medium text-foreground">Runtime</div>
-                        <div className="text-muted-foreground">{formatRuntime(vodItem.publicityMetadata.Runtime)}</div>
-                      </div>
-                      <div>
-                        <div className="font-medium text-foreground">Category</div>
-                        <div className="text-muted-foreground">{vodItem.publicityMetadata.Category}</div>
-                      </div>
+                  <div>
+                    <h4 className="font-medium text-foreground mb-2">Genres</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {getLocalizedGenres(vodItem).map((genre, index) => (
+                        <Badge key={index} variant="outline">
+                          {genre.Text}
+                        </Badge>
+                      ))}
                     </div>
-
-                    <Separator />
-
-                    <div>
-                      <h4 className="font-medium text-foreground mb-2">Synopsis</h4>
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {getLocalizedSynopsis(vodItem)}
-                      </p>
-                    </div>
-
-                    <div>
-                      <h4 className="font-medium text-foreground mb-2">Genres</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {getLocalizedGenres(vodItem).map((genre, index) => (
-                          <Badge key={index} variant="outline">
-                            {genre.Text}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="font-medium text-foreground mb-2">Available Languages</h4>
-                      <div className="flex flex-wrap gap-2">
-                        {getAvailableLanguagesForMovie(vodItem).map((language) => (
-                          <Badge 
-                            key={language.code} 
-                            variant={language.code === selectedLanguage ? "default" : "secondary"}
-                            className="cursor-pointer"
-                            onClick={() => changeLanguage(language.code)}
-                          >
-                            <span className="mr-1">{language.flag}</span>
-                            {language.name}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <h4 className="font-medium text-foreground mb-2">License Information</h4>
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <div className="font-medium text-foreground">Available From</div>
-                          <div className="text-muted-foreground">
-                            {new Date(vodItem.effectiveLicenseDates.LicenseStart).toLocaleDateString()}
-                          </div>
-                        </div>
-                        <div>
-                          <div className="font-medium text-foreground">Available Until</div>
-                          <div className="text-muted-foreground">
-                            {new Date(vodItem.effectiveLicenseDates.LicenseEnd).toLocaleDateString()}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="cast" className="space-y-4 mt-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <h4 className="font-medium text-foreground mb-3 flex items-center gap-2">
-                          <Users className="w-4 h-4" />
-                          Cast
-                        </h4>
-                        <div className="space-y-3">
-                          {getAllCast(vodItem).map((actor, index) => (
-                            <div key={index} className="text-sm">
-                              <div className="font-medium text-foreground">{actor.Name}</div>
-                              <div className="text-muted-foreground text-xs">{actor.PartName}</div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div>
-                        <h4 className="font-medium text-foreground mb-3 flex items-center gap-2">
-                          <Award className="w-4 h-4" />
-                          Crew
-                        </h4>
-                        <div className="space-y-3">
-                          {getAllCrew(vodItem).map((crew, index) => (
-                            <div key={index} className="text-sm">
-                              <div className="font-medium text-foreground">{crew.Name}</div>
-                              <div className="text-muted-foreground text-xs">{crew.Role}</div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="technical" className="space-y-4 mt-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <h4 className="font-medium text-foreground mb-3 flex items-center gap-2">
-                          <Monitor className="w-4 h-4" />
-                          Video Information
-                        </h4>
-                        {videoInfo ? (
-                          <div className="space-y-2 text-sm">
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Resolution:</span>
-                              <span className="text-foreground">{videoInfo.resolution}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Aspect Ratio:</span>
-                              <span className="text-foreground">{videoInfo.aspectRatio}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Frame Rate:</span>
-                              <span className="text-foreground">{videoInfo.frameRate}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-muted-foreground">Format:</span>
-                              <span className="text-foreground">{videoInfo.format}</span>
-                            </div>
-                          </div>
-                        ) : (
-                          <p className="text-sm text-muted-foreground">No video information available</p>
-                        )}
-                      </div>
-
-                      <div>
-                        <h4 className="font-medium text-foreground mb-3 flex items-center gap-2">
-                          <HardDrive className="w-4 h-4" />
-                          File Information
-                        </h4>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">File Size:</span>
-                            <span className="text-foreground">{getFileSize(vodItem) || 'N/A'}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Format:</span>
-                            <span className="text-foreground">{vodItem.mediaFileInfo?.General?.Format || 'N/A'}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Protection:</span>
-                            <span className="text-foreground">{vodItem.protectionType}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">Film Number:</span>
-                            <span className="text-foreground">#{vodItem.identifiers.FilmNumber}</span>
-                          </div>
-                        </div>
-                        
-                        {audioInfo && (
-                          <div className="mt-4">
-                            <h5 className="font-medium text-foreground mb-2">Audio Track</h5>
-                            <div className="space-y-2 text-sm">
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Format:</span>
-                                <span className="text-foreground">{audioInfo.format}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Channels:</span>
-                                <span className="text-foreground">{audioInfo.channels}</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span className="text-muted-foreground">Bit Rate:</span>
-                                <span className="text-foreground">{audioInfo.bitRate}</span>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="assets" className="space-y-4 mt-6">
-                    <h4 className="font-medium text-foreground mb-3 flex items-center gap-2">
-                      <Image className="w-4 h-4" />
-                      Available Assets
-                    </h4>
-                    {vodItem.publicityMetadata.Assets && vodItem.publicityMetadata.Assets.length > 0 ? (
-                      <div className="space-y-3">
-                        {vodItem.publicityMetadata.Assets.map((asset, index) => (
-                          <div key={index} className="flex items-center justify-between p-3 border border-border rounded-lg">
-                            <div>
-                              <div className="font-medium text-foreground text-sm">{asset.Name}</div>
-                              <div className="text-muted-foreground text-xs">{asset.AssetType} • {asset.FileType}</div>
-                            </div>
-                            <Badge variant="outline" className="text-xs">
-                              {asset.Locale}
-                            </Badge>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-sm text-muted-foreground">No additional assets available</p>
-                    )}
-                  </TabsContent>
-                </Tabs>
+                  </div>
+                </div>
               </ScrollArea>
             </div>
           </div>
@@ -905,13 +729,13 @@ const VideoOnDemand = () => {
             </div>
           ) : (
             <>
-              {vodData?.payload.documents.length === 0 ? (
+              {swankMovies.length === 0 ? (
                 <Card className="text-center py-12">
                   <CardContent>
                     <Film className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">No Movies Found</h3>
+                    <h3 className="text-xl font-semibold mb-2">No Swank Movies Found</h3>
                     <p className="text-muted-foreground mb-4">
-                      Your VOD library is empty. Import content to get started.
+                      Your Swank VOD library is empty. Import content to get started.
                     </p>
                     <Button className="gap-2">
                       <Play className="w-4 h-4" />
@@ -981,9 +805,7 @@ const VideoOnDemand = () => {
                         return (
                           <Card 
                             key={vodItem._id} 
-                            className={`group overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 border-0 bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-sm hover:-translate-y-2 cursor-pointer ${
-                              selectedMovie?._id === vodItem._id ? 'ring-2 ring-primary' : ''
-                            }`}
+                            className="group overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 border-0 bg-gradient-to-br from-card/80 to-card/60 backdrop-blur-sm hover:-translate-y-2 cursor-pointer"
                             onClick={() => setSelectedMovie(vodItem)}
                           >
                             <div className="aspect-[2/3] relative overflow-hidden bg-gradient-to-br from-muted/20 to-muted/40">
@@ -1016,7 +838,7 @@ const VideoOnDemand = () => {
                                 </Badge>
                                 
                                 <Badge className="bg-black/40 text-white border-white/20 backdrop-blur-md text-xs font-medium">
-                                  {vodItem.publicityMetadata.Rating}
+                                  {vodItem.publicityMetadata?.Rating}
                                 </Badge>
                               </div>
 
@@ -1053,11 +875,11 @@ const VideoOnDemand = () => {
                                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
                                   <div className="flex items-center gap-1">
                                     <Calendar className="w-3 h-3" />
-                                    <span>{vodItem.publicityMetadata.ReleaseYear}</span>
+                                    <span>{vodItem.publicityMetadata?.ReleaseYear}</span>
                                   </div>
                                   <div className="flex items-center gap-1">
                                     <Clock className="w-3 h-3" />
-                                    <span>{formatRuntime(vodItem.publicityMetadata.Runtime)}</span>
+                                    <span>{formatRuntime(vodItem.publicityMetadata?.Runtime || 0)}</span>
                                   </div>
                                 </div>
                                 
@@ -1087,38 +909,52 @@ const VideoOnDemand = () => {
                                         <MoreVertical className="h-4 w-4" />
                                       </Button>
                                     </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleToggleVisibility(vodItem);
-                                }}
-                                disabled={isUpdatingVisibility === vodItem._id}
-                              >
-                                <Tv className="w-4 h-4 mr-2" />
-                                {vodItem.visible_on_tv ? 'Hide from TV' : 'Show on TV'}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  // Toggle crew visibility
-                                  updateVodItem(vodItem._id, { visible_crew_only: !vodItem.visible_crew_only });
-                                }}
-                              >
-                                <Users className="w-4 h-4 mr-2" />
-                                {vodItem.visible_crew_only ? 'Hide from Crew' : 'Show to Crew Only'}
-                              </DropdownMenuItem>
-                              <DropdownMenuItem 
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteVod(vodItem);
-                                }}
-                                className="text-destructive"
-                              >
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                Delete VOD Item
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
+                                    <DropdownMenuContent align="end" className="bg-card border shadow-lg z-50">
+                                      <DropdownMenuItem 
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleToggleVisibility(vodItem);
+                                        }}
+                                        disabled={isUpdatingVisibility === vodItem._id}
+                                        className="flex items-center justify-between"
+                                      >
+                                        <div className="flex items-center">
+                                          <Tv className="w-4 h-4 mr-2" />
+                                          TV Visibility
+                                        </div>
+                                        <Switch
+                                          checked={vodItem.visible_on_tv || false}
+                                          onCheckedChange={() => {}}
+                                        />
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem 
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleToggleCrewVisibility(vodItem);
+                                        }}
+                                        className="flex items-center justify-between"
+                                      >
+                                        <div className="flex items-center">
+                                          <Users className="w-4 h-4 mr-2" />
+                                          Crew Only
+                                        </div>
+                                        <Switch
+                                          checked={vodItem.visible_crew_only || false}
+                                          onCheckedChange={() => {}}
+                                        />
+                                      </DropdownMenuItem>
+                                      <Separator />
+                                      <DropdownMenuItem 
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleDeleteVod(vodItem);
+                                        }}
+                                        className="text-destructive focus:text-destructive"
+                                      >
+                                        <Trash2 className="w-4 h-4 mr-2" />
+                                        Delete VOD Item
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
                                   </DropdownMenu>
                                 </div>
                                 
@@ -1164,7 +1000,7 @@ const VideoOnDemand = () => {
                         <div>
                           <CardTitle className="text-2xl">{getLocalizedTitle(selectedMovie)}</CardTitle>
                           <CardDescription className="text-lg">
-                            {selectedMovie.publicityMetadata.Studio} • {selectedMovie.publicityMetadata.ReleaseYear}
+                            {selectedMovie.publicityMetadata?.Studio} • {selectedMovie.publicityMetadata?.ReleaseYear}
                           </CardDescription>
                         </div>
                         <div className="flex gap-2">
@@ -1368,36 +1204,38 @@ const VideoOnDemand = () => {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
+                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                      <div>
+                        <label htmlFor="visible_on_tv" className="text-sm font-medium cursor-pointer">
+                          Visible on TV
+                        </label>
+                        <p className="text-xs text-muted-foreground">Show this video on the TV interface</p>
+                      </div>
+                      <Switch
                         id="visible_on_tv"
                         checked={newCustomVideo.visible_on_tv}
-                        onChange={(e) => setNewCustomVideo({
+                        onCheckedChange={(checked) => setNewCustomVideo({
                           ...newCustomVideo,
-                          visible_on_tv: e.target.checked
+                          visible_on_tv: checked
                         })}
-                        className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary focus:ring-2"
                       />
-                      <label htmlFor="visible_on_tv" className="text-sm font-medium">
-                        Visible on TV
-                      </label>
                     </div>
                     
-                    <div className="flex items-center space-x-2">
-                      <input
-                        type="checkbox"
+                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                      <div>
+                        <label htmlFor="visible_crew_only" className="text-sm font-medium cursor-pointer">
+                          Crew Only Access
+                        </label>
+                        <p className="text-xs text-muted-foreground">Restrict access to crew members only</p>
+                      </div>
+                      <Switch
                         id="visible_crew_only"
                         checked={newCustomVideo.visible_crew_only}
-                        onChange={(e) => setNewCustomVideo({
+                        onCheckedChange={(checked) => setNewCustomVideo({
                           ...newCustomVideo,
-                          visible_crew_only: e.target.checked
+                          visible_crew_only: checked
                         })}
-                        className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary focus:ring-2"
                       />
-                      <label htmlFor="visible_crew_only" className="text-sm font-medium">
-                        Visible to Crew Only
-                      </label>
                     </div>
                   </div>
 
@@ -1469,33 +1307,47 @@ const VideoOnDemand = () => {
                                 <MoreVertical className="w-4 h-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
+                            <DropdownMenuContent align="end" className="bg-card border shadow-lg z-50">
                               <DropdownMenuItem
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleToggleCustomVideoVisibility(customVideo);
                                 }}
                                 disabled={isUpdatingCustomVisibility === customVideo._id}
+                                className="flex items-center justify-between"
                               >
-                                <Tv className="w-4 h-4 mr-2" />
-                                {customVideo.visible_on_tv ? 'Hide from TV' : 'Show on TV'}
+                                <div className="flex items-center">
+                                  <Tv className="w-4 h-4 mr-2" />
+                                  TV Visibility
+                                </div>
+                                <Switch
+                                  checked={customVideo.visible_on_tv || false}
+                                  onCheckedChange={() => {}}
+                                />
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  // Toggle crew visibility
-                                  updateVodItem(customVideo._id, { visible_crew_only: !customVideo.visible_crew_only });
+                                  handleToggleCrewVisibility(customVideo);
                                 }}
+                                className="flex items-center justify-between"
                               >
-                                <Users className="w-4 h-4 mr-2" />
-                                {customVideo.visible_crew_only ? 'Hide from Crew' : 'Show to Crew Only'}
+                                <div className="flex items-center">
+                                  <Users className="w-4 h-4 mr-2" />
+                                  Crew Only
+                                </div>
+                                <Switch
+                                  checked={customVideo.visible_crew_only || false}
+                                  onCheckedChange={() => {}}
+                                />
                               </DropdownMenuItem>
+                              <Separator />
                               <DropdownMenuItem
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleDeleteCustomVideo(customVideo);
                                 }}
-                                className="text-destructive"
+                                className="text-destructive focus:text-destructive"
                               >
                                 <Trash2 className="w-4 h-4 mr-2" />
                                 Delete Video
