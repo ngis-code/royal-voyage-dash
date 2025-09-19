@@ -84,3 +84,45 @@ export async function listGuestMessages(params: {
 
   return response.json();
 }
+
+export async function createGuestMessage(message: Omit<GuestMessage, '_id' | 'createdAt' | 'updatedAt' | 'sentBy'>): Promise<GuestMessage> {
+  const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/guest_messages/`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: getApiHeaders(),
+    body: JSON.stringify(message)
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return response.json();
+}
+
+export async function updateGuestMessage(messageId: string, update: Partial<Omit<GuestMessage, '_id' | 'createdAt' | 'updatedAt' | 'sentBy'>>): Promise<GuestMessage> {
+  const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/guest_messages/${messageId}`, {
+    method: 'PUT',
+    credentials: 'include',
+    headers: getApiHeaders(),
+    body: JSON.stringify(update)
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+
+  return response.json();
+}
+
+export async function deleteGuestMessage(messageId: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/guest_messages/${messageId}`, {
+    method: 'DELETE',
+    credentials: 'include',
+    headers: getApiHeaders()
+  });
+
+  if (!response.ok) {
+    await handleApiError(response);
+  }
+}

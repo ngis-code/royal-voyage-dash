@@ -6,9 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Search, Filter, Eye, MessageSquare, Users, Bell, ChevronUp, ChevronDown } from "lucide-react";
-import { listGuestMessages, GuestMessage } from "@/services/guestMessageApi";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Search, Filter, Eye, MessageSquare, Users, Bell, ChevronUp, ChevronDown, Plus, Edit, Trash2 } from "lucide-react";
+import { listGuestMessages, GuestMessage, createGuestMessage, updateGuestMessage, deleteGuestMessage } from "@/services/guestMessageApi";
 import { useToast } from "@/hooks/use-toast";
+import { MessageFormDialog } from "@/components/MessageFormDialog";
 
 const GuestMessages = () => {
   const [messages, setMessages] = useState<GuestMessage[]>([]);
@@ -24,6 +26,8 @@ const GuestMessages = () => {
   });
   const [canAccessAll, setCanAccessAll] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState<GuestMessage | null>(null);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [editingMessage, setEditingMessage] = useState<GuestMessage | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -108,6 +112,47 @@ const GuestMessages = () => {
     }
   };
 
+  const handleCreateMessage = async (messageData: Omit<GuestMessage, '_id' | 'createdAt' | 'updatedAt' | 'sentBy'>) => {
+    try {
+      await createGuestMessage(messageData);
+      toast({
+        title: "Success",
+        description: "Message created successfully",
+      });
+      fetchMessages();
+    } catch (error) {
+      console.error('Failed to create message:', error);
+    }
+  };
+
+  const handleUpdateMessage = async (messageData: Omit<GuestMessage, '_id' | 'createdAt' | 'updatedAt' | 'sentBy'>) => {
+    if (!editingMessage) return;
+    try {
+      await updateGuestMessage(editingMessage._id, messageData);
+      toast({
+        title: "Success",
+        description: "Message updated successfully",
+      });
+      setEditingMessage(null);
+      fetchMessages();
+    } catch (error) {
+      console.error('Failed to update message:', error);
+    }
+  };
+
+  const handleDeleteMessage = async (messageId: string) => {
+    try {
+      await deleteGuestMessage(messageId);
+      toast({
+        title: "Success",
+        description: "Message deleted successfully",
+      });
+      fetchMessages();
+    } catch (error) {
+      console.error('Failed to delete message:', error);
+    }
+  };
+
   return (
     <div className="flex-1 space-y-6 p-6">
       {/* Header */}
@@ -116,12 +161,18 @@ const GuestMessages = () => {
           <h1 className="text-3xl font-bold text-foreground">Guest Messages</h1>
           <p className="text-muted-foreground mt-1">Manage and view guest communications</p>
         </div>
-        {!canAccessAll && (
-          <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
-            <p className="text-sm text-destructive font-medium">Limited Access</p>
-            <p className="text-xs text-destructive/80">You may not be able to see all messages</p>
-          </div>
-        )}
+        <div className="flex items-center gap-4">
+          <Button onClick={() => setShowCreateDialog(true)} className="flex items-center gap-2">
+            <Plus className="w-4 h-4" />
+            New Message
+          </Button>
+          {!canAccessAll && (
+            <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-3">
+              <p className="text-sm text-destructive font-medium">Limited Access</p>
+              <p className="text-xs text-destructive/80">You may not be able to see all messages</p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Filters and Search */}
@@ -211,7 +262,7 @@ const GuestMessages = () => {
                     </Button>
                   </TableHead>
                   <TableHead>Media</TableHead>
-                  <TableHead className="w-24">Actions</TableHead>
+                  <TableHead className="w-32">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -271,16 +322,17 @@ const GuestMessages = () => {
                         )}
                       </TableCell>
                       <TableCell>
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="sm"
-                              onClick={() => setSelectedMessage(message)}
-                            >
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                          </DialogTrigger>
+                        <div className="flex items-center gap-1">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="sm"
+                                onClick={() => setSelectedMessage(message)}
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                            </DialogTrigger>
                           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
                             <DialogHeader>
                               <DialogTitle className="flex items-center gap-2">
@@ -378,6 +430,39 @@ const GuestMessages = () => {
                             )}
                           </DialogContent>
                         </Dialog>
+                        
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setEditingMessage(message)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        
+                        {message.deleteable && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Message</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete this message? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => handleDeleteMessage(message._id)}>
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
@@ -414,6 +499,21 @@ const GuestMessages = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Create Message Dialog */}
+      <MessageFormDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        onSave={handleCreateMessage}
+      />
+
+      {/* Edit Message Dialog */}
+      <MessageFormDialog
+        open={!!editingMessage}
+        onOpenChange={(open) => !open && setEditingMessage(null)}
+        message={editingMessage}
+        onSave={handleUpdateMessage}
+      />
     </div>
   );
 };
