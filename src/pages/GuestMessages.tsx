@@ -451,9 +451,13 @@ const GuestMessages = () => {
                                        <div>
                                          <h4 className="font-medium mb-3">Question Responses</h4>
                                          <div className="space-y-4">
-                                           {Object.entries(messageSummary.responses).map(([questionId, responses]) => (
-                                             <div key={questionId} className="bg-muted/20 p-4 rounded-md">
-                                               <h5 className="font-medium text-sm mb-2">{questionId}</h5>
+                                            {Object.entries(messageSummary.responses).map(([questionId, responses]) => {
+                                              const questionData = messageSummary.questions?.find(q => q._id === questionId);
+                                              return (
+                                              <div key={questionId} className="bg-muted/20 p-4 rounded-md">
+                                                <h5 className="font-medium text-sm mb-2">
+                                                  {questionData?.question || questionId}
+                                                </h5>
                                                <div className="space-y-2">
                                                  {Object.entries(responses).map(([option, count]) => (
                                                    <div key={option} className="flex justify-between items-center text-sm">
@@ -461,10 +465,11 @@ const GuestMessages = () => {
                                                      <Badge variant="secondary">{count}</Badge>
                                                    </div>
                                                  ))}
-                                               </div>
-                                             </div>
-                                           ))}
-                                         </div>
+                                                </div>
+                                              </div>
+                                              );
+                                            })}
+                                          </div>
                                        </div>
                                      )}
 

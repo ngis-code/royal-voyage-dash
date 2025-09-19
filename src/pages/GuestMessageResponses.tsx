@@ -3,8 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Filter } from "lucide-react";
 import { listGuestMessagesResponses, GuestMessageResponseDocument } from "@/services/guestMessageResponseApi";
 import { useToast } from "@/hooks/use-toast";
 
@@ -19,23 +21,35 @@ const GuestMessageResponses = () => {
     total: 0
   });
   const [canAccessAll, setCanAccessAll] = useState(true);
+  const [roomFilter, setRoomFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const { toast } = useToast();
 
   useEffect(() => {
     if (messageId) {
       fetchResponses();
     }
-  }, [messageId, pagination.offset]);
+  }, [messageId, pagination.offset, roomFilter, statusFilter]);
 
   const fetchResponses = async () => {
     if (!messageId) return;
 
     try {
       setLoading(true);
+      
+      const filter: Partial<GuestMessageResponseDocument> = {};
+      if (roomFilter) {
+        filter._createdBy = roomFilter;
+      }
+      if (statusFilter !== "all") {
+        filter.status = statusFilter as "delivered" | "read" | "answered";
+      }
+
       const result = await listGuestMessagesResponses({
         messageId,
         limit: pagination.limit,
         offset: pagination.offset,
+        filter,
         sort: { createdAt: 'desc' }
       });
 
@@ -109,6 +123,42 @@ const GuestMessageResponses = () => {
           </p>
         </div>
       )}
+
+      {/* Filters */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Filter className="w-5 h-5" />
+            Filters
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <label className="text-sm font-medium mb-2 block">Room ID</label>
+              <Input
+                placeholder="Filter by room ID..."
+                value={roomFilter}
+                onChange={(e) => setRoomFilter(e.target.value)}
+              />
+            </div>
+            <div className="w-full md:w-48">
+              <label className="text-sm font-medium mb-2 block">Status</label>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="delivered">Delivered</SelectItem>
+                  <SelectItem value="read">Read</SelectItem>
+                  <SelectItem value="answered">Answered</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

@@ -25,6 +25,14 @@ export interface GuestMessageSummary {
   totalRead: number;
   totalReplied: number;
   responses: Record<string, Record<string, number>>;
+  questions: {
+    _id: string;
+    question: string;
+    options: {
+      text: string;
+      icon: string;
+    }[];
+  }[];
 }
 
 export interface GuestMessageSummaryResponse {
