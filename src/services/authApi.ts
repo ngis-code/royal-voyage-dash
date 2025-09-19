@@ -60,10 +60,45 @@ export const resetPassword = async (apiKey: string, password: string): Promise<a
 
 // Check authentication status
 export const getAuthStatus = async (): Promise<AuthStatusResponse> => {
+  const headers = getApiHeaders({});
+  if (import.meta.env.DEV) {
+    const response = await fetch(`${API_BASE_URL}/api/apikey/status?apiKey=${import.meta.env.VITE_DEV_API_KEY}`, {
+      method: 'GET',
+      headers,
+    });
+    if (!response.ok) {
+      await handleApiError(response);
+    }
+    const data: {
+      "status": number,
+      "payload": {
+        "createdAt": string,
+        "updatedAt": string,
+        "_id": string,
+        "expiresAt": string,
+        "name": string,
+        "masterKey": boolean
+      }
+    } = await response.json();
+
+    return {
+      status: data.status,
+      payload: {
+        authenticated: true,
+        isApiKey: true,
+        userId: data.payload._id,
+        deviceId: 'Dev Environment',
+        masterSession: data.payload.masterKey,
+        sessionId: data.payload._id,
+        expires: data.payload.expiresAt,
+      }
+    };
+  }
+
   const response = await fetch(`${API_BASE_URL}/api/auth/status`, {
     method: 'GET',
     credentials: 'include', // Include cookies
-    headers: getApiHeaders({}),
+    headers,
   })
 
   if (!response.ok) {
@@ -75,9 +110,9 @@ export const getAuthStatus = async (): Promise<AuthStatusResponse> => {
 
 // Generate device ID
 export const generateDeviceId = (): string => {
-  const browser = navigator.userAgent.includes('Chrome') ? 'Chrome' : 
-                  navigator.userAgent.includes('Firefox') ? 'Firefox' : 
-                  navigator.userAgent.includes('Safari') ? 'Safari' : 'Browser'
+  const browser = navigator.userAgent.includes('Chrome') ? 'Chrome' :
+    navigator.userAgent.includes('Firefox') ? 'Firefox' :
+      navigator.userAgent.includes('Safari') ? 'Safari' : 'Browser'
   const location = 'Device'
   return `${browser} - ${location}`
 }
