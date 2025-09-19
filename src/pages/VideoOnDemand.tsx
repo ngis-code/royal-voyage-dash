@@ -588,7 +588,7 @@ const VideoOnDemand = () => {
             View Details
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
+        <DialogContent className="max-w-7xl max-h-[95vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle className="text-2xl flex items-center justify-between">
               <span>{getLocalizedTitle(vodItem)}</span>
@@ -601,241 +601,383 @@ const VideoOnDemand = () => {
             </DialogTitle>
           </DialogHeader>
           
-          <ScrollArea className="h-[80vh]">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left Column - Poster and Basic Info */}
-              <div className="space-y-4">
-                <div className="aspect-[2/3] bg-gradient-to-br from-muted/50 to-muted rounded-lg overflow-hidden">
-                  {posterImage ? (
-                    <img 
-                      src={`https://assets.swankmp.net/${posterImage.Location}`}
-                      alt={`${getLocalizedTitle(vodItem)} poster`}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                      }}
-                    />
-                  ) : null}
-                  <div className={`absolute inset-0 flex items-center justify-center ${posterImage ? 'hidden' : ''}`}>
-                    <div className="text-center">
-                      <Film className="w-16 h-16 mx-auto text-muted-foreground/50 mb-2" />
-                      <p className="text-sm text-muted-foreground">No Poster</p>
-                    </div>
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[80vh]">
+            {/* Left Column - Poster and Quick Info */}
+            <div className="space-y-4">
+              <div className="aspect-[2/3] bg-gradient-to-br from-muted/50 to-muted rounded-lg overflow-hidden">
+                {posterImage ? (
+                  <img 
+                    src={`https://assets.swankmp.net/${posterImage.Location}`}
+                    alt={`${getLocalizedTitle(vodItem)} poster`}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                ) : null}
+                <div className={`absolute inset-0 flex items-center justify-center ${posterImage ? 'hidden' : ''}`}>
+                  <div className="text-center">
+                    <Film className="w-16 h-16 mx-auto text-muted-foreground/50 mb-2" />
+                    <p className="text-sm text-muted-foreground">No Poster</p>
                   </div>
                 </div>
-                
-                {/* Basic Movie Info */}
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div>
-                      <strong>Studio:</strong><br />
-                      {vodItem.publicityMetadata?.Studio || 'Unknown'}
+              </div>
+              
+              {/* Quick Info Card */}
+              <Card className="p-4">
+                <div className="space-y-3 text-sm">
+                  <div className="grid grid-cols-1 gap-2">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Studio:</span>
+                      <span className="font-medium text-right">{vodItem.publicityMetadata?.Studio || 'Unknown'}</span>
                     </div>
-                    <div>
-                      <strong>Year:</strong><br />
-                      {vodItem.publicityMetadata?.ReleaseYear || 'N/A'}
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Year:</span>
+                      <span className="font-medium">{vodItem.publicityMetadata?.ReleaseYear || 'N/A'}</span>
                     </div>
-                    <div>
-                      <strong>Runtime:</strong><br />
-                      {formatRuntime(vodItem.publicityMetadata?.Runtime || 0)}
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Runtime:</span>
+                      <span className="font-medium">{formatRuntime(vodItem.publicityMetadata?.Runtime || 0)}</span>
                     </div>
-                    <div>
-                      <strong>Rating:</strong><br />
-                      {vodItem.publicityMetadata?.Rating || 'Not Rated'}
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Rating:</span>
+                      <Badge variant="secondary">{vodItem.publicityMetadata?.Rating || 'Not Rated'}</Badge>
                     </div>
-                    <div>
-                      <strong>Category:</strong><br />
-                      {vodItem.publicityMetadata?.Category || 'Movie'}
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Category:</span>
+                      <span className="font-medium">{vodItem.publicityMetadata?.Category || 'Movie'}</span>
                     </div>
-                    <div>
-                      <strong>Color:</strong><br />
-                      {vodItem.publicityMetadata?.Color || 'N/A'}
-                    </div>
+                    {getDirector(vodItem) && (
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Director:</span>
+                        <span className="font-medium text-right">{getDirector(vodItem)}</span>
+                      </div>
+                    )}
                   </div>
-
-                  {/* License Information */}
-                  {vodItem.effectiveLicenseDates && (
-                    <div className="border rounded-lg p-3 bg-muted/20">
-                      <h4 className="font-medium mb-2 text-sm">License Period</h4>
-                      <div className="text-xs space-y-1">
-                        <div><strong>Start:</strong> {new Date(vodItem.effectiveLicenseDates.LicenseStart).toLocaleDateString()}</div>
-                        <div><strong>End:</strong> {new Date(vodItem.effectiveLicenseDates.LicenseEnd).toLocaleDateString()}</div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Technical Info Quick View */}
-                  {(videoInfo || audioInfo || getFileSize(vodItem)) && (
-                    <div className="border rounded-lg p-3 bg-muted/20">
-                      <h4 className="font-medium mb-2 text-sm">Technical Info</h4>
-                      <div className="text-xs space-y-1">
-                        {videoInfo && <div><strong>Resolution:</strong> {videoInfo.resolution}</div>}
-                        {audioInfo && <div><strong>Audio:</strong> {audioInfo.format} {audioInfo.channels}ch</div>}
-                        {getFileSize(vodItem) && <div><strong>File Size:</strong> {getFileSize(vodItem)}</div>}
-                      </div>
-                    </div>
-                  )}
-
+                  
                   {hasTrailer(vodItem) && (
-                    <Button variant="outline" className="w-full gap-2">
+                    <Button variant="outline" size="sm" className="w-full gap-2 mt-3">
                       <Play className="w-4 h-4" />
                       Watch Trailer
                     </Button>
                   )}
                 </div>
-              </div>
+              </Card>
 
-              {/* Right Columns - Detailed Information */}
-              <div className="lg:col-span-2 space-y-6">
-                {/* Synopsis */}
-                <div>
-                  <h4 className="font-semibold text-lg mb-3">Synopsis</h4>
-                  <p className="text-sm text-muted-foreground leading-relaxed">
-                    {getLocalizedSynopsis(vodItem)}
-                  </p>
-                </div>
-
-                {/* Genres */}
-                <div>
-                  <h4 className="font-semibold mb-3">Genres</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {getLocalizedGenres(vodItem).map((genre, index) => (
-                      <Badge key={index} variant="outline">
-                        {genre.Text}
-                      </Badge>
-                    ))}
+              {/* License Info */}
+              {vodItem.effectiveLicenseDates && (
+                <Card className="p-3">
+                  <h4 className="font-medium mb-2 text-sm">License Period</h4>
+                  <div className="text-xs space-y-1">
+                    <div className="flex justify-between">
+                      <span>Start:</span>
+                      <span>{new Date(vodItem.effectiveLicenseDates.LicenseStart).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>End:</span>
+                      <span>{new Date(vodItem.effectiveLicenseDates.LicenseEnd).toLocaleDateString()}</span>
+                    </div>
                   </div>
-                </div>
+                </Card>
+              )}
+            </div>
 
-                {/* Cast */}
-                <div>
-                  <h4 className="font-semibold mb-3">Cast</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                    {getAllCast(vodItem).map((actor, index) => (
-                      <div key={index} className="flex justify-between">
-                        <span className="font-medium">{actor.Name}</span>
-                        <span className="text-muted-foreground">{actor.PartName}</span>
+            {/* Right Columns - Tabbed Content */}
+            <div className="lg:col-span-3">
+              <Tabs defaultValue="overview" className="h-full">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="overview">Overview</TabsTrigger>
+                  <TabsTrigger value="cast">Cast & Crew</TabsTrigger>
+                  <TabsTrigger value="technical">Technical</TabsTrigger>
+                  <TabsTrigger value="metadata">Metadata</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="overview" className="mt-4">
+                  <ScrollArea className="h-[65vh]">
+                    <div className="space-y-6">
+                      {/* Synopsis */}
+                      <div>
+                        <h4 className="font-semibold text-lg mb-3">Synopsis</h4>
+                        <p className="text-sm leading-relaxed">
+                          {getLocalizedSynopsis(vodItem)}
+                        </p>
                       </div>
-                    ))}
-                    {getAllCast(vodItem).length === 0 && (
-                      <p className="text-muted-foreground text-sm">No cast information available</p>
-                    )}
-                  </div>
-                </div>
 
-                {/* Crew */}
-                <div>
-                  <h4 className="font-semibold mb-3">Crew</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                    {getAllCrew(vodItem).map((crew, index) => (
-                      <div key={index} className="flex justify-between">
-                        <span className="font-medium">{crew.Name}</span>
-                        <span className="text-muted-foreground">{crew.Role}</span>
+                      {/* Genres */}
+                      <div>
+                        <h4 className="font-semibold mb-3">Genres</h4>
+                        <div className="flex flex-wrap gap-2">
+                          {getLocalizedGenres(vodItem).map((genre, index) => (
+                            <Badge key={index} variant="outline">
+                              {genre.Text}
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
-                    ))}
-                    {getAllCrew(vodItem).length === 0 && (
-                      <p className="text-muted-foreground text-sm">No crew information available</p>
-                    )}
-                  </div>
-                </div>
 
-                {/* Detailed Technical Information */}
-                {vodItem.mediaFileInfo && (
-                  <div>
-                    <h4 className="font-semibold mb-3">Technical Specifications</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                      {/* Video Info */}
-                      {vodItem.mediaFileInfo.VideoTracks?.[0] && (
-                        <div className="border rounded-lg p-3 bg-muted/20">
-                          <h5 className="font-medium mb-2">Video</h5>
-                          <div className="space-y-1 text-xs">
-                            <div><strong>Format:</strong> {vodItem.mediaFileInfo.VideoTracks[0].Format}</div>
-                            <div><strong>Resolution:</strong> {vodItem.mediaFileInfo.VideoTracks[0].Width} × {vodItem.mediaFileInfo.VideoTracks[0].Height}</div>
-                            <div><strong>Aspect Ratio:</strong> {vodItem.mediaFileInfo.VideoTracks[0].DisplayAspectRatio}</div>
-                            <div><strong>Frame Rate:</strong> {vodItem.mediaFileInfo.VideoTracks[0].FrameRate}</div>
-                            <div><strong>Bit Rate:</strong> {vodItem.mediaFileInfo.VideoTracks[0].BitRate}</div>
-                            <div><strong>Color Space:</strong> {vodItem.mediaFileInfo.VideoTracks[0].ColorSpace}</div>
-                          </div>
+                      {/* Main Cast (Top 6) */}
+                      <div>
+                        <h4 className="font-semibold mb-3">Main Cast</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {getAllCast(vodItem).slice(0, 6).map((actor, index) => (
+                            <div key={index} className="flex flex-col border rounded-lg p-3">
+                              <span className="font-medium">{actor.Name}</span>
+                              <span className="text-sm text-muted-foreground">{actor.PartName}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Key Crew */}
+                      <div>
+                        <h4 className="font-semibold mb-3">Key Crew</h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {getAllCrew(vodItem).slice(0, 6).map((crew, index) => (
+                            <div key={index} className="flex flex-col border rounded-lg p-3">
+                              <span className="font-medium">{crew.Name}</span>
+                              <span className="text-sm text-muted-foreground">{crew.Role}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+
+                <TabsContent value="cast" className="mt-4">
+                  <ScrollArea className="h-[65vh]">
+                    <div className="space-y-6">
+                      {/* Full Cast */}
+                      <div>
+                        <h4 className="font-semibold text-lg mb-4">Full Cast</h4>
+                        <div className="space-y-2">
+                          {getAllCast(vodItem).map((actor, index) => (
+                            <div key={index} className="flex justify-between items-start p-3 border rounded-lg">
+                              <div>
+                                <div className="font-medium">{actor.Name}</div>
+                                <div className="text-sm text-muted-foreground">{actor.PartName}</div>
+                              </div>
+                              <Badge variant="outline" className="text-xs">
+                                #{actor.DisplayOrder}
+                              </Badge>
+                            </div>
+                          ))}
+                          {getAllCast(vodItem).length === 0 && (
+                            <p className="text-muted-foreground text-center py-8">No cast information available</p>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Full Crew */}
+                      <div>
+                        <h4 className="font-semibold text-lg mb-4">Full Crew</h4>
+                        <div className="space-y-2">
+                          {getAllCrew(vodItem).map((crew, index) => (
+                            <div key={index} className="flex justify-between items-center p-3 border rounded-lg">
+                              <div>
+                                <div className="font-medium">{crew.Name}</div>
+                                <div className="text-sm text-muted-foreground">{crew.Role}</div>
+                              </div>
+                            </div>
+                          ))}
+                          {getAllCrew(vodItem).length === 0 && (
+                            <p className="text-muted-foreground text-center py-8">No crew information available</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+
+                <TabsContent value="technical" className="mt-4">
+                  <ScrollArea className="h-[65vh]">
+                    <div className="space-y-4">
+                      {vodItem.mediaFileInfo && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {/* Video Specifications */}
+                          {vodItem.mediaFileInfo.VideoTracks?.[0] && (
+                            <Card className="p-4">
+                              <h5 className="font-semibold mb-3 flex items-center gap-2">
+                                <Monitor className="w-4 h-4" />
+                                Video Specifications
+                              </h5>
+                              <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                  <span>Format:</span>
+                                  <span className="font-medium">{vodItem.mediaFileInfo.VideoTracks[0].Format}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Resolution:</span>
+                                  <span className="font-medium">{vodItem.mediaFileInfo.VideoTracks[0].Width} × {vodItem.mediaFileInfo.VideoTracks[0].Height}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Aspect Ratio:</span>
+                                  <span className="font-medium">{vodItem.mediaFileInfo.VideoTracks[0].DisplayAspectRatio}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Frame Rate:</span>
+                                  <span className="font-medium">{vodItem.mediaFileInfo.VideoTracks[0].FrameRate}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Bit Rate:</span>
+                                  <span className="font-medium">{vodItem.mediaFileInfo.VideoTracks[0].BitRate}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Color Space:</span>
+                                  <span className="font-medium">{vodItem.mediaFileInfo.VideoTracks[0].ColorSpace}</span>
+                                </div>
+                              </div>
+                            </Card>
+                          )}
+
+                          {/* Audio Specifications */}
+                          {vodItem.mediaFileInfo.AudioTracks?.[0] && (
+                            <Card className="p-4">
+                              <h5 className="font-semibold mb-3 flex items-center gap-2">
+                                <Users className="w-4 h-4" />
+                                Audio Specifications
+                              </h5>
+                              <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                  <span>Format:</span>
+                                  <span className="font-medium">{vodItem.mediaFileInfo.AudioTracks[0].Format}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Channels:</span>
+                                  <span className="font-medium">{vodItem.mediaFileInfo.AudioTracks[0].Channels}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Bit Rate:</span>
+                                  <span className="font-medium">{vodItem.mediaFileInfo.AudioTracks[0].BitRate}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Sampling Rate:</span>
+                                  <span className="font-medium">{vodItem.mediaFileInfo.AudioTracks[0].SamplingRate}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Channels:</span>
+                                  <span className="font-medium">{vodItem.mediaFileInfo.AudioTracks[0].ChannelPositions}</span>
+                                </div>
+                              </div>
+                            </Card>
+                          )}
+
+                          {/* File Information */}
+                          {vodItem.mediaFileInfo.General && (
+                            <Card className="p-4">
+                              <h5 className="font-semibold mb-3 flex items-center gap-2">
+                                <HardDrive className="w-4 h-4" />
+                                File Information
+                              </h5>
+                              <div className="space-y-2 text-sm">
+                                <div className="flex justify-between">
+                                  <span>Format:</span>
+                                  <span className="font-medium">{vodItem.mediaFileInfo.General.Format}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>File Size:</span>
+                                  <span className="font-medium">{getFileSize(vodItem)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Bit Rate:</span>
+                                  <span className="font-medium">{vodItem.mediaFileInfo.General.BitRate}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Duration:</span>
+                                  <span className="font-medium">{vodItem.mediaFileInfo.General.FileRuntime ? Math.round(parseInt(vodItem.mediaFileInfo.General.FileRuntime) / 60) : 'N/A'} min</span>
+                                </div>
+                              </div>
+                            </Card>
+                          )}
+
+                          {/* Subtitles & Captions */}
+                          {vodItem.asset?.SidecarAssetTracks && vodItem.asset.SidecarAssetTracks.length > 0 && (
+                            <Card className="p-4">
+                              <h5 className="font-semibold mb-3 flex items-center gap-2">
+                                <Languages className="w-4 h-4" />
+                                Available Subtitles
+                              </h5>
+                              <div className="space-y-2 text-sm">
+                                {vodItem.asset.SidecarAssetTracks.map((track, index) => (
+                                  <div key={index} className="flex justify-between">
+                                    <span>{track.Description}:</span>
+                                    <Badge variant="outline" className="text-xs">{track.Format}</Badge>
+                                  </div>
+                                ))}
+                              </div>
+                            </Card>
+                          )}
                         </div>
                       )}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
 
-                      {/* Audio Info */}
-                      {vodItem.mediaFileInfo.AudioTracks?.[0] && (
-                        <div className="border rounded-lg p-3 bg-muted/20">
-                          <h5 className="font-medium mb-2">Audio</h5>
-                          <div className="space-y-1 text-xs">
-                            <div><strong>Format:</strong> {vodItem.mediaFileInfo.AudioTracks[0].Format}</div>
-                            <div><strong>Channels:</strong> {vodItem.mediaFileInfo.AudioTracks[0].Channels}</div>
-                            <div><strong>Bit Rate:</strong> {vodItem.mediaFileInfo.AudioTracks[0].BitRate}</div>
-                            <div><strong>Sampling Rate:</strong> {vodItem.mediaFileInfo.AudioTracks[0].SamplingRate}</div>
-                            <div><strong>Channel Positions:</strong> {vodItem.mediaFileInfo.AudioTracks[0].ChannelPositions}</div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* File Info */}
-                      {vodItem.mediaFileInfo.General && (
-                        <div className="border rounded-lg p-3 bg-muted/20">
-                          <h5 className="font-medium mb-2">File Information</h5>
-                          <div className="space-y-1 text-xs">
-                            <div><strong>Format:</strong> {vodItem.mediaFileInfo.General.Format}</div>
-                            <div><strong>Size:</strong> {getFileSize(vodItem)}</div>
-                            <div><strong>Bit Rate:</strong> {vodItem.mediaFileInfo.General.BitRate}</div>
-                            <div><strong>Duration:</strong> {vodItem.mediaFileInfo.General.FileRuntime ? Math.round(parseInt(vodItem.mediaFileInfo.General.FileRuntime) / 60) : 'N/A'} minutes</div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Subtitles & Captions */}
-                      {vodItem.asset?.SidecarAssetTracks && vodItem.asset.SidecarAssetTracks.length > 0 && (
-                        <div className="border rounded-lg p-3 bg-muted/20">
-                          <h5 className="font-medium mb-2">Available Subtitles</h5>
-                          <div className="space-y-1 text-xs">
-                            {vodItem.asset.SidecarAssetTracks.map((track, index) => (
-                              <div key={index}>
-                                <strong>{track.Description}:</strong> {track.Format}
+                <TabsContent value="metadata" className="mt-4">
+                  <ScrollArea className="h-[65vh]">
+                    <div className="space-y-6">
+                      {/* International Ratings */}
+                      {vodItem.publicityMetadata?.Ratings && vodItem.publicityMetadata.Ratings.length > 0 && (
+                        <div>
+                          <h4 className="font-semibold mb-3 flex items-center gap-2">
+                            <Award className="w-4 h-4" />
+                            International Ratings
+                          </h4>
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                            {vodItem.publicityMetadata.Ratings.slice(0, 12).map((rating, index) => (
+                              <div key={index} className="flex justify-between border rounded-lg p-3">
+                                <span className="text-sm font-medium">{rating.Authority.split('-')[0]}</span>
+                                <Badge variant="secondary" className="text-xs">{rating.Value}</Badge>
                               </div>
                             ))}
                           </div>
                         </div>
                       )}
-                    </div>
-                  </div>
-                )}
 
-                {/* Ratings from Different Authorities */}
-                {vodItem.publicityMetadata?.Ratings && vodItem.publicityMetadata.Ratings.length > 0 && (
-                  <div>
-                    <h4 className="font-semibold mb-3">International Ratings</h4>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 text-xs">
-                      {vodItem.publicityMetadata.Ratings.slice(0, 8).map((rating, index) => (
-                        <div key={index} className="flex justify-between border rounded p-2">
-                          <span>{rating.Authority.split('-')[0]}:</span>
-                          <span className="font-medium">{rating.Value}</span>
+                      {/* System Identifiers */}
+                      {vodItem.publicityMetadata?.Identifiers && (
+                        <div>
+                          <h4 className="font-semibold mb-3 flex items-center gap-2">
+                            <Info className="w-4 h-4" />
+                            System Identifiers
+                          </h4>
+                          <div className="space-y-2">
+                            {vodItem.publicityMetadata.Identifiers.map((identifier, index) => (
+                              <div key={index} className="flex justify-between border rounded-lg p-3">
+                                <span className="font-medium">{identifier.Name}</span>
+                                <code className="text-sm bg-muted px-2 py-1 rounded">{identifier.Value}</code>
+                              </div>
+                            ))}
+                          </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                      )}
 
-                {/* Identifiers */}
-                {vodItem.publicityMetadata?.Identifiers && (
-                  <div>
-                    <h4 className="font-semibold mb-3">Identifiers</h4>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      {vodItem.publicityMetadata.Identifiers.map((identifier, index) => (
-                        <div key={index} className="flex justify-between">
-                          <span>{identifier.Name}:</span>
-                          <span className="font-mono">{identifier.Value}</span>
+                      {/* Tags & Keywords */}
+                      {vodItem.publicityMetadata?.Tags && vodItem.publicityMetadata.Tags.length > 0 && (
+                        <div>
+                          <h4 className="font-semibold mb-3">Tags & Keywords</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {vodItem.publicityMetadata.Tags
+                              .filter((tag, index, self) => 
+                                index === self.findIndex(t => t.Text === tag.Text && t.Locale === selectedLanguage)
+                              )
+                              .slice(0, 20)
+                              .map((tag, index) => (
+                                <Badge key={index} variant="outline" className="text-xs">
+                                  {tag.Text}
+                                </Badge>
+                              ))
+                            }
+                          </div>
                         </div>
-                      ))}
+                      )}
                     </div>
-                  </div>
-                )}
-              </div>
+                  </ScrollArea>
+                </TabsContent>
+              </Tabs>
             </div>
-          </ScrollArea>
+          </div>
         </DialogContent>
       </Dialog>
     );
