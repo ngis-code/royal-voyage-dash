@@ -167,7 +167,7 @@ export default function Devices() {
         </Button>
       </div>
 
-      {!canAccessAll && (
+      {!isLoading && devicesResponse && !canAccessAll && (
         <Card className="border-destructive/50 bg-destructive/5">
           <CardHeader className="pb-3">
             <CardTitle className="flex items-center gap-2 text-destructive">
