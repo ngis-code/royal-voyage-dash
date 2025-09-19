@@ -1,5 +1,6 @@
 // Authentication API service
 import { handleApiError } from '@/lib/apiErrorHandler';
+import { getApiHeaders } from '@/lib/apiHeaders';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
@@ -31,9 +32,7 @@ export const login = async (loginData: LoginRequest): Promise<any> => {
   const response = await fetch(`${API_BASE_URL}/api/services/request/auth/apikey-user/login`, {
     method: 'POST',
     credentials: 'include', // Include cookies
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getApiHeaders(),
     body: JSON.stringify(loginData),
   })
 
@@ -48,10 +47,7 @@ export const login = async (loginData: LoginRequest): Promise<any> => {
 export const resetPassword = async (apiKey: string, password: string): Promise<any> => {
   const response = await fetch(`${API_BASE_URL}/api/services/request/auth/apikey-user/reset-pwd`, {
     method: 'POST',
-    headers: {
-      'x-api-key': apiKey,
-      'Content-Type': 'application/json',
-    },
+    headers: getApiHeaders({ 'x-api-key': apiKey }),
     body: JSON.stringify({ password }),
   })
 
@@ -67,6 +63,7 @@ export const getAuthStatus = async (): Promise<AuthStatusResponse> => {
   const response = await fetch(`${API_BASE_URL}/api/auth/status`, {
     method: 'GET',
     credentials: 'include', // Include cookies
+    headers: getApiHeaders({}),
   })
 
   if (!response.ok) {

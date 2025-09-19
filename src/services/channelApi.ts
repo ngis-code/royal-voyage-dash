@@ -1,5 +1,6 @@
 // Channel API service for IPTV system
 import { handleApiError } from '@/lib/apiErrorHandler';
+import { getApiHeaders } from '@/lib/apiHeaders';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
 
@@ -283,9 +284,7 @@ export const getChannels = async (): Promise<ChannelResponse> => {
   const response = await fetch(`${API_BASE_URL}/api/databases/list-documents`, {
     method: 'POST',
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getApiHeaders(),
     body: JSON.stringify({
       databaseId: 'royaltv_main',
       collectionId: 'channels',
@@ -304,9 +303,7 @@ export const createChannel = async (channelData: CreateChannelRequest): Promise<
   const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/channels`, {
     method: 'POST',
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getApiHeaders(),
     body: JSON.stringify(channelData),
   })
 
@@ -322,9 +319,7 @@ export const updateChannel = async (channelId: string, channelData: Partial<Crea
   const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/channels/${channelId}`, {
     method: 'PUT',
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getApiHeaders(),
     body: JSON.stringify(channelData),
   })
 
@@ -340,9 +335,7 @@ export const deleteChannel = async (channelId: string): Promise<any> => {
   const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/channels/${channelId}`, {
     method: 'DELETE',
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getApiHeaders(),
   })
 
   if (!response.ok) {
@@ -357,9 +350,7 @@ export const getVodItems = async (): Promise<VodResponse> => {
   const response = await fetch(`${API_BASE_URL}/api/databases/list-documents`, {
     method: 'POST',
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getApiHeaders(),
     body: JSON.stringify({
       databaseId: 'royaltv_main',
       collectionId: 'vod_imports',
@@ -378,9 +369,7 @@ export const importVod = async (url: string): Promise<any> => {
   const response = await fetch(`${API_BASE_URL}/api/services/request/import_vod/ingest`, {
     method: 'POST',
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getApiHeaders(),
     body: JSON.stringify({ url }),
   })
 
@@ -396,9 +385,7 @@ export const updateVodItem = async (vodItemId: string, vodData: Partial<{ visibl
   const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/vod_imports/${vodItemId}`, {
     method: 'PUT',
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getApiHeaders(),
     body: JSON.stringify(vodData),
   })
 
@@ -414,9 +401,7 @@ export const deleteVodItem = async (vodItemId: string): Promise<any> => {
   const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/vod_imports/${vodItemId}`, {
     method: 'DELETE',
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getApiHeaders(),
   })
 
   if (!response.ok) {
@@ -431,9 +416,7 @@ export const createCustomVideo = async (videoData: CreateCustomVideoRequest): Pr
   const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/vod_imports`, {
     method: 'POST',
     credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: getApiHeaders(),
     body: JSON.stringify(videoData),
   })
 
@@ -449,6 +432,7 @@ export const getHealth = async (): Promise<HealthResponse> => {
   const response = await fetch(`${API_BASE_URL}/health`, {
     method: 'GET',
     credentials: 'include',
+    headers: getApiHeaders({}),
   });
 
   if (!response.ok) {
