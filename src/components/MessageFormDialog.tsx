@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,17 +20,48 @@ interface MessageFormDialogProps {
 
 export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: MessageFormDialogProps) => {
   const [formData, setFormData] = useState({
-    subject: message?.subject || "",
-    description: message?.description || "",
-    sentTo: message?.sentTo || "",
-    type: message?.type || "notification" as const,
-    mediaType: message?.mediaType || undefined,
-    mediaOrientation: message?.mediaOrientation || "horizontal" as const,
-    mediaUrl: message?.mediaUrl || "",
-    questions: message?.questions || [],
-    tags: message?.tags || [],
-    deleteable: message?.deleteable ?? true
+    subject: "",
+    description: "",
+    sentTo: "",
+    type: "notification" as "action" | "survey" | "notification",
+    mediaType: undefined as "image" | "video" | undefined,
+    mediaOrientation: "horizontal" as "horizontal" | "vertical",
+    mediaUrl: "",
+    questions: [] as GuestMessage['questions'],
+    tags: [] as string[],
+    deleteable: true
   });
+
+  // Reset form data when message prop changes
+  useEffect(() => {
+    if (message) {
+      setFormData({
+        subject: message.subject || "",
+        description: message.description || "",
+        sentTo: message.sentTo || "",
+        type: message.type || "notification",
+        mediaType: message.mediaType || undefined,
+        mediaOrientation: message.mediaOrientation || "horizontal",
+        mediaUrl: message.mediaUrl || "",
+        questions: message.questions || [],
+        tags: message.tags || [],
+        deleteable: message.deleteable ?? true
+      });
+    } else {
+      setFormData({
+        subject: "",
+        description: "",
+        sentTo: "",
+        type: "notification" as "action" | "survey" | "notification",
+        mediaType: undefined as "image" | "video" | undefined,
+        mediaOrientation: "horizontal" as "horizontal" | "vertical",
+        mediaUrl: "",
+        questions: [] as GuestMessage['questions'],
+        tags: [] as string[],
+        deleteable: true
+      });
+    }
+  }, [message]);
   
   const [newTag, setNewTag] = useState("");
   const [newQuestion, setNewQuestion] = useState({ question: "", options: [{ text: "", icon: "" }] });
@@ -68,6 +99,10 @@ export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: Messa
 
   const addQuestion = () => {
     if (newQuestion.question.trim()) {
+      // For action type, only allow 1 question
+      if (formData.type === 'action' && formData.questions.length >= 1) {
+        return;
+      }
       setFormData({
         ...formData,
         questions: [...formData.questions, { ...newQuestion, _id: Date.now().toString() }]
@@ -193,16 +228,27 @@ export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: Messa
                   onChange={(e) => setFormData({ ...formData, mediaUrl: e.target.value })}
                   placeholder="https://example.com/image.jpg"
                 />
-                {formData.mediaUrl && formData.mediaType === 'image' && (
+                {formData.mediaUrl && (
                   <div className="mt-2">
-                    <img 
-                      src={formData.mediaUrl} 
-                      alt="Preview" 
-                      className="max-w-xs max-h-32 object-cover rounded border"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
+                    {formData.mediaType === 'image' ? (
+                      <img 
+                        src={formData.mediaUrl} 
+                        alt="Preview" 
+                        className="max-w-xs max-h-32 object-cover rounded border"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    ) : formData.mediaType === 'video' ? (
+                      <video 
+                        src={formData.mediaUrl} 
+                        className="max-w-xs max-h-32 rounded border"
+                        controls
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    ) : null}
                   </div>
                 )}
               </div>
@@ -243,7 +289,19 @@ export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: Messa
           {(formData.type === 'action' || formData.type === 'survey') && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Questions</CardTitle>
+                <CardTitle className="text-lg">
+                  Questions
+                  {formData.type === 'action' && (
+                    <span className="text-sm font-normal text-muted-foreground ml-2">
+                      (Exactly 1 question required)
+                    </span>
+                  )}
+                  {formData.type === 'survey' && (
+                    <span className="text-sm font-normal text-muted-foreground ml-2">
+                      (Multiple questions allowed)
+                    </span>
+                  )}
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Existing Questions */}
@@ -312,7 +370,12 @@ export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: Messa
                       <Plus className="w-4 h-4 mr-2" />
                       Add Option
                     </Button>
-                    <Button variant="outline" size="sm" onClick={addQuestion}>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={addQuestion}
+                      disabled={formData.type === 'action' && formData.questions.length >= 1}
+                    >
                       <Plus className="w-4 h-4 mr-2" />
                       Add Question
                     </Button>
