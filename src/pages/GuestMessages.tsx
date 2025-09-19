@@ -13,6 +13,8 @@ import { getGuestMessageSummary, GuestMessageSummary } from "@/services/guestMes
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { MessageFormDialog } from "@/components/MessageFormDialog";
+import TemplateManager from "@/components/TemplateManager";
+import { GuestMessageTemplate } from "@/services/templateApi";
 
 const GuestMessages = () => {
   const [messages, setMessages] = useState<GuestMessage[]>([]);
@@ -179,7 +181,27 @@ const GuestMessages = () => {
   };
 
   const handleViewResponses = (messageId: string) => {
-    navigate(`/guest-messages/${messageId}/responses`);
+    navigate(`/guest-message-responses/${messageId}`);
+  };
+
+  const handleUseTemplate = (template: GuestMessageTemplate) => {
+    setEditingMessage({
+      _id: '',
+      sentBy: '',
+      sentTo: template.type === 'action' ? '' : null,
+      subject: template.subject,
+      description: template.description,
+      mediaUrl: template.mediaUrl,
+      mediaType: template.mediaType,
+      mediaOrientation: template.mediaOrientation,
+      questions: template.questions,
+      deleteable: true,
+      tags: template.tags,
+      type: template.type,
+      createdAt: '',
+      updatedAt: ''
+    } as GuestMessage);
+    setShowCreateDialog(true);
   };
 
   return (
@@ -203,6 +225,8 @@ const GuestMessages = () => {
           )}
         </div>
       </div>
+
+      <TemplateManager onUseTemplate={handleUseTemplate} />
 
       {/* Filters and Search */}
       <Card className="bg-gradient-card border-border shadow-card-shadow">
