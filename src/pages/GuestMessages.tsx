@@ -34,6 +34,7 @@ const GuestMessages = () => {
   const [summaryLoading, setSummaryLoading] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingMessage, setEditingMessage] = useState<GuestMessage | null>(null);
+  const [templateData, setTemplateData] = useState<Partial<GuestMessage> | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -126,6 +127,7 @@ const GuestMessages = () => {
         title: "Success",
         description: "Message created successfully",
       });
+      setTemplateData(null); // Clear template data after successful creation
       fetchMessages();
     } catch (error) {
       console.error('Failed to create message:', error);
@@ -185,9 +187,7 @@ const GuestMessages = () => {
   };
 
   const handleUseTemplate = (template: GuestMessageTemplate) => {
-    setEditingMessage({
-      _id: '',
-      sentBy: '',
+    setTemplateData({
       sentTo: template.type === 'action' ? '' : null,
       subject: template.subject,
       description: template.description,
@@ -198,9 +198,7 @@ const GuestMessages = () => {
       deleteable: true,
       tags: template.tags,
       type: template.type,
-      createdAt: '',
-      updatedAt: ''
-    } as GuestMessage);
+    });
     setShowCreateDialog(true);
   };
 
@@ -557,7 +555,11 @@ const GuestMessages = () => {
       {/* Create Message Dialog */}
       <MessageFormDialog
         open={showCreateDialog}
-        onOpenChange={setShowCreateDialog}
+        onOpenChange={(open) => {
+          setShowCreateDialog(open);
+          if (!open) setTemplateData(null); // Clear template data when dialog closes
+        }}
+        message={templateData as GuestMessage}
         onSave={handleCreateMessage}
       />
 
