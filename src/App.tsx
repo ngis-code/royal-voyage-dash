@@ -11,6 +11,7 @@ import LiveChannels from "./pages/LiveChannels";
 import VideoOnDemand from "./pages/VideoOnDemand";
 import GuestMessages from "./pages/GuestMessages";
 import GuestMessageResponses from "./pages/GuestMessageResponses";
+import Devices from "./pages/Devices";
 import Login from "./pages/Login";
 import PasswordReset from "./pages/PasswordReset";
 import NotFound from "./pages/NotFound";
@@ -47,6 +48,7 @@ const App = () => (
                       <Route path="/vod" element={<VideoOnDemand />} />
                       <Route path="/guest-messages" element={<GuestMessages />} />
                       <Route path="/guest-messages/:messageId/responses" element={<GuestMessageResponses />} />
+                      <Route path="/devices" element={<Devices />} />
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
                     </Routes>

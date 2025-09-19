@@ -1,4 +1,4 @@
-import { Home, Tv, Film, MessageSquare } from "lucide-react"
+import { Home, Tv, Film, MessageSquare, Monitor } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import rcclLogo from "@/assets/rccl-logo.png"
 
@@ -19,6 +19,7 @@ const menuItems = [
   { title: "Live Channels", url: "/channels", icon: Tv },
   { title: "Video on Demand", url: "/vod", icon: Film },
   { title: "Guest Messages", url: "/guest-messages", icon: MessageSquare },
+  { title: "Devices", url: "/devices", icon: Monitor },
 ]
 
 export function AppSidebar() {
