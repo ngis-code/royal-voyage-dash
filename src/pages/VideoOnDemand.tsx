@@ -52,11 +52,12 @@ const VideoOnDemand = () => {
   const [newCustomVideo, setNewCustomVideo] = useState<CreateCustomVideoRequest>({
     id: '',
     custom_import: true,
+    visible_on_tv: false,
+    visible_crew_only: false,
     title: { en: '', es: '', fr: '', de: '' },
     description: { en: '', es: '', fr: '', de: '' },
     media: { full_video_url: '' },
-    rating: { system: 'MPAA', value: '' },
-    visible_on_tv: true
+    rating: { system: 'MPAA', value: '' }
   });
   
   const { data: vodData, isLoading, error, refetch, isFetching } = useQuery({
@@ -203,11 +204,12 @@ const VideoOnDemand = () => {
       setNewCustomVideo({
         id: '',
         custom_import: true,
+        visible_on_tv: false,
+        visible_crew_only: false,
         title: { en: '', es: '', fr: '', de: '' },
         description: { en: '', es: '', fr: '', de: '' },
         media: { full_video_url: '' },
-        rating: { system: 'MPAA', value: '' },
-        visible_on_tv: true
+        rating: { system: 'MPAA', value: '' }
       });
       setShowAddCustomVideo(false);
       refetch();
@@ -1085,28 +1087,38 @@ const VideoOnDemand = () => {
                                         <MoreVertical className="h-4 w-4" />
                                       </Button>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                      <DropdownMenuItem 
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleToggleVisibility(vodItem);
-                                        }}
-                                        disabled={isUpdatingVisibility === vodItem._id}
-                                      >
-                                        <Tv className="w-4 h-4 mr-2" />
-                                        {vodItem.visible_on_tv ? 'Hide from TV' : 'Show on TV'}
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem 
-                                        onClick={(e) => {
-                                          e.stopPropagation();
-                                          handleDeleteVod(vodItem);
-                                        }}
-                                        className="text-destructive"
-                                      >
-                                        <Trash2 className="w-4 h-4 mr-2" />
-                                        Delete VOD Item
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleToggleVisibility(vodItem);
+                                }}
+                                disabled={isUpdatingVisibility === vodItem._id}
+                              >
+                                <Tv className="w-4 h-4 mr-2" />
+                                {vodItem.visible_on_tv ? 'Hide from TV' : 'Show on TV'}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  // Toggle crew visibility
+                                  updateVodItem(vodItem._id, { visible_crew_only: !vodItem.visible_crew_only });
+                                }}
+                              >
+                                <Users className="w-4 h-4 mr-2" />
+                                {vodItem.visible_crew_only ? 'Hide from Crew' : 'Show to Crew Only'}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteVod(vodItem);
+                                }}
+                                className="text-destructive"
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Delete VOD Item
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
                                   </DropdownMenu>
                                 </div>
                                 
@@ -1115,13 +1127,25 @@ const VideoOnDemand = () => {
                                     {vodItem.publicityMetadata?.Category || 'Movie'}
                                   </Badge>
                                   
-                                  <Badge 
-                                    variant={vodItem.visible_on_tv ? "default" : "outline"} 
-                                    className="text-xs flex items-center gap-1"
-                                  >
-                                    <Tv className="w-3 h-3" />
-                                    {vodItem.visible_on_tv ? 'On TV' : 'Hidden'}
-                                  </Badge>
+                                  <div className="flex gap-1">
+                                    <Badge 
+                                      variant={vodItem.visible_on_tv ? "default" : "outline"} 
+                                      className="text-xs flex items-center gap-1"
+                                    >
+                                      <Tv className="w-3 h-3" />
+                                      {vodItem.visible_on_tv ? 'On TV' : 'Hidden'}
+                                    </Badge>
+                                    
+                                    {vodItem.visible_crew_only && (
+                                      <Badge 
+                                        variant="secondary" 
+                                        className="text-xs flex items-center gap-1"
+                                      >
+                                        <Users className="w-3 h-3" />
+                                        Crew Only
+                                      </Badge>
+                                    )}
+                                  </div>
                                 </div>
                                 
                                 <MovieDetailDialog vodItem={vodItem} />
@@ -1343,6 +1367,40 @@ const VideoOnDemand = () => {
                     </div>
                   </div>
 
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="visible_on_tv"
+                        checked={newCustomVideo.visible_on_tv}
+                        onChange={(e) => setNewCustomVideo({
+                          ...newCustomVideo,
+                          visible_on_tv: e.target.checked
+                        })}
+                        className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary focus:ring-2"
+                      />
+                      <label htmlFor="visible_on_tv" className="text-sm font-medium">
+                        Visible on TV
+                      </label>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        id="visible_crew_only"
+                        checked={newCustomVideo.visible_crew_only}
+                        onChange={(e) => setNewCustomVideo({
+                          ...newCustomVideo,
+                          visible_crew_only: e.target.checked
+                        })}
+                        className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary focus:ring-2"
+                      />
+                      <label htmlFor="visible_crew_only" className="text-sm font-medium">
+                        Visible to Crew Only
+                      </label>
+                    </div>
+                  </div>
+
                   <div className="flex gap-2">
                     <Button onClick={handleAddCustomVideo}>Add Video</Button>
                     <Button 
@@ -1425,6 +1483,16 @@ const VideoOnDemand = () => {
                               <DropdownMenuItem
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                  // Toggle crew visibility
+                                  updateVodItem(customVideo._id, { visible_crew_only: !customVideo.visible_crew_only });
+                                }}
+                              >
+                                <Users className="w-4 h-4 mr-2" />
+                                {customVideo.visible_crew_only ? 'Hide from Crew' : 'Show to Crew Only'}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
                                   handleDeleteCustomVideo(customVideo);
                                 }}
                                 className="text-destructive"
@@ -1454,6 +1522,12 @@ const VideoOnDemand = () => {
                             <Badge variant={customVideo.visible_on_tv ? "default" : "outline"}>
                               {customVideo.visible_on_tv ? 'On TV' : 'Hidden'}
                             </Badge>
+                            {customVideo.visible_crew_only && (
+                              <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                                <Users className="w-3 h-3" />
+                                Crew Only
+                              </Badge>
+                            )}
                           </div>
                         </div>
                       </CardContent>

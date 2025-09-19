@@ -74,6 +74,7 @@ export interface VodItem {
   _createdBy: string
   _permissions: string[]
   visible_on_tv?: boolean
+  visible_crew_only?: boolean
   custom_import?: boolean
   // Custom video fields (when custom_import is true)
   id?: string
@@ -252,6 +253,8 @@ export interface VodResponse {
 export interface CreateCustomVideoRequest {
   id: string
   custom_import: boolean
+  visible_on_tv: boolean
+  visible_crew_only: boolean
   title: {
     en: string
     es: string
@@ -273,7 +276,6 @@ export interface CreateCustomVideoRequest {
     system: string
     value: string
   }
-  visible_on_tv: boolean
 }
 
 // Get all channels
@@ -390,7 +392,7 @@ export const importVod = async (url: string): Promise<any> => {
 }
 
 // Update a VOD item
-export const updateVodItem = async (vodItemId: string, vodData: Partial<{ visible_on_tv: boolean }>): Promise<any> => {
+export const updateVodItem = async (vodItemId: string, vodData: Partial<{ visible_on_tv: boolean; visible_crew_only: boolean }>): Promise<any> => {
   const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/vod_imports/${vodItemId}`, {
     method: 'PUT',
     credentials: 'include',
