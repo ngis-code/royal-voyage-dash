@@ -192,7 +192,7 @@ const TemplateManager = ({ onUseTemplate }: TemplateManagerProps) => {
                     <p className="text-xs text-muted-foreground mb-2 line-clamp-2">{template.subject}</p>
                     <p className="text-xs text-muted-foreground mb-3 line-clamp-2">{template.description}</p>
                     
-                    {template.tags.length > 0 && (
+                    {template.tags?.length && (
                       <div className="flex flex-wrap gap-1 mb-3">
                         {template.tags.slice(0, 2).map((tag, index) => (
                           <Badge key={index} variant="outline" className="text-xs">
