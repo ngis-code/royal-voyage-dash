@@ -695,7 +695,7 @@ const VideoOnDemand = () => {
 
                 <TabsContent value="overview" className="mt-4">
                   <ScrollArea className="h-[65vh]">
-                    <div className="space-y-6">
+                    <div className="space-y-6 pr-4">
                       {/* Synopsis */}
                       <div>
                         <h4 className="font-semibold text-lg mb-3">Synopsis</h4>
@@ -747,7 +747,7 @@ const VideoOnDemand = () => {
 
                 <TabsContent value="cast" className="mt-4">
                   <ScrollArea className="h-[65vh]">
-                    <div className="space-y-6">
+                    <div className="space-y-6 pr-4">
                       {/* Full Cast */}
                       <div>
                         <h4 className="font-semibold text-lg mb-4">Full Cast</h4>
@@ -792,7 +792,7 @@ const VideoOnDemand = () => {
 
                 <TabsContent value="technical" className="mt-4">
                   <ScrollArea className="h-[65vh]">
-                    <div className="space-y-4">
+                    <div className="space-y-4 pr-4">
                       {vodItem.mediaFileInfo && (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {/* Video Specifications */}
@@ -916,7 +916,7 @@ const VideoOnDemand = () => {
 
                 <TabsContent value="metadata" className="mt-4">
                   <ScrollArea className="h-[65vh]">
-                    <div className="space-y-6">
+                    <div className="space-y-6 pr-4">
                       {/* International Ratings */}
                       {vodItem.publicityMetadata?.Ratings && vodItem.publicityMetadata.Ratings.length > 0 && (
                         <div>
@@ -1362,7 +1362,7 @@ const VideoOnDemand = () => {
                                   </div>
                                 </div>
                                 
-                                <MovieDetailDialog vodItem={vodItem} />
+                <MovieDetailDialog vodItem={vodItem} />
                               </div>
                             </CardContent>
                           </Card>
