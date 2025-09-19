@@ -50,6 +50,8 @@ const VideoOnDemand = () => {
   const [customDeleteDialogOpen, setCustomDeleteDialogOpen] = useState(false);
   const [isUpdatingCustomVisibility, setIsUpdatingCustomVisibility] = useState<string | null>(null);
   const [showAddCustomVideo, setShowAddCustomVideo] = useState(false);
+  const [editingCustomVideo, setEditingCustomVideo] = useState<VodItem | null>(null);
+  const [showEditCustomVideo, setShowEditCustomVideo] = useState(false);
   const [newCustomVideo, setNewCustomVideo] = useState<CreateCustomVideoRequest>({
     id: '',
     custom_import: true,
@@ -285,6 +287,66 @@ const VideoOnDemand = () => {
       toast({
         title: "Error",
         description: "Failed to update video. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEditCustomVideo = (customVideo: VodItem) => {
+    setEditingCustomVideo(customVideo);
+    setNewCustomVideo({
+      id: customVideo.id || '',
+      custom_import: true,
+      visible_on_tv: customVideo.visible_on_tv || false,
+      visible_crew_only: customVideo.visible_crew_only || false,
+      title: customVideo.title || { en: '', es: '', fr: '', de: '' },
+      description: customVideo.description || { en: '', es: '', fr: '', de: '' },
+      media: { 
+        full_video_url: customVideo.media?.full_video_url || '',
+        poster_image_url: customVideo.media?.poster_image_url || '',
+        trailer_url: customVideo.media?.trailer_url || ''
+      },
+      rating: customVideo.rating || { system: 'MPAA', value: '' }
+    });
+    setShowEditCustomVideo(true);
+  };
+
+  const handleUpdateCustomVideo = async () => {
+    if (!editingCustomVideo || !newCustomVideo.id.trim() || !newCustomVideo.title.en.trim() || !newCustomVideo.media.full_video_url.trim()) {
+      toast({
+        title: "Required fields missing",
+        description: "Please fill in ID, English title, and video URL.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Delete the old video and create a new one with updated data
+      await deleteVodItem(editingCustomVideo._id);
+      await createCustomVideo(newCustomVideo);
+      
+      toast({
+        title: "Success",
+        description: "Custom video updated successfully",
+      });
+      setNewCustomVideo({
+        id: '',
+        custom_import: true,
+        visible_on_tv: false,
+        visible_crew_only: false,
+        title: { en: '', es: '', fr: '', de: '' },
+        description: { en: '', es: '', fr: '', de: '' },
+        media: { full_video_url: '' },
+        rating: { system: 'MPAA', value: '' }
+      });
+      setShowEditCustomVideo(false);
+      setEditingCustomVideo(null);
+      refetch();
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update custom video. Please try again.",
         variant: "destructive",
       });
     }
@@ -1074,9 +1136,9 @@ const VideoOnDemand = () => {
               </div>
             </CardHeader>
             <CardContent>
-              {showAddCustomVideo && (
+              {(showAddCustomVideo || showEditCustomVideo) && (
                 <div className="border rounded-lg p-4 mb-6 space-y-4">
-                  <h3 className="font-semibold">Add New Custom Video</h3>
+                  <h3 className="font-semibold">{showEditCustomVideo ? 'Edit Custom Video' : 'Add New Custom Video'}</h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -1088,8 +1150,9 @@ const VideoOnDemand = () => {
                       />
                     </div>
                     
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium mb-2">Video URL</label>
+                      <label className="block text-sm font-medium mb-2">Video URL *</label>
                       <Input
                         placeholder="https://example.com/video.mp4"
                         value={newCustomVideo.media.full_video_url}
@@ -1099,6 +1162,31 @@ const VideoOnDemand = () => {
                         })}
                       />
                     </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Poster Image URL</label>
+                      <Input
+                        placeholder="https://example.com/poster.jpg"
+                        value={newCustomVideo.media.poster_image_url || ''}
+                        onChange={(e) => setNewCustomVideo({
+                          ...newCustomVideo, 
+                          media: {...newCustomVideo.media, poster_image_url: e.target.value}
+                        })}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Trailer URL</label>
+                    <Input
+                      placeholder="https://example.com/trailer.mp4"
+                      value={newCustomVideo.media.trailer_url || ''}
+                      onChange={(e) => setNewCustomVideo({
+                        ...newCustomVideo, 
+                        media: {...newCustomVideo.media, trailer_url: e.target.value}
+                      })}
+                    />
+                  </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1240,10 +1328,26 @@ const VideoOnDemand = () => {
                   </div>
 
                   <div className="flex gap-2">
-                    <Button onClick={handleAddCustomVideo}>Add Video</Button>
+                    <Button onClick={showEditCustomVideo ? handleUpdateCustomVideo : handleAddCustomVideo}>
+                      {showEditCustomVideo ? 'Update Video' : 'Add Video'}
+                    </Button>
                     <Button 
                       variant="outline" 
-                      onClick={() => setShowAddCustomVideo(false)}
+                      onClick={() => {
+                        setShowAddCustomVideo(false);
+                        setShowEditCustomVideo(false);
+                        setEditingCustomVideo(null);
+                        setNewCustomVideo({
+                          id: '',
+                          custom_import: true,
+                          visible_on_tv: false,
+                          visible_crew_only: false,
+                          title: { en: '', es: '', fr: '', de: '' },
+                          description: { en: '', es: '', fr: '', de: '' },
+                          media: { full_video_url: '' },
+                          rating: { system: 'MPAA', value: '' }
+                        });
+                      }}
                     >
                       Cancel
                     </Button>
@@ -1308,6 +1412,17 @@ const VideoOnDemand = () => {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="bg-card border shadow-lg z-50">
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEditCustomVideo(customVideo);
+                                }}
+                                className="flex items-center"
+                              >
+                                <Edit className="w-4 h-4 mr-2" />
+                                Edit Video
+                              </DropdownMenuItem>
+                              <Separator />
                               <DropdownMenuItem
                                 onClick={(e) => {
                                   e.stopPropagation();
