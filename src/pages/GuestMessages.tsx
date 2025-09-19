@@ -183,7 +183,7 @@ const GuestMessages = () => {
   };
 
   const handleViewResponses = (messageId: string) => {
-    navigate(`/guest-message-responses/${messageId}`);
+    navigate(`/guest-messages/${messageId}/responses`);
   };
 
   const handleUseTemplate = (template: GuestMessageTemplate) => {
