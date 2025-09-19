@@ -7,9 +7,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Search, Filter, Eye, MessageSquare, Users, Bell, ChevronUp, ChevronDown, Plus, Edit, Trash2 } from "lucide-react";
+import { Search, Filter, Eye, MessageSquare, Users, Bell, ChevronUp, ChevronDown, Plus, Edit, Trash2, BarChart3 } from "lucide-react";
 import { listGuestMessages, GuestMessage, createGuestMessage, updateGuestMessage, deleteGuestMessage } from "@/services/guestMessageApi";
+import { getGuestMessageSummary, GuestMessageSummary } from "@/services/guestMessageResponseApi";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import { MessageFormDialog } from "@/components/MessageFormDialog";
 
 const GuestMessages = () => {
@@ -26,9 +28,12 @@ const GuestMessages = () => {
   });
   const [canAccessAll, setCanAccessAll] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState<GuestMessage | null>(null);
+  const [messageSummary, setMessageSummary] = useState<GuestMessageSummary | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingMessage, setEditingMessage] = useState<GuestMessage | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchMessages();
@@ -151,6 +156,30 @@ const GuestMessages = () => {
     } catch (error) {
       console.error('Failed to delete message:', error);
     }
+  };
+
+  const handleViewSummary = async (message: GuestMessage) => {
+    setSelectedMessage(message);
+    setSummaryLoading(true);
+    setMessageSummary(null);
+    
+    try {
+      const result = await getGuestMessageSummary(message._id);
+      setMessageSummary(result.payload);
+    } catch (error) {
+      console.error('Error fetching summary:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load message summary"
+      });
+    } finally {
+      setSummaryLoading(false);
+    }
+  };
+
+  const handleViewResponses = (messageId: string) => {
+    navigate(`/guest-messages/${messageId}/responses`);
   };
 
   return (
@@ -335,134 +364,103 @@ const GuestMessages = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                onClick={() => setSelectedMessage(message)}
-                              >
-                                <Eye className="w-4 h-4" />
-                              </Button>
-                            </DialogTrigger>
-                          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                            <DialogHeader>
-                              <DialogTitle className="flex items-center gap-2">
-                                {selectedMessage && getTypeIcon(selectedMessage.type)}
-                                {selectedMessage?.subject}
-                              </DialogTitle>
-                            </DialogHeader>
-                            {selectedMessage && (
-                              <div className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4 text-sm">
-                                  <div>
-                                    <span className="font-medium">Type:</span>
-                                    <Badge variant="outline" className={`ml-2 ${getTypeColor(selectedMessage.type)}`}>
-                                      {selectedMessage.type}
-                                    </Badge>
-                                  </div>
-                                  <div>
-                                    <span className="font-medium">Sent To:</span>
-                                    <span className="ml-2">
-                                      {selectedMessage.sentTo ? `Room: ${selectedMessage.sentTo}` : 'Broadcast'}
-                                    </span>
-                                  </div>
-                                  <div>
-                                    <span className="font-medium">Created:</span>
-                                    <span className="ml-2">{formatDate(selectedMessage.createdAt)}</span>
-                                  </div>
-                                  <div>
-                                    <span className="font-medium">Deleteable:</span>
-                                    <span className="ml-2">{selectedMessage.deleteable ? 'Yes' : 'No'}</span>
-                                  </div>
-                                </div>
-                                
-                                {selectedMessage.description && (
-                                  <div>
-                                    <h4 className="font-medium mb-2">Description</h4>
-                                    <p className="text-sm text-muted-foreground bg-muted/20 p-3 rounded-md">
-                                      {selectedMessage.description}
-                                    </p>
-                                  </div>
-                                )}
+                           <Dialog>
+                             <DialogTrigger asChild>
+                               <Button 
+                                 variant="ghost" 
+                                 size="sm"
+                                 onClick={() => handleViewSummary(message)}
+                               >
+                                 <BarChart3 className="w-4 h-4" />
+                               </Button>
+                             </DialogTrigger>
+                           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                             <DialogHeader>
+                               <DialogTitle className="flex items-center gap-2">
+                                 {selectedMessage && getTypeIcon(selectedMessage.type)}
+                                 {selectedMessage?.subject} - Summary
+                               </DialogTitle>
+                             </DialogHeader>
+                             {selectedMessage && (
+                               <div className="space-y-6">
+                                 <div className="grid grid-cols-2 gap-4 text-sm">
+                                   <div>
+                                     <span className="font-medium">Type:</span>
+                                     <Badge variant="outline" className={`ml-2 ${getTypeColor(selectedMessage.type)}`}>
+                                       {selectedMessage.type}
+                                     </Badge>
+                                   </div>
+                                   <div>
+                                     <span className="font-medium">Sent To:</span>
+                                     <span className="ml-2">
+                                       {selectedMessage.sentTo ? `Room: ${selectedMessage.sentTo}` : 'Broadcast'}
+                                     </span>
+                                   </div>
+                                 </div>
 
-                                {selectedMessage.mediaUrl && (
-                                  <div>
-                                    <h4 className="font-medium mb-2">Media</h4>
-                                    <div className="bg-muted/20 p-3 rounded-md space-y-3">
-                                      {selectedMessage.mediaType === 'image' ? (
-                                        <img 
-                                          src={selectedMessage.mediaUrl} 
-                                          alt="Message media" 
-                                          className="max-w-full max-h-64 object-cover rounded border"
-                                          onError={(e) => {
-                                            e.currentTarget.style.display = 'none';
-                                          }}
-                                        />
-                                      ) : selectedMessage.mediaType === 'video' ? (
-                                        <video 
-                                          src={selectedMessage.mediaUrl} 
-                                          className="max-w-full max-h-64 rounded border"
-                                          controls
-                                          onError={(e) => {
-                                            e.currentTarget.style.display = 'none';
-                                          }}
-                                        />
-                                      ) : null}
-                                      <div className="text-sm space-y-1">
-                                        <p>
-                                          <span className="font-medium">Type:</span> {selectedMessage.mediaType || 'Unknown'}
-                                        </p>
-                                        <p>
-                                          <span className="font-medium">Orientation:</span> {selectedMessage.mediaOrientation || 'Not specified'}
-                                        </p>
-                                        <p className="break-all">
-                                          <span className="font-medium">URL:</span> {selectedMessage.mediaUrl}
-                                        </p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
+                                 {summaryLoading ? (
+                                   <div className="flex justify-center py-8">
+                                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                                   </div>
+                                 ) : messageSummary ? (
+                                   <div className="space-y-4">
+                                     <div className="grid grid-cols-3 gap-4">
+                                       <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg text-center">
+                                         <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                                           {messageSummary.totalDeliveries}
+                                         </div>
+                                         <div className="text-sm text-blue-600 dark:text-blue-400">Total Deliveries</div>
+                                       </div>
+                                       <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg text-center">
+                                         <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                                           {messageSummary.totalRead}
+                                         </div>
+                                         <div className="text-sm text-yellow-600 dark:text-yellow-400">Total Read</div>
+                                       </div>
+                                       <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg text-center">
+                                         <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                                           {messageSummary.totalReplied}
+                                         </div>
+                                         <div className="text-sm text-green-600 dark:text-green-400">Total Replied</div>
+                                       </div>
+                                     </div>
 
-                                {selectedMessage.questions && selectedMessage.questions.length > 0 && (
-                                  <div>
-                                    <h4 className="font-medium mb-2">Questions</h4>
-                                    <div className="space-y-3">
-                                      {selectedMessage.questions.map((question, idx) => (
-                                        <div key={question._id} className="bg-muted/20 p-3 rounded-md">
-                                          <p className="font-medium text-sm mb-2">
-                                            {idx + 1}. {question.question}
-                                          </p>
-                                          <div className="grid grid-cols-2 gap-2">
-                                            {question.options.map((option, optIdx) => (
-                                              <div key={optIdx} className="flex items-center gap-2 text-sm">
-                                                {option.icon && <span>{option.icon}</span>}
-                                                <span>{option.text}</span>
-                                              </div>
-                                            ))}
-                                          </div>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
+                                     {Object.keys(messageSummary.responses).length > 0 && (
+                                       <div>
+                                         <h4 className="font-medium mb-3">Question Responses</h4>
+                                         <div className="space-y-4">
+                                           {Object.entries(messageSummary.responses).map(([questionId, responses]) => (
+                                             <div key={questionId} className="bg-muted/20 p-4 rounded-md">
+                                               <h5 className="font-medium text-sm mb-2">{questionId}</h5>
+                                               <div className="space-y-2">
+                                                 {Object.entries(responses).map(([option, count]) => (
+                                                   <div key={option} className="flex justify-between items-center text-sm">
+                                                     <span>{option}</span>
+                                                     <Badge variant="secondary">{count}</Badge>
+                                                   </div>
+                                                 ))}
+                                               </div>
+                                             </div>
+                                           ))}
+                                         </div>
+                                       </div>
+                                     )}
 
-                                {selectedMessage.tags && selectedMessage.tags.length > 0 && (
-                                  <div>
-                                    <h4 className="font-medium mb-2">Tags</h4>
-                                    <div className="flex flex-wrap gap-2">
-                                      {selectedMessage.tags.map((tag, idx) => (
-                                        <Badge key={idx} variant="secondary">
-                                          {tag}
-                                        </Badge>
-                                      ))}
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            )}
-                          </DialogContent>
-                        </Dialog>
+                                     <div className="flex justify-end">
+                                       <Button onClick={() => handleViewResponses(selectedMessage._id)}>
+                                         View All Responses
+                                       </Button>
+                                     </div>
+                                   </div>
+                                 ) : (
+                                   <div className="text-center py-8 text-muted-foreground">
+                                     Failed to load summary
+                                   </div>
+                                 )}
+                               </div>
+                             )}
+                           </DialogContent>
+                         </Dialog>
                         
                         <Button
                           variant="ghost"
