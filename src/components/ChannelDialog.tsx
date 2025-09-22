@@ -20,6 +20,8 @@ import {
 } from "@/components/ui/select"
 import { useToast } from "@/hooks/use-toast"
 import { createChannel, updateChannel, Channel, CreateChannelRequest } from "@/services/channelApi"
+import { uploadImage, updateImage, getImageUrl, deleteImage } from "@/services/imageUploadApi"
+import { X, Upload, Image as ImageIcon } from "lucide-react"
 
 interface ChannelDialogProps {
   open: boolean
@@ -45,6 +47,8 @@ export const ChannelDialog = ({ open, onOpenChange, channel, onSuccess }: Channe
     minorNumber: channel?.minorNumber || "",
     rfBroadcastType: channel?.rfBroadcastType || "cable",
   })
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string>("")
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
 
@@ -67,6 +71,7 @@ export const ChannelDialog = ({ open, onOpenChange, channel, onSuccess }: Channe
         minorNumber: channel.minorNumber || "",
         rfBroadcastType: channel.rfBroadcastType || "cable",
       })
+      setImagePreview(channel.imgUrl ? getImageUrl(channel.imgUrl) : "")
     } else {
       // Reset form for new channel
       setFormData({
@@ -85,7 +90,9 @@ export const ChannelDialog = ({ open, onOpenChange, channel, onSuccess }: Channe
         minorNumber: "",
         rfBroadcastType: "cable",
       })
+      setImagePreview("")
     }
+    setSelectedFile(null)
   }, [channel, open])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -93,14 +100,29 @@ export const ChannelDialog = ({ open, onOpenChange, channel, onSuccess }: Channe
     setLoading(true)
 
     try {
+      let finalFormData = { ...formData }
+
+      // Handle image upload
+      if (selectedFile) {
+        if (channel && formData.imgUrl) {
+          // Update existing image
+          const uploadResponse = await updateImage(formData.imgUrl, selectedFile)
+          finalFormData.imgUrl = uploadResponse.filename
+        } else {
+          // Upload new image
+          const uploadResponse = await uploadImage(selectedFile)
+          finalFormData.imgUrl = uploadResponse.filename
+        }
+      }
+
       if (channel) {
-        await updateChannel(channel._id, formData)
+        await updateChannel(channel._id, finalFormData)
         toast({
           title: "Success",
           description: "Channel updated successfully",
         })
       } else {
-        await createChannel(formData)
+        await createChannel(finalFormData)
         toast({
           title: "Success",
           description: "Channel created successfully",
@@ -121,6 +143,45 @@ export const ChannelDialog = ({ open, onOpenChange, channel, onSuccess }: Channe
 
   const handleChange = (field: keyof CreateChannelRequest, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }))
+  }
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Invalid file type",
+          description: "Please select an image file",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select an image smaller than 5MB",
+          variant: "destructive",
+        })
+        return
+      }
+
+      setSelectedFile(file)
+      // Create preview
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setImagePreview(e.target?.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const removeImage = () => {
+    setSelectedFile(null)
+    setImagePreview("")
+    setFormData(prev => ({ ...prev, imgUrl: "" }))
   }
 
   return (
@@ -196,27 +257,55 @@ export const ChannelDialog = ({ open, onOpenChange, channel, onSuccess }: Channe
           </div>
 
           <div>
-            <Label htmlFor="imgUrl" className="text-foreground">Image URL</Label>
-            <Input
-              id="imgUrl"
-              value={formData.imgUrl}
-              onChange={(e) => handleChange('imgUrl', e.target.value)}
-              placeholder="/images/channel.png"
-              className="bg-card border-border"
+            <Label htmlFor="image" className="text-foreground">Channel Image</Label>
+            {imagePreview || formData.imgUrl ? (
+              <div className="space-y-2">
+                <div className="relative w-full h-32 bg-muted rounded-lg overflow-hidden">
+                  <img 
+                    src={imagePreview || (formData.imgUrl ? getImageUrl(formData.imgUrl) : "")} 
+                    alt="Channel preview" 
+                    className="w-full h-full object-cover"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="absolute top-2 right-2 h-6 w-6"
+                    onClick={removeImage}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => document.getElementById('image-upload')?.click()}
+                    className="border-border bg-card"
+                  >
+                    <Upload className="w-3 h-3 mr-1" />
+                    Change Image
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div 
+                className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-primary transition-colors"
+                onClick={() => document.getElementById('image-upload')?.click()}
+              >
+                <ImageIcon className="w-8 h-8 mx-auto mb-2 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground mb-1">Click to upload channel image</p>
+                <p className="text-xs text-muted-foreground">PNG, JPG up to 5MB</p>
+              </div>
+            )}
+            <input
+              id="image-upload"
+              type="file"
+              accept="image/*"
+              onChange={handleFileSelect}
+              className="hidden"
             />
-          </div>
-
-          <div>
-            <Label htmlFor="channelType" className="text-foreground">Channel Type</Label>
-            <Select value={formData.channelType} onValueChange={(value) => handleChange('channelType', value as "ip" | "rf")}>
-              <SelectTrigger className="bg-card border-border">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-popover border-border">
-                <SelectItem value="ip">IP</SelectItem>
-                <SelectItem value="rf">RF</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           {formData.channelType === "ip" && (

@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast"
 import { getChannels, deleteChannel, Channel } from "@/services/channelApi"
+import { getImageUrl } from "@/services/imageUploadApi"
 import { ChannelDialog } from "@/components/ChannelDialog"
 
 const LiveChannels = () => {
@@ -183,7 +184,7 @@ const LiveChannels = () => {
           <Card key={channel._id} className="bg-gradient-card border-border shadow-card-shadow hover:shadow-professional transition-all duration-300 group overflow-hidden">
             <div className="relative">
               <img 
-                src={channel.imgUrl.startsWith('/') ? `${import.meta.env.VITE_API_BASE_URL}${channel.imgUrl}` : channel.imgUrl}
+                src={channel.imgUrl ? (channel.imgUrl.startsWith('/') ? `${import.meta.env.VITE_API_BASE_URL}${channel.imgUrl}` : (channel.imgUrl.includes('.') ? getImageUrl(channel.imgUrl) : channel.imgUrl)) : 'https://via.placeholder.com/400x225/1a1a1a/white?text=No+Image'}
                 alt={channel.name}
                 className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
                 onError={(e) => {
