@@ -17,7 +17,7 @@ export const TvMessagePreview = ({ formData }: TvMessagePreviewProps) => {
   // Only show preview for notification type
   if (formData.type !== "notification") {
     return (
-      <div className="bg-slate-900 rounded-lg aspect-video flex items-center justify-center">
+      <div className="bg-slate-900 rounded-lg min-h-[300px] flex items-center justify-center">
         <div className="text-center text-slate-400">
           <p className="text-lg font-medium">Preview Not Available</p>
           <p className="text-sm">Preview will be available for {formData.type} messages in the future</p>
@@ -32,7 +32,7 @@ export const TvMessagePreview = ({ formData }: TvMessagePreviewProps) => {
   // For video, use same layout regardless of orientation
   if (isVideo) {
     return (
-      <div className="bg-slate-900 rounded-lg aspect-video relative overflow-hidden">
+      <div className="bg-slate-900 rounded-lg min-h-[400px] relative overflow-hidden">
         {/* Blurred background overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-slate-800/50 to-slate-900/80 backdrop-blur-sm" />
         
@@ -63,7 +63,7 @@ export const TvMessagePreview = ({ formData }: TvMessagePreviewProps) => {
           <div className="flex-1 flex flex-col items-center justify-center mb-4">
             {hasMedia && (
               <div className="w-full max-w-md">
-                <div className="bg-slate-700/60 rounded-lg overflow-hidden aspect-video relative">
+                <div className="bg-slate-700/60 rounded-lg overflow-hidden min-h-[200px] aspect-video relative">
                   <video 
                     src={formData.mediaUrl}
                     className="w-full h-full object-cover"
@@ -93,7 +93,7 @@ export const TvMessagePreview = ({ formData }: TvMessagePreviewProps) => {
           </div>
 
           {/* Action buttons at bottom - full width column */}
-          <div className="flex flex-col gap-2 max-w-sm mx-auto w-full">
+          <div className="flex flex-col gap-2 max-w-sm mx-auto w-full mt-auto">
             <button className="bg-white/90 hover:bg-white text-slate-900 py-3 rounded-full font-medium text-sm w-full">
               Close
             </button>
@@ -110,7 +110,7 @@ export const TvMessagePreview = ({ formData }: TvMessagePreviewProps) => {
 
   // For images, use different layouts based on orientation
   return (
-    <div className="bg-slate-900 rounded-lg aspect-video relative overflow-hidden">
+    <div className="bg-slate-900 rounded-lg min-h-[400px] relative overflow-hidden">
       {/* Blurred background overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-800/50 to-slate-900/80 backdrop-blur-sm" />
       
@@ -122,7 +122,7 @@ export const TvMessagePreview = ({ formData }: TvMessagePreviewProps) => {
             {/* Image banner on top for horizontal */}
             {hasMedia && (
               <div className="w-full mb-4">
-                <div className="bg-slate-700/60 rounded-lg overflow-hidden h-32 w-full">
+                <div className="bg-slate-700/60 rounded-lg overflow-hidden min-h-[120px] w-full">
                   <img 
                     src={formData.mediaUrl} 
                     alt="Message media"
@@ -166,7 +166,7 @@ export const TvMessagePreview = ({ formData }: TvMessagePreviewProps) => {
             </div>
 
             {/* Action buttons at bottom - full width column */}
-            <div className="flex flex-col gap-2 max-w-sm mx-auto w-full">
+            <div className="flex flex-col gap-2 max-w-sm mx-auto w-full mt-auto">
               <button className="bg-white/90 hover:bg-white text-slate-900 py-3 rounded-full font-medium text-sm w-full">
                 Close
               </button>
@@ -179,11 +179,11 @@ export const TvMessagePreview = ({ formData }: TvMessagePreviewProps) => {
           </div>
         ) : (
           /* Vertical layout: image on left, content on right */
-          <div className="flex h-full gap-6">
+          <div className="flex h-full gap-6 min-h-[300px]">
             {/* Image on left for vertical */}
             {hasMedia && (
               <div className="flex-shrink-0 w-48">
-                <div className="bg-slate-700/60 rounded-lg overflow-hidden h-full w-full">
+                <div className="bg-slate-700/60 rounded-lg overflow-hidden min-h-[200px] w-full">
                   <img 
                     src={formData.mediaUrl} 
                     alt="Message media"
@@ -197,7 +197,7 @@ export const TvMessagePreview = ({ formData }: TvMessagePreviewProps) => {
             )}
 
             {/* Content section on right */}
-            <div className="flex-1 text-white flex flex-col">
+            <div className="flex-1 text-white flex flex-col min-h-0">
               {/* Header - Left aligned text content */}
               <div className="mb-4">
                 {/* Title */}
@@ -229,7 +229,7 @@ export const TvMessagePreview = ({ formData }: TvMessagePreviewProps) => {
               </div>
 
               {/* Action buttons - full width column */}
-              <div className="flex flex-col gap-2 max-w-sm w-full">
+              <div className="flex flex-col gap-2 max-w-sm w-full mt-auto">
                 <button className="bg-white/90 hover:bg-white text-slate-900 py-3 rounded-full font-medium text-sm w-full">
                   Close
                 </button>
