@@ -11,9 +11,10 @@ interface TvMessagePreviewProps {
     deleteable: boolean;
     tags?: string[];
   };
+  filePreview?: string | null;
 }
 
-export const TvMessagePreview = ({ formData }: TvMessagePreviewProps) => {
+export const TvMessagePreview = ({ formData, filePreview }: TvMessagePreviewProps) => {
   // Only show preview for notification type
   if (formData.type !== "notification") {
     return (
@@ -26,7 +27,8 @@ export const TvMessagePreview = ({ formData }: TvMessagePreviewProps) => {
     );
   }
 
-  const hasMedia = formData.mediaUrl && formData.mediaType;
+  const mediaSource = filePreview || formData.mediaUrl || "";
+  const hasMedia = !!(mediaSource && formData.mediaType);
   const isVideo = formData.mediaType === "video";
 
   // For video, use same layout regardless of orientation
@@ -65,7 +67,7 @@ export const TvMessagePreview = ({ formData }: TvMessagePreviewProps) => {
               <div className="w-full max-w-md">
                 <div className="bg-slate-700/60 rounded-lg overflow-hidden min-h-[200px] aspect-video relative">
                   <video 
-                    src={formData.mediaUrl}
+                    src={mediaSource}
                     className="w-full h-full object-cover"
                     muted
                     onError={(e) => {
@@ -124,7 +126,7 @@ export const TvMessagePreview = ({ formData }: TvMessagePreviewProps) => {
               <div className="w-full mb-4">
                 <div className="bg-slate-700/60 rounded-lg overflow-hidden min-h-[120px] w-full">
                   <img 
-                    src={formData.mediaUrl} 
+                    src={mediaSource} 
                     alt="Message media"
                     className="w-full h-full object-cover"
                     onError={(e) => {
@@ -185,7 +187,7 @@ export const TvMessagePreview = ({ formData }: TvMessagePreviewProps) => {
               <div className="flex-shrink-0 w-48">
                 <div className="bg-slate-700/60 rounded-lg overflow-hidden min-h-[200px] w-full">
                   <img 
-                    src={formData.mediaUrl} 
+                    src={mediaSource} 
                     alt="Message media"
                     className="w-full h-full object-cover"
                     onError={(e) => {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,9 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, X, Save, Loader2 } from "lucide-react";
+import { Plus, X, Save, Loader2, Upload, Image } from "lucide-react";
 import { GuestMessage } from "@/services/guestMessageApi";
 import { TvMessagePreview } from "./TvMessagePreview";
+import { uploadImage, getImageUrl } from "@/services/imageUploadApi";
+import { useToast } from "@/components/ui/use-toast";
 
 interface MessageFormDialogProps {
   open: boolean;
@@ -20,6 +22,9 @@ interface MessageFormDialogProps {
 }
 
 export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: MessageFormDialogProps) => {
+  const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const [formData, setFormData] = useState({
     subject: "",
     description: "",
@@ -32,6 +37,9 @@ export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: Messa
     tags: [] as string[],
     deleteable: true
   });
+  
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filePreview, setFilePreview] = useState<string | null>(null);
 
   // Reset form data when message prop changes
   useEffect(() => {
@@ -62,6 +70,12 @@ export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: Messa
         deleteable: true
       });
     }
+    // Reset file selection when message changes
+    setSelectedFile(null);
+    setFilePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   }, [message]);
   
   const [newTag, setNewTag] = useState("");
@@ -71,17 +85,54 @@ export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: Messa
   const handleSave = async () => {
     try {
       setLoading(true);
+      
+      let finalMediaUrl = formData.mediaUrl;
+      
+      // Upload image if file is selected
+      if (selectedFile) {
+        try {
+          const uploadResult = await uploadImage(selectedFile);
+          finalMediaUrl = getImageUrl(uploadResult.filename);
+          
+          toast({
+            title: "Success",
+            description: "Image uploaded successfully",
+          });
+        } catch (error) {
+          console.error('Failed to upload image:', error);
+          toast({
+            title: "Error",
+            description: "Failed to upload image. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+      }
+      
       await onSave({
         ...formData,
-        mediaType: formData.mediaUrl ? formData.mediaType : undefined,
-        mediaUrl: formData.mediaUrl || undefined,
+        mediaType: finalMediaUrl ? formData.mediaType : undefined,
+        mediaUrl: finalMediaUrl || undefined,
         description: formData.description || undefined,
         sentTo: formData.sentTo || undefined,
         tags: formData.tags.length > 0 ? formData.tags : undefined
       });
+      
+      // Reset file selection after successful save
+      setSelectedFile(null);
+      setFilePreview(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+      
       onOpenChange(false);
     } catch (error) {
       console.error('Failed to save message:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save message. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setLoading(false);
     }
@@ -141,6 +192,54 @@ export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: Messa
     }
   };
 
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Error",
+          description: "Please select an image file",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        toast({
+          title: "Error", 
+          description: "File size must be less than 10MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      setSelectedFile(file);
+      
+      // Create preview URL
+      const reader = new FileReader();
+      reader.onload = () => {
+        setFilePreview(reader.result as string);
+        // Auto-set media type to image and clear manual URL
+        setFormData(prev => ({
+          ...prev,
+          mediaType: 'image',
+          mediaUrl: ''
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearSelectedFile = () => {
+    setSelectedFile(null);
+    setFilePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-7xl max-h-[95vh] overflow-hidden">
@@ -155,7 +254,7 @@ export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: Messa
           <div className="flex flex-col">
             <h3 className="text-lg font-semibold mb-4">TV Preview</h3>
             <div className="flex-1 min-h-0">
-              <TvMessagePreview formData={formData} />
+              <TvMessagePreview formData={formData} filePreview={filePreview} />
             </div>
           </div>
 
@@ -232,44 +331,101 @@ export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: Messa
                   <CardTitle className="text-lg">Media (Optional)</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  {/* Image Upload Section */}
                   <div className="space-y-2">
-                    <Label htmlFor="mediaUrl">Media URL</Label>
-                    <Input
-                      id="mediaUrl"
-                      value={formData.mediaUrl}
-                      onChange={(e) => setFormData({ ...formData, mediaUrl: e.target.value })}
-                      placeholder="https://example.com/image.jpg"
+                    <Label>Upload Image</Label>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex items-center gap-2"
+                      >
+                        <Upload className="w-4 h-4" />
+                        Choose Image
+                      </Button>
+                      {selectedFile && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={clearSelectedFile}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileSelect}
+                      className="hidden"
                     />
-                    {formData.mediaUrl && (
-                      <div className="mt-2">
-                        {formData.mediaType === 'image' ? (
-                          <img 
-                            src={formData.mediaUrl} 
-                            alt="Preview" 
-                            className="max-w-xs max-h-32 object-cover rounded border"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                        ) : formData.mediaType === 'video' ? (
-                          <video 
-                            src={formData.mediaUrl} 
-                            className="max-w-xs max-h-32 rounded border"
-                            controls
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                            }}
-                          />
-                        ) : null}
+                    {selectedFile && (
+                      <div className="text-sm text-muted-foreground">
+                        Selected: {selectedFile.name} ({Math.round(selectedFile.size / 1024)} KB)
                       </div>
                     )}
                   </div>
 
-                  {formData.mediaUrl && (
+                  {/* OR divider */}
+                  {!selectedFile && (
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1 border-t border-border"></div>
+                      <span className="text-sm text-muted-foreground">OR</span>
+                      <div className="flex-1 border-t border-border"></div>
+                    </div>
+                  )}
+
+                  {/* Media URL Section */}
+                  {!selectedFile && (
+                    <div className="space-y-2">
+                      <Label htmlFor="mediaUrl">Media URL</Label>
+                      <Input
+                        id="mediaUrl"
+                        value={formData.mediaUrl}
+                        onChange={(e) => setFormData({ ...formData, mediaUrl: e.target.value })}
+                        placeholder="https://example.com/image.jpg"
+                      />
+                    </div>
+                  )}
+
+                  {/* Preview Section */}
+                  {(filePreview || formData.mediaUrl) && (
+                    <div className="mt-2">
+                      {formData.mediaType === 'image' && (
+                        <img 
+                          src={filePreview || formData.mediaUrl} 
+                          alt="Preview" 
+                          className="max-w-xs max-h-32 object-cover rounded border"
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      )}
+                      {formData.mediaType === 'video' && formData.mediaUrl && (
+                        <video 
+                          src={formData.mediaUrl} 
+                          className="max-w-xs max-h-32 rounded border"
+                          controls
+                          onError={(e) => {
+                            e.currentTarget.style.display = 'none';
+                          }}
+                        />
+                      )}
+                    </div>
+                  )}
+
+                  {(selectedFile || formData.mediaUrl) && (
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label>Media Type</Label>
-                        <Select value={formData.mediaType || ""} onValueChange={(value: any) => setFormData({ ...formData, mediaType: value || undefined })}>
+                        <Select 
+                          value={formData.mediaType || ""} 
+                          onValueChange={(value: any) => setFormData({ ...formData, mediaType: value || undefined })}
+                          disabled={!!selectedFile} // Disable if file is selected (auto-set to image)
+                        >
                           <SelectTrigger>
                             <SelectValue placeholder="Select media type" />
                           </SelectTrigger>
