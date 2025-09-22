@@ -9,6 +9,7 @@ interface TvMessagePreviewProps {
     mediaOrientation: "horizontal" | "vertical";
     mediaUrl: string;
     deleteable: boolean;
+    tags?: string[];
   };
 }
 
@@ -26,105 +27,52 @@ export const TvMessagePreview = ({ formData }: TvMessagePreviewProps) => {
   }
 
   const hasMedia = formData.mediaUrl && formData.mediaType;
-  const isVerticalImage = hasMedia && formData.mediaOrientation === "vertical";
+  const isVideo = formData.mediaType === "video";
 
   return (
     <div className="bg-slate-900 rounded-lg aspect-video relative overflow-hidden">
       {/* Blurred background overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-800/50 to-slate-900/80 backdrop-blur-sm" />
       
-      {/* Content container - full height layout */}
+      {/* Content container */}
       <div className="relative z-10 h-full flex flex-col p-6">
-        {/* For horizontal: image banner on top, for vertical: image left + content right */}
-        {formData.mediaOrientation === "horizontal" ? (
-          <div className="flex flex-col h-full">
-            {/* Image banner on top for horizontal */}
-            {hasMedia && (
-              <div className="w-full mb-6">
-                <div className="bg-slate-700/60 rounded-lg overflow-hidden h-32 w-full">
-                  {formData.mediaType === 'image' ? (
-                    <img 
-                      src={formData.mediaUrl} 
-                      alt="Message media"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                  ) : formData.mediaType === 'video' ? (
-                    <video 
-                      src={formData.mediaUrl}
-                      className="w-full h-full object-cover"
-                      muted
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-slate-600/50 flex items-center justify-center">
-                      <div className="text-center text-slate-400">
-                        <div className="w-8 h-8 border-2 border-current rounded mb-2 mx-auto" />
-                        <p className="text-xs">Media</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+        {/* Header - Left aligned text content */}
+        <div className="text-white mb-4">
+          {/* Title */}
+          {formData.subject && (
+            <h1 className="text-2xl font-bold mb-2 text-left">
+              {formData.subject}
+            </h1>
+          )}
 
-            {/* Text content section */}
-            <div className="flex-1 text-white text-center flex flex-col justify-center">
-              {/* Title */}
-              {formData.subject && (
-                <h1 className="text-2xl font-bold mb-2">
-                  {formData.subject}
-                </h1>
-              )}
-
-              {/* Mock date and category */}
-              <div className="text-slate-300 text-sm mb-3 flex items-center justify-center gap-2">
-                <span>July 10th, 2025</span>
+          {/* Date and tags */}
+          <div className="text-slate-300 text-sm mb-3 flex items-center gap-2 text-left">
+            <span>July 10th, 2025</span>
+            {formData.tags && formData.tags.length > 0 && (
+              <>
                 <span>•</span>
-                <span className="text-blue-400">Safety</span>
-              </div>
-
-              {/* Description */}
-              {formData.description && (
-                <p className="text-slate-200 text-base leading-relaxed mb-4">
-                  {formData.description}
-                </p>
-              )}
-            </div>
-
-            {/* Action buttons at bottom */}
-            <div className="flex justify-center gap-3 mt-4">
-              <button className="bg-white/90 hover:bg-white text-slate-900 px-6 py-2 rounded-full font-medium text-sm">
-                Close
-              </button>
-              {formData.deleteable && (
-                <button className="bg-red-500/80 hover:bg-red-500 text-white px-6 py-2 rounded-full font-medium text-sm">
-                  Delete
-                </button>
-              )}
-            </div>
+                <span className="text-blue-400">{formData.tags.join(", ")}</span>
+              </>
+            )}
           </div>
-        ) : (
-          /* Vertical layout: image on left, content on right */
-          <div className="flex h-full gap-6">
-            {/* Image on left for vertical */}
-            {hasMedia && (
-              <div className="flex-shrink-0 w-48">
-                <div className="bg-slate-700/60 rounded-lg overflow-hidden h-full w-full">
-                  {formData.mediaType === 'image' ? (
-                    <img 
-                      src={formData.mediaUrl} 
-                      alt="Message media"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                      }}
-                    />
-                  ) : formData.mediaType === 'video' ? (
+        </div>
+
+        {/* Media section - centered in available space */}
+        <div className="flex-1 flex flex-col items-center justify-center mb-4">
+          {hasMedia && (
+            <div className="w-full max-w-md">
+              <div className="bg-slate-700/60 rounded-lg overflow-hidden aspect-video relative">
+                {formData.mediaType === 'image' ? (
+                  <img 
+                    src={formData.mediaUrl} 
+                    alt="Message media"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                ) : formData.mediaType === 'video' ? (
+                  <>
                     <video 
                       src={formData.mediaUrl}
                       className="w-full h-full object-cover"
@@ -133,55 +81,46 @@ export const TvMessagePreview = ({ formData }: TvMessagePreviewProps) => {
                         e.currentTarget.style.display = 'none';
                       }}
                     />
-                  ) : (
-                    <div className="w-full h-full bg-slate-600/50 flex items-center justify-center">
-                      <div className="text-center text-slate-400">
-                        <div className="w-8 h-8 border-2 border-current rounded mb-2 mx-auto" />
-                        <p className="text-xs">Media</p>
+                    {/* Play button overlay for video */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-16 h-16 bg-black/60 rounded-full flex items-center justify-center">
+                        <div className="w-0 h-0 border-l-[12px] border-l-white border-t-[8px] border-t-transparent border-b-[8px] border-b-transparent ml-1"></div>
                       </div>
                     </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Content section on right */}
-            <div className="flex-1 text-white flex flex-col justify-center">
-              {/* Title */}
-              {formData.subject && (
-                <h1 className="text-2xl font-bold mb-2">
-                  {formData.subject}
-                </h1>
-              )}
-
-              {/* Mock date and category */}
-              <div className="text-slate-300 text-sm mb-3 flex items-center gap-2">
-                <span>July 10th, 2025</span>
-                <span>•</span>
-                <span className="text-blue-400">Safety</span>
-              </div>
-
-              {/* Description */}
-              {formData.description && (
-                <p className="text-slate-200 text-base leading-relaxed mb-4">
-                  {formData.description}
-                </p>
-              )}
-
-              {/* Action buttons */}
-              <div className="flex flex-col gap-2 mt-4">
-                <button className="bg-white/90 hover:bg-white text-slate-900 px-6 py-2 rounded-full font-medium text-sm w-48">
-                  Close
-                </button>
-                {formData.deleteable && (
-                  <button className="bg-red-500/80 hover:bg-red-500 text-white px-6 py-2 rounded-full font-medium text-sm w-48">
-                    Delete
-                  </button>
+                  </>
+                ) : (
+                  <div className="w-full h-full bg-slate-600/50 flex items-center justify-center">
+                    <div className="text-center text-slate-400">
+                      <div className="w-8 h-8 border-2 border-current rounded mb-2 mx-auto" />
+                      <p className="text-xs">Media</p>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {/* Description - centered below media */}
+          {formData.description && (
+            <div className="text-white text-center mt-4 max-w-lg">
+              <p className="text-slate-200 text-base leading-relaxed">
+                {formData.description}
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Action buttons at bottom - side by side */}
+        <div className="flex justify-center gap-3">
+          <button className="bg-white/90 hover:bg-white text-slate-900 px-8 py-3 rounded-full font-medium text-sm min-w-[120px]">
+            Close
+          </button>
+          {formData.deleteable && (
+            <button className="bg-red-500/80 hover:bg-red-500 text-white px-8 py-3 rounded-full font-medium text-sm min-w-[120px]">
+              Delete
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
