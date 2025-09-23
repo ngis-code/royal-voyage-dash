@@ -1,8 +1,4 @@
-import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -11,9 +7,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { AdDocument, createAd, updateAd } from "@/services/adApi";
-import { uploadImage, updateImage, deleteImage, convertVideoToM3U8 } from "@/services/imageUploadApi";
+import { convertVideoToM3U8, deleteImage, updateImage, uploadImage } from "@/services/imageUploadApi";
+import { useRef, useState } from "react";
 
 interface AdFormDialogProps {
   isOpen: boolean;
@@ -22,11 +22,11 @@ interface AdFormDialogProps {
   ad?: AdDocument;
 }
 
-export default function AdFormDialog({ 
-  isOpen, 
-  onOpenChange, 
-  onSuccess, 
-  ad 
+export default function AdFormDialog({
+  isOpen,
+  onOpenChange,
+  onSuccess,
+  ad
 }: AdFormDialogProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -46,7 +46,7 @@ export default function AdFormDialog({
       setSelectedFile(file);
       const url = URL.createObjectURL(file);
       setPreviewUrl(url);
-      
+
       // Determine format based on file type
       if (file.type.startsWith('image/')) {
         setFormData(prev => ({ ...prev, ad_format: 'image' }));
@@ -79,13 +79,13 @@ export default function AdFormDialog({
           const filename = ad.ad_url.split('/').pop();
           if (filename) {
             const uploadResponse = await updateImage(filename, selectedFile);
-            finalAdUrl = `${import.meta.env.VITE_STATIC_SERVER_URL}/${uploadResponse.filename}`;
+            finalAdUrl = `${import.meta.env.VITE_STATIC_SERVER_URL}/videos/${uploadResponse.filename}`;
           }
         } else {
           // Upload new file
           const uploadResponse = await uploadImage(selectedFile);
-          finalAdUrl = `${import.meta.env.VITE_STATIC_SERVER_URL}/${uploadResponse.filename}`;
-          
+          finalAdUrl = `${import.meta.env.VITE_STATIC_SERVER_URL}/videos/${uploadResponse.filename}`;
+
           // Delete old file if exists and it's from our storage
           if (ad?.ad_url && !ad.ad_url.startsWith('http')) {
             const oldFilename = ad.ad_url.split('/').pop();
@@ -110,17 +110,17 @@ export default function AdFormDialog({
             // Calculate segment count based on file size (rough estimate)
             const fileSizeMB = selectedFile.size / (1024 * 1024);
             const segmentCount = Math.max(2, Math.min(10, Math.ceil(fileSizeMB / 10)));
-            
+
             const conversionResponse = await convertVideoToM3U8(finalAdUrl, segmentCount);
-            
+
             if (conversionResponse.payload.videoVersions.length > 0) {
               const m3u8Version = conversionResponse.payload.videoVersions[0];
-              finalAdUrl = `${import.meta.env.VITE_STATIC_SERVER_URL}/${m3u8Version.path}`;
+              finalAdUrl = `${import.meta.env.VITE_STATIC_SERVER_URL}/hls/${m3u8Version.path}`;
             }
           } catch (error) {
             console.warn('Video conversion failed:', error);
             toast({
-              title: "Warning", 
+              title: "Warning",
               description: "Video conversion failed, using original video file",
               variant: "default",
             });
@@ -153,7 +153,7 @@ export default function AdFormDialog({
         };
         await createAd(createData);
         toast({
-          title: "Success", 
+          title: "Success",
           description: "Ad created successfully",
         });
       }
@@ -245,25 +245,25 @@ export default function AdFormDialog({
                 </Button>
               )}
             </div>
-            
+
             {previewUrl && (
               <div className="mt-2">
                 {formData.ad_format === 'image' ? (
-                  <img 
-                    src={previewUrl} 
-                    alt="Ad preview" 
+                  <img
+                    src={previewUrl}
+                    alt="Ad preview"
                     className="w-full max-w-xs h-32 object-cover rounded-md border"
                   />
                 ) : (
-                  <video 
-                    src={previewUrl} 
-                    controls 
+                  <video
+                    src={previewUrl}
+                    controls
                     className="w-full max-w-xs h-32 rounded-md border"
                   />
                 )}
               </div>
             )}
-            
+
             <div className="text-sm text-muted-foreground">
               Or enter a direct URL:
             </div>
@@ -275,9 +275,9 @@ export default function AdFormDialog({
           </div>
 
           <DialogFooter>
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={isLoading}
             >
