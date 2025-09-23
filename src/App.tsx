@@ -7,6 +7,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
+import Ads from "./pages/Ads";
 import LiveChannels from "./pages/LiveChannels";
 import VideoOnDemand from "./pages/VideoOnDemand";
 import GuestMessages from "./pages/GuestMessages";
@@ -48,6 +49,7 @@ const App = () => (
                       <Route path="/vod" element={<VideoOnDemand />} />
                       <Route path="/guest-messages" element={<GuestMessages />} />
                       <Route path="/guest-messages/:messageId/responses" element={<GuestMessageResponses />} />
+                      <Route path="/ads" element={<Ads />} />
                       <Route path="/devices" element={<Devices />} />
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />
