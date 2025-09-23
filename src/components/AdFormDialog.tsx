@@ -115,7 +115,7 @@ export default function AdFormDialog({
 
             if (conversionResponse.payload.videoVersions.length > 0) {
               const m3u8Version = conversionResponse.payload.videoVersions[0];
-              finalAdUrl = `${import.meta.env.VITE_STATIC_SERVER_URL}/hls/${m3u8Version.path}`;
+              finalAdUrl = `/hls/${m3u8Version.path}`;
             }
           } catch (error) {
             console.warn('Video conversion failed:', error);
