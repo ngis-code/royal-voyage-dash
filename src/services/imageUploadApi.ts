@@ -65,3 +65,43 @@ export const deleteImage = async (filename: string): Promise<void> => {
 export const getImageUrl = (filename: string): string => {
   return `${STATIC_SERVER_URL}/${filename}`;
 };
+
+export interface VideoConversionResponse {
+  status: number;
+  payload: {
+    _id: string;
+    originalUrl: string;
+    videoVersions: Array<{
+      format: string;
+      quality: string;
+      segmentCount: number;
+      path: string;
+      size: number;
+      actualSegmentCount: number;
+    }>;
+  };
+}
+
+export const convertVideoToM3U8 = async (videoUrl: string, segmentCount: number = 4): Promise<VideoConversionResponse> => {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+  
+  const response = await fetch(`${API_BASE_URL}/api/services/request/image-converter/video/convert`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-access-key': 'FdEkspWY7giU39dZ',
+    },
+    body: JSON.stringify({
+      videoUrl,
+      format: 'm3u8',
+      quality: 'high',
+      segmentCount
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Video conversion failed: ${response.statusText}`);
+  }
+
+  return response.json();
+};

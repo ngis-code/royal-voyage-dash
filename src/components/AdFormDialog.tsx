@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "@/hooks/use-toast";
 import { AdDocument, createAd, updateAd } from "@/services/adApi";
-import { uploadImage, updateImage, deleteImage } from "@/services/imageUploadApi";
+import { uploadImage, updateImage, deleteImage, convertVideoToM3U8 } from "@/services/imageUploadApi";
 
 interface AdFormDialogProps {
   isOpen: boolean;
@@ -75,27 +75,56 @@ export default function AdFormDialog({
       // Handle file upload/update
       if (selectedFile) {
         if (ad?.ad_url && !ad.ad_url.startsWith('http')) {
-          // Update existing image
+          // Update existing file
           const filename = ad.ad_url.split('/').pop();
           if (filename) {
             const uploadResponse = await updateImage(filename, selectedFile);
             finalAdUrl = `${import.meta.env.VITE_STATIC_SERVER_URL}/${uploadResponse.filename}`;
           }
         } else {
-          // Upload new image
+          // Upload new file
           const uploadResponse = await uploadImage(selectedFile);
           finalAdUrl = `${import.meta.env.VITE_STATIC_SERVER_URL}/${uploadResponse.filename}`;
           
-          // Delete old image if exists and it's from our storage
+          // Delete old file if exists and it's from our storage
           if (ad?.ad_url && !ad.ad_url.startsWith('http')) {
             const oldFilename = ad.ad_url.split('/').pop();
             if (oldFilename) {
               try {
                 await deleteImage(oldFilename);
               } catch (error) {
-                console.warn('Failed to delete old image:', error);
+                console.warn('Failed to delete old file:', error);
+                toast({
+                  title: "Warning",
+                  description: "Failed to delete old file, but continuing with update",
+                  variant: "default",
+                });
               }
             }
+          }
+        }
+
+        // If it's a video file, try to convert it to m3u8
+        if (selectedFile.type.startsWith('video/')) {
+          try {
+            // Calculate segment count based on file size (rough estimate)
+            const fileSizeMB = selectedFile.size / (1024 * 1024);
+            const segmentCount = Math.max(2, Math.min(10, Math.ceil(fileSizeMB / 10)));
+            
+            const conversionResponse = await convertVideoToM3U8(finalAdUrl, segmentCount);
+            
+            if (conversionResponse.payload.videoVersions.length > 0) {
+              const m3u8Version = conversionResponse.payload.videoVersions[0];
+              finalAdUrl = `${import.meta.env.VITE_STATIC_SERVER_URL}/${m3u8Version.path}`;
+            }
+          } catch (error) {
+            console.warn('Video conversion failed:', error);
+            toast({
+              title: "Warning", 
+              description: "Video conversion failed, using original video file",
+              variant: "default",
+            });
+            // Continue with original video URL
           }
         }
       }
