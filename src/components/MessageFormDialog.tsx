@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, X, Save, Loader2, Upload, Image } from "lucide-react";
 import { GuestMessage } from "@/services/guestMessageApi";
 import { TvMessagePreview } from "./TvMessagePreview";
-import { uploadImage, getImageUrl } from "@/services/imageUploadApi";
+import { uploadImage, getImageUrl, deleteImage } from "@/services/imageUploadApi";
 import { useToast } from "@/components/ui/use-toast";
 
 interface MessageFormDialogProps {
@@ -87,12 +87,16 @@ export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: Messa
       setLoading(true);
       
       let finalMediaUrl = formData.mediaUrl;
+      let uploadedFilename: string | null = null;
+      let oldMediaUrl = message?.mediaUrl;
       
       // Upload image if file is selected
       if (selectedFile) {
         try {
           const uploadResult = await uploadImage(selectedFile);
-          finalMediaUrl = getImageUrl(uploadResult.filename);
+          // Store only the filename (relative path), not the full URL
+          finalMediaUrl = uploadResult.filename;
+          uploadedFilename = uploadResult.filename;
           
           toast({
             title: "Success",
@@ -109,23 +113,53 @@ export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: Messa
         }
       }
       
-      await onSave({
-        ...formData,
-        mediaType: finalMediaUrl ? formData.mediaType : undefined,
-        mediaUrl: finalMediaUrl || undefined,
-        description: formData.description || undefined,
-        sentTo: formData.sentTo || undefined,
-        tags: formData.tags.length > 0 ? formData.tags : undefined
-      });
-      
-      // Reset file selection after successful save
-      setSelectedFile(null);
-      setFilePreview(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+      try {
+        await onSave({
+          ...formData,
+          mediaType: finalMediaUrl ? formData.mediaType : undefined,
+          mediaUrl: finalMediaUrl || undefined,
+          description: formData.description || undefined,
+          sentTo: formData.sentTo || undefined,
+          tags: formData.tags.length > 0 ? formData.tags : undefined
+        });
+        
+        // If we're updating and there's a new image, delete the old one
+        if (message && uploadedFilename && oldMediaUrl && oldMediaUrl !== finalMediaUrl) {
+          try {
+            // Extract filename from old URL if it's a full URL
+            const oldFilename = oldMediaUrl.includes('/') ? oldMediaUrl.split('/').pop() : oldMediaUrl;
+            if (oldFilename) {
+              await deleteImage(oldFilename);
+            }
+          } catch (deleteError) {
+            console.warn('Failed to delete old image:', deleteError);
+            toast({
+              title: "Warning",
+              description: "Failed to delete old image file, but message was saved successfully.",
+              variant: "default",
+            });
+          }
+        }
+        
+        // Reset file selection after successful save
+        setSelectedFile(null);
+        setFilePreview(null);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        
+        onOpenChange(false);
+      } catch (saveError) {
+        // If message save fails but we uploaded a file, clean it up
+        if (uploadedFilename) {
+          try {
+            await deleteImage(uploadedFilename);
+          } catch (cleanupError) {
+            console.warn('Failed to cleanup uploaded file:', cleanupError);
+          }
+        }
+        throw saveError; // Re-throw to trigger the error handling below
       }
-      
-      onOpenChange(false);
     } catch (error) {
       console.error('Failed to save message:', error);
       toast({

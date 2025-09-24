@@ -1,4 +1,5 @@
 import { GuestMessage } from "@/services/guestMessageApi";
+import { getImageUrl } from "@/services/imageUploadApi";
 
 interface TvMessagePreviewProps {
   formData: {
@@ -27,7 +28,20 @@ export const TvMessagePreview = ({ formData, filePreview }: TvMessagePreviewProp
     );
   }
 
-  const mediaSource = filePreview || formData.mediaUrl || "";
+  // For preview, use filePreview if available, otherwise add StaticServerUrl to stored filename
+  const getMediaSource = () => {
+    if (filePreview) return filePreview;
+    if (!formData.mediaUrl) return "";
+    
+    // If it's already a full URL, use as is, otherwise add StaticServerUrl
+    if (formData.mediaUrl.startsWith('http')) {
+      return formData.mediaUrl;
+    } else {
+      return getImageUrl(formData.mediaUrl);
+    }
+  };
+  
+  const mediaSource = getMediaSource();
   const hasMedia = !!(mediaSource && formData.mediaType);
   const isVideo = formData.mediaType === "video";
 

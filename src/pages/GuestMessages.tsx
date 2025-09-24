@@ -10,6 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Search, Filter, Eye, MessageSquare, Users, Bell, ChevronUp, ChevronDown, Plus, Edit, Trash2, BarChart3 } from "lucide-react";
 import { listGuestMessages, GuestMessage, createGuestMessage, updateGuestMessage, deleteGuestMessage } from "@/services/guestMessageApi";
 import { getGuestMessageSummary, GuestMessageSummary } from "@/services/guestMessageResponseApi";
+import { getImageUrl } from "@/services/imageUploadApi";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { MessageFormDialog } from "@/components/MessageFormDialog";
@@ -344,7 +345,7 @@ const GuestMessages = () => {
                         <div className="flex items-center gap-3">
                           {message.mediaUrl && message.mediaType === 'image' && (
                             <img 
-                              src={message.mediaUrl} 
+                              src={message.mediaUrl.startsWith('http') ? message.mediaUrl : getImageUrl(message.mediaUrl)} 
                               alt="Message media" 
                               className="w-12 h-12 object-cover rounded border flex-shrink-0"
                               onError={(e) => {
