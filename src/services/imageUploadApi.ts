@@ -49,6 +49,25 @@ export const updateImage = async (filename: string, file: File): Promise<UploadR
   return response.json();
 };
 
+export const updateVideo = async (filename: string, file: File): Promise<UploadResponse> => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch(`${UPLOAD_SERVER_URL}/video/${filename}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${UPLOAD_TOKEN}`,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Video update failed: ${response.statusText}`);
+  }
+
+  return response.json();
+};
+
 export const deleteImage = async (filename: string): Promise<void> => {
   const response = await fetch(`${UPLOAD_SERVER_URL}/file/${filename}`, {
     method: 'DELETE',

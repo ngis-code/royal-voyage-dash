@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, X, Save, Loader2, Upload, Image } from "lucide-react";
 import { GuestMessage } from "@/services/guestMessageApi";
 import { TvMessagePreview } from "./TvMessagePreview";
-import { uploadImage, getImageUrl, deleteImage, uploadVideo, convertVideoToM3U8, deleteVideo, deleteHlsVideo } from "@/services/imageUploadApi";
+import { uploadImage, getImageUrl, deleteImage, uploadVideo, convertVideoToM3U8, deleteVideo, deleteHlsVideo, updateImage, updateVideo } from "@/services/imageUploadApi";
 import { useToast } from "@/components/ui/use-toast";
 
 interface MessageFormDialogProps {
@@ -95,8 +95,19 @@ export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: Messa
       // Upload file if selected
       if (selectedFile) {
         try {
+          const isEditing = Boolean(message);
+          const existingUrl = message?.mediaUrl;
+          const shouldUpdateFile = isEditing && existingUrl && !existingUrl.includes('://');
+          
           if (selectedFile.type.startsWith('image/')) {
-            const uploadResult = await uploadImage(selectedFile);
+            let uploadResult;
+            if (shouldUpdateFile) {
+              // Extract filename from existing URL (remove path prefix if present)
+              const filename = existingUrl.includes('/') ? existingUrl.split('/').pop()! : existingUrl;
+              uploadResult = await updateImage(filename, selectedFile);
+            } else {
+              uploadResult = await uploadImage(selectedFile);
+            }
             finalMediaUrl = uploadResult.filename;
             uploadedFilename = uploadResult.filename;
             
@@ -106,7 +117,14 @@ export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: Messa
             });
           } else if (selectedFile.type.startsWith('video/')) {
             // Upload video first
-            const uploadResult = await uploadVideo(selectedFile);
+            let uploadResult;
+            if (shouldUpdateFile && existingUrl.startsWith('/videos/')) {
+              // Extract filename from existing URL
+              const filename = existingUrl.split('/').pop()!;
+              uploadResult = await updateVideo(filename, selectedFile);
+            } else {
+              uploadResult = await uploadVideo(selectedFile);
+            }
             uploadedVideoFilename = uploadResult.filename;
             
             toast({
