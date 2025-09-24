@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, X, Save, Loader2, Upload, Image } from "lucide-react";
 import { GuestMessage } from "@/services/guestMessageApi";
 import { TvMessagePreview } from "./TvMessagePreview";
-import { uploadImage, getImageUrl, deleteImage } from "@/services/imageUploadApi";
+import { uploadImage, getImageUrl, deleteImage, uploadVideo, convertVideoToM3U8, deleteVideo, deleteHlsVideo } from "@/services/imageUploadApi";
 import { useToast } from "@/components/ui/use-toast";
 
 interface MessageFormDialogProps {
@@ -88,25 +88,80 @@ export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: Messa
       
       let finalMediaUrl = formData.mediaUrl;
       let uploadedFilename: string | null = null;
+      let uploadedVideoFilename: string | null = null;
+      let convertedHlsFilename: string | null = null;
       let oldMediaUrl = message?.mediaUrl;
       
-      // Upload image if file is selected
+      // Upload file if selected
       if (selectedFile) {
         try {
-          const uploadResult = await uploadImage(selectedFile);
-          // Store only the filename (relative path), not the full URL
-          finalMediaUrl = uploadResult.filename;
-          uploadedFilename = uploadResult.filename;
-          
-          toast({
-            title: "Success",
-            description: "Image uploaded successfully",
-          });
+          if (selectedFile.type.startsWith('image/')) {
+            const uploadResult = await uploadImage(selectedFile);
+            finalMediaUrl = uploadResult.filename;
+            uploadedFilename = uploadResult.filename;
+            
+            toast({
+              title: "Success",
+              description: "Image uploaded successfully",
+            });
+          } else if (selectedFile.type.startsWith('video/')) {
+            // Upload video first
+            const uploadResult = await uploadVideo(selectedFile);
+            uploadedVideoFilename = uploadResult.filename;
+            
+            toast({
+              title: "Success",
+              description: "Video uploaded successfully",
+            });
+
+            // Try to convert to HLS
+            try {
+              const videoUrl = `/videos/${uploadResult.filename}`;
+              const segmentCount = Math.max(2, Math.min(10, Math.ceil(selectedFile.size / (50 * 1024 * 1024))));
+              
+              const conversionResult = await convertVideoToM3U8(
+                `${import.meta.env.VITE_STATIC_SERVER_URL}${videoUrl}`, 
+                segmentCount
+              );
+              
+              if (conversionResult.status === 200 && conversionResult.payload.videoVersions.length > 0) {
+                const hlsPath = conversionResult.payload.videoVersions[0].path;
+                finalMediaUrl = hlsPath;
+                convertedHlsFilename = hlsPath;
+                
+                toast({
+                  title: "Success",
+                  description: "Video converted to HLS successfully",
+                });
+              } else {
+                // Fallback to original video
+                finalMediaUrl = videoUrl;
+                uploadedFilename = uploadResult.filename;
+                
+                toast({
+                  title: "Warning",
+                  description: "Video uploaded but HLS conversion failed. Using original video.",
+                  variant: "default",
+                });
+              }
+            } catch (conversionError) {
+              console.warn('Video conversion failed:', conversionError);
+              // Fallback to original video
+              finalMediaUrl = `/videos/${uploadResult.filename}`;
+              uploadedFilename = uploadResult.filename;
+              
+              toast({
+                title: "Warning",
+                description: "Video uploaded but HLS conversion failed. Using original video.",
+                variant: "default",
+              });
+            }
+          }
         } catch (error) {
-          console.error('Failed to upload image:', error);
+          console.error('Failed to upload file:', error);
           toast({
             title: "Error",
-            description: "Failed to upload image. Please try again.",
+            description: "Failed to upload file. Please try again.",
             variant: "destructive",
           });
           return;
@@ -123,19 +178,25 @@ export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: Messa
           tags: formData.tags.length > 0 ? formData.tags : undefined
         });
         
-        // If we're updating and there's a new image, delete the old one
-        if (message && uploadedFilename && oldMediaUrl && oldMediaUrl !== finalMediaUrl) {
+        // If we're updating and there's a new file, delete the old one
+        if (message && (uploadedFilename || convertedHlsFilename) && oldMediaUrl && oldMediaUrl !== finalMediaUrl) {
           try {
-            // Extract filename from old URL if it's a full URL
             const oldFilename = oldMediaUrl.includes('/') ? oldMediaUrl.split('/').pop() : oldMediaUrl;
             if (oldFilename) {
-              await deleteImage(oldFilename);
+              // Check if old file is HLS or regular media
+              if (oldMediaUrl.endsWith('.m3u8')) {
+                await deleteHlsVideo(oldFilename);
+              } else if (oldMediaUrl.startsWith('/videos/')) {
+                await deleteVideo(oldFilename);
+              } else {
+                await deleteImage(oldFilename);
+              }
             }
           } catch (deleteError) {
-            console.warn('Failed to delete old image:', deleteError);
+            console.warn('Failed to delete old file:', deleteError);
             toast({
               title: "Warning",
-              description: "Failed to delete old image file, but message was saved successfully.",
+              description: "Failed to delete old file, but message was saved successfully.",
               variant: "default",
             });
           }
@@ -150,12 +211,30 @@ export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: Messa
         
         onOpenChange(false);
       } catch (saveError) {
-        // If message save fails but we uploaded a file, clean it up
+        // If message save fails but we uploaded files, clean them up
         if (uploadedFilename) {
           try {
-            await deleteImage(uploadedFilename);
+            if (selectedFile?.type.startsWith('image/')) {
+              await deleteImage(uploadedFilename);
+            } else if (selectedFile?.type.startsWith('video/')) {
+              await deleteVideo(uploadedFilename);
+            }
           } catch (cleanupError) {
             console.warn('Failed to cleanup uploaded file:', cleanupError);
+          }
+        }
+        if (uploadedVideoFilename) {
+          try {
+            await deleteVideo(uploadedVideoFilename);
+          } catch (cleanupError) {
+            console.warn('Failed to cleanup uploaded video:', cleanupError);
+          }
+        }
+        if (convertedHlsFilename) {
+          try {
+            await deleteHlsVideo(convertedHlsFilename);
+          } catch (cleanupError) {
+            console.warn('Failed to cleanup converted HLS:', cleanupError);
           }
         }
         throw saveError; // Re-throw to trigger the error handling below
@@ -230,20 +309,21 @@ export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: Messa
     const file = event.target.files?.[0];
     if (file) {
       // Validate file type
-      if (!file.type.startsWith('image/')) {
+      if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
         toast({
           title: "Error",
-          description: "Please select an image file",
+          description: "Please select an image or video file",
           variant: "destructive",
         });
         return;
       }
       
-      // Validate file size (max 10MB)
-      if (file.size > 10 * 1024 * 1024) {
+      // Validate file size (max 100MB for videos, 10MB for images)
+      const maxSize = file.type.startsWith('video/') ? 100 * 1024 * 1024 : 10 * 1024 * 1024;
+      if (file.size > maxSize) {
         toast({
           title: "Error", 
-          description: "File size must be less than 10MB",
+          description: `File size must be less than ${file.type.startsWith('video/') ? '100MB' : '10MB'}`,
           variant: "destructive",
         });
         return;
@@ -255,10 +335,10 @@ export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: Messa
       const reader = new FileReader();
       reader.onload = () => {
         setFilePreview(reader.result as string);
-        // Auto-set media type to image and clear manual URL
+        // Auto-set media type and clear manual URL
         setFormData(prev => ({
           ...prev,
-          mediaType: 'image',
+          mediaType: file.type.startsWith('image/') ? 'image' : 'video',
           mediaUrl: ''
         }));
       };
@@ -365,9 +445,9 @@ export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: Messa
                   <CardTitle className="text-lg">Media (Optional)</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* Image Upload Section */}
+                  {/* File Upload Section */}
                   <div className="space-y-2">
-                    <Label>Upload Image</Label>
+                    <Label>Upload Image or Video</Label>
                     <div className="flex gap-2">
                       <Button
                         type="button"
@@ -376,7 +456,7 @@ export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: Messa
                         className="flex items-center gap-2"
                       >
                         <Upload className="w-4 h-4" />
-                        Choose Image
+                        Choose File
                       </Button>
                       {selectedFile && (
                         <Button
@@ -392,13 +472,13 @@ export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: Messa
                     <input
                       ref={fileInputRef}
                       type="file"
-                      accept="image/*"
+                      accept="image/*,video/*"
                       onChange={handleFileSelect}
                       className="hidden"
                     />
                     {selectedFile && (
                       <div className="text-sm text-muted-foreground">
-                        Selected: {selectedFile.name} ({Math.round(selectedFile.size / 1024)} KB)
+                        Selected: {selectedFile.name} ({Math.round(selectedFile.size / (1024 * 1024))} MB)
                       </div>
                     )}
                   </div>

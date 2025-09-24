@@ -1,5 +1,5 @@
 import { GuestMessage } from "@/services/guestMessageApi";
-import { getImageUrl } from "@/services/imageUploadApi";
+import { getImageUrl, getVideoUrl, getHlsUrl } from "@/services/imageUploadApi";
 
 interface TvMessagePreviewProps {
   formData: {
@@ -33,11 +33,24 @@ export const TvMessagePreview = ({ formData, filePreview }: TvMessagePreviewProp
     if (filePreview) return filePreview;
     if (!formData.mediaUrl) return "";
     
-    // If it's already a full URL, use as is, otherwise add StaticServerUrl
+    // If it's already a full URL, use as is
     if (formData.mediaUrl.startsWith('http')) {
       return formData.mediaUrl;
     } else {
-      return getImageUrl(formData.mediaUrl);
+      // Handle different media types with proper prefixes
+      if (formData.mediaUrl.endsWith('.m3u8')) {
+        // HLS videos
+        return getHlsUrl(formData.mediaUrl);
+      } else if (formData.mediaUrl.startsWith('/videos/')) {
+        // Regular videos with /videos prefix already included
+        return `${import.meta.env.VITE_STATIC_SERVER_URL}${formData.mediaUrl}`;
+      } else if (formData.mediaType === 'video') {
+        // Videos without prefix
+        return getVideoUrl(formData.mediaUrl);
+      } else {
+        // Images
+        return getImageUrl(formData.mediaUrl);
+      }
     }
   };
   

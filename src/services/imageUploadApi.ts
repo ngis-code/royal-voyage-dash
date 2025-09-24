@@ -62,7 +62,60 @@ export const deleteImage = async (filename: string): Promise<void> => {
   }
 };
 
+export const deleteVideo = async (filename: string): Promise<void> => {
+  const response = await fetch(`${UPLOAD_SERVER_URL}/video/${filename}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${UPLOAD_TOKEN}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Delete video failed: ${response.statusText}`);
+  }
+};
+
+export const deleteHlsVideo = async (filename: string): Promise<void> => {
+  const response = await fetch(`${UPLOAD_SERVER_URL}/hls/${filename}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${UPLOAD_TOKEN}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Delete HLS video failed: ${response.statusText}`);
+  }
+};
+
+export const uploadVideo = async (file: File): Promise<UploadResponse> => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const response = await fetch(`${UPLOAD_SERVER_URL}/upload/`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${UPLOAD_TOKEN}`,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Video upload failed: ${response.statusText}`);
+  }
+
+  return response.json();
+};
+
 export const getImageUrl = (filename: string): string => {
+  return `${STATIC_SERVER_URL}/${filename}`;
+};
+
+export const getVideoUrl = (filename: string): string => {
+  return `${STATIC_SERVER_URL}/videos/${filename}`;
+};
+
+export const getHlsUrl = (filename: string): string => {
   return `${STATIC_SERVER_URL}/${filename}`;
 };
 
