@@ -1,5 +1,7 @@
-import { getApiHeaders } from "@/lib/apiHeaders";
+import { toast } from "@/hooks/use-toast";
 import { handleApiError } from "@/lib/apiErrorHandler";
+import { getApiHeaders } from "@/lib/apiHeaders";
+import { deleteHlsVideo } from "./imageUploadApi";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -107,12 +109,28 @@ export async function updateAd(adId: string, update: Partial<Omit<AdDocument, '_
     return response.json();
 }
 
-export async function deleteAd(adId: string): Promise<void> {
+export async function deleteAd(adId: string, videoUrl: string | undefined): Promise<void> {
+    let videoDeletionError: string | null = null;
+    try {
+        await deleteHlsVideo(videoUrl ? videoUrl.split('/').pop() || '' : '');
+    } catch (err) {
+        videoDeletionError = JSON.stringify(err);
+        console.error('Error deleting HLS video:', err);
+    }
+
     const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/ads/${adId}`, {
         method: 'DELETE',
         credentials: 'include',
         headers: getApiHeaders()
     });
+
+    if (videoDeletionError) {
+        toast({
+            variant: "destructive",
+            title: "Video Deletion Error",
+            description: videoDeletionError,
+        });
+    }
 
     if (!response.ok) {
         await handleApiError(response);

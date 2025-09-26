@@ -84,7 +84,7 @@ export default function AdFormDialog({
         } else {
           // Upload new file
           const uploadResponse = await uploadImage(selectedFile);
-          finalAdUrl = `${import.meta.env.VITE_STATIC_SERVER_URL}/videos/${uploadResponse.filename}`;
+          finalAdUrl = `/videos/${uploadResponse.filename}`;
 
           // Delete old file if exists and it's from our storage
           if (ad?.ad_url && !ad.ad_url.startsWith('http')) {
@@ -111,7 +111,7 @@ export default function AdFormDialog({
             const fileSizeMB = selectedFile.size / (1024 * 1024);
             const segmentCount = Math.max(2, Math.min(10, Math.ceil(fileSizeMB / 10)));
 
-            const conversionResponse = await convertVideoToM3U8(finalAdUrl, segmentCount);
+            const conversionResponse = await convertVideoToM3U8(`${import.meta.env.VITE_STATIC_SERVER_URL}${finalAdUrl}`, segmentCount);
 
             if (conversionResponse.payload.videoVersions.length > 0) {
               const m3u8Version = conversionResponse.payload.videoVersions[0];

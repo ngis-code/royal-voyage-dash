@@ -89,7 +89,7 @@ export default function Ads() {
 
   const handleDelete = async (ad: AdDocument) => {
     try {
-      await deleteAd(ad._id);
+      await deleteAd(ad._id, ad.ad_url);
       toast({
         title: "Success",
         description: "Ad deleted successfully",
