@@ -112,7 +112,7 @@ export async function updateAd(adId: string, update: Partial<Omit<AdDocument, '_
 export async function deleteAd(adId: string, videoUrl: string | undefined): Promise<void> {
     let videoDeletionError: string | null = null;
     try {
-        await deleteHlsVideo(videoUrl ? videoUrl.split('/').pop() || '' : '');
+        await deleteHlsVideo(videoUrl ? videoUrl.split('/').pop().split('.')[0] || '' : '');
     } catch (err) {
         videoDeletionError = JSON.stringify(err);
         console.error('Error deleting HLS video:', err);
