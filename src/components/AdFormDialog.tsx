@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { AdDocument, createAd, updateAd } from "@/services/adApi";
-import { convertVideoToM3U8, deleteImage, deleteVideo, updateImage, uploadImage } from "@/services/imageUploadApi";
+import { convertVideoToM3U8, deleteImage, deleteVideo, deleteHlsVideo, updateImage, uploadImage } from "@/services/imageUploadApi";
 import { useRef, useState } from "react";
 
 interface AdFormDialogProps {
@@ -72,6 +72,21 @@ export default function AdFormDialog({
     try {
       let finalAdUrl = formData.ad_url;
       let fileName = "";
+
+      // Delete old HLS video if we're updating and have a new file or URL
+      if (ad && ad.ad_url && (selectedFile || (formData.ad_url && formData.ad_url !== ad.ad_url))) {
+        // Check if old URL is an HLS video
+        if (ad.ad_url.includes('/hls/')) {
+          const oldFilename = ad.ad_url.split('/').pop()?.split('.')[0];
+          if (oldFilename) {
+            try {
+              await deleteHlsVideo(oldFilename);
+            } catch (error) {
+              console.warn('Failed to delete old HLS video:', error);
+            }
+          }
+        }
+      }
 
       // Handle file upload/update
       if (selectedFile) {
@@ -201,6 +216,7 @@ export default function AdFormDialog({
               value={formData._id}
               onChange={(e) => setFormData(prev => ({ ...prev, _id: e.target.value }))}
               placeholder="Leave empty for auto-generation"
+              disabled={!!ad}
             />
           </div>
 
