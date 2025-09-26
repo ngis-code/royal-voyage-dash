@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { AdDocument, createAd, updateAd } from "@/services/adApi";
-import { convertVideoToM3U8, deleteImage, updateImage, uploadImage } from "@/services/imageUploadApi";
+import { convertVideoToM3U8, deleteImage, deleteVideo, updateImage, uploadImage } from "@/services/imageUploadApi";
 import { useRef, useState } from "react";
 
 interface AdFormDialogProps {
@@ -71,6 +71,7 @@ export default function AdFormDialog({
 
     try {
       let finalAdUrl = formData.ad_url;
+      let fileName = "";
 
       // Handle file upload/update
       if (selectedFile) {
@@ -79,11 +80,13 @@ export default function AdFormDialog({
           const filename = ad.ad_url.split('/').pop();
           if (filename) {
             const uploadResponse = await updateImage(filename, selectedFile);
+            fileName = uploadResponse.filename;
             finalAdUrl = `${import.meta.env.VITE_STATIC_SERVER_URL}/videos/${uploadResponse.filename}`;
           }
         } else {
           // Upload new file
           const uploadResponse = await uploadImage(selectedFile);
+          fileName = uploadResponse.filename;
           finalAdUrl = `/videos/${uploadResponse.filename}`;
 
           // Delete old file if exists and it's from our storage
@@ -117,6 +120,18 @@ export default function AdFormDialog({
               const m3u8Version = conversionResponse.payload.videoVersions[0];
               const fileName = m3u8Version.path.split('/').pop().split('.').slice(0, -1).join('.');
               finalAdUrl = `/hls/${fileName}/${m3u8Version.path}`;
+            }
+
+            // Delete the original uploaded video file after conversion
+            try {
+              await deleteVideo(fileName);
+            } catch (error) {
+              console.warn('Failed to delete original video file after conversion:', error);
+              toast({
+                title: "Warning",
+                description: "Failed to delete original video file after conversion",
+                variant: "default",
+              });
             }
           } catch (error) {
             console.warn('Video conversion failed:', error);
