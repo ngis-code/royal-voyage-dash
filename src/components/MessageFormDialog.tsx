@@ -90,7 +90,7 @@ export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: Messa
       let uploadedFilename: string | null = null;
       let uploadedVideoFilename: string | null = null;
       let convertedHlsFilename: string | null = null;
-      let oldMediaUrl = message?.mediaUrl;
+      const oldMediaUrl = message?.mediaUrl;
       
       // Upload file if selected
       if (selectedFile) {
@@ -151,6 +151,16 @@ export const MessageFormDialog = ({ open, onOpenChange, message, onSave }: Messa
                   title: "Success",
                   description: "Video converted to HLS successfully",
                 });
+
+                // Delete the original uploaded video to save space
+                if (uploadedVideoFilename) {
+                  try {
+                    await deleteVideo(uploadedVideoFilename);
+                    uploadedVideoFilename = null; // Clear since we've deleted it
+                  } catch (deletionError) {
+                    console.warn('Failed to delete original video after HLS conversion:', deletionError);
+                  }
+                }
               } else {
                 // Fallback to original video
                 finalMediaUrl = videoUrl;
