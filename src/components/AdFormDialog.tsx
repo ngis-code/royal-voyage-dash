@@ -50,7 +50,12 @@ export default function AdFormDialog({
         ad_format: ad?.ad_format || undefined,
         ad_url: ad?.ad_url || "",
       });
-      setPreviewUrl(ad?.ad_url || null);
+      if(ad?.ad_url && ad.ad_url.startsWith('http')) {
+        setPreviewUrl(ad.ad_url || null);
+      }else{
+        const adUrl = ad.ad_url.startsWith('/') ? ad.ad_url : `/${ad.ad_url}`;
+        setPreviewUrl(`${import.meta.env.VITE_STATIC_SERVER_URL}${adUrl}` || null);
+      }
       setSelectedFile(null);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
