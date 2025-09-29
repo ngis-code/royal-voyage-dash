@@ -1,5 +1,6 @@
 import { GuestMessage } from "@/services/guestMessageApi";
 import { getImageUrl, getVideoUrl, getHlsUrl } from "@/services/imageUploadApi";
+import { HlsVideoPlayer } from "./HlsVideoPlayer";
 
 interface TvMessagePreviewProps {
   formData: {
@@ -93,7 +94,7 @@ export const TvMessagePreview = ({ formData, filePreview }: TvMessagePreviewProp
             {hasMedia && (
               <div className="w-full max-w-md">
                 <div className="bg-slate-700/60 rounded-lg overflow-hidden min-h-[200px] aspect-video relative">
-                  <video 
+                  <HlsVideoPlayer 
                     src={mediaSource}
                     className="w-full h-full object-cover"
                     muted

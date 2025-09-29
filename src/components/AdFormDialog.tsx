@@ -14,6 +14,7 @@ import { toast } from "@/hooks/use-toast";
 import { AdDocument, createAd, updateAd } from "@/services/adApi";
 import { convertVideoToM3U8, deleteImage, deleteVideo, deleteHlsVideo, updateImage, uploadImage } from "@/services/imageUploadApi";
 import { useRef, useState, useEffect } from "react";
+import { HlsVideoPlayer } from "./HlsVideoPlayer";
 
 interface AdFormDialogProps {
   isOpen: boolean;
@@ -310,7 +311,7 @@ export default function AdFormDialog({
                     className="w-full max-w-xs h-32 object-cover rounded-md border"
                   />
                 ) : (
-                  <video
+                  <HlsVideoPlayer
                     src={previewUrl}
                     controls
                     className="w-full max-w-xs h-32 rounded-md border"
