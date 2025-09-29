@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "@/hooks/use-toast";
 import { AdDocument, createAd, updateAd } from "@/services/adApi";
 import { convertVideoToM3U8, deleteImage, deleteVideo, deleteHlsVideo, updateImage, uploadImage } from "@/services/imageUploadApi";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 
 interface AdFormDialogProps {
   isOpen: boolean;
@@ -39,6 +39,24 @@ export default function AdFormDialog({
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(ad?.ad_url || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Reset form data when ad prop changes or dialog opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      setFormData({
+        _id: ad?._id || "",
+        campaign_id: ad?.campaign_id || "",
+        advertiser_id: ad?.advertiser_id || "",
+        ad_format: ad?.ad_format || undefined,
+        ad_url: ad?.ad_url || "",
+      });
+      setPreviewUrl(ad?.ad_url || null);
+      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  }, [ad, isOpen]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
