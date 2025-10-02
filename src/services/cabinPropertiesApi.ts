@@ -12,7 +12,7 @@ export interface CabinProperties {
   CabinType?: string;
   CabinTypeDesc?: string;
   MusterStation?: string;
-  MusterStatusDesc?: string;
+  MusterStationDesc?: string;
   CabinStatus?: string;
   _createdBy?: string;
   createdAt: Date;
@@ -70,15 +70,13 @@ export async function listCabinProperties(params: {
 export async function createCabinProperty(
   data: Omit<CabinProperties, '_id' | 'createdAt' | 'updatedAt' | '_createdBy' | '_permissions'>
 ): Promise<CabinProperties> {
-  const response = await fetch(`${API_BASE_URL}/api/databases/create-document`, {
+  const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/cabin_properties/${data.Cabin}`, {
     method: 'POST',
     credentials: 'include',
     headers: getApiHeaders(),
-    body: JSON.stringify({
-      databaseId: 'royaltv_main',
-      collectionId: 'cabin_properties',
-      data,
-    }),
+    body: JSON.stringify({...data, _permissions: [
+      { scope: `user(${data.Cabin})`, operation: 'read' },
+    ]}),
   });
 
   if (!response.ok) {
@@ -90,19 +88,16 @@ export async function createCabinProperty(
 }
 
 export async function updateCabinProperty(
-  propertyId: string,
+  cabin: string,
   data: Partial<Omit<CabinProperties, '_id' | 'createdAt' | 'updatedAt' | '_createdBy' | '_permissions'>>
 ): Promise<CabinProperties> {
-  const response = await fetch(`${API_BASE_URL}/api/databases/update-document`, {
-    method: 'PUT',
+  const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/cabin_properties/${cabin}`, {
+    method: 'PATCH',
     credentials: 'include',
     headers: getApiHeaders(),
-    body: JSON.stringify({
-      databaseId: 'royaltv_main',
-      collectionId: 'cabin_properties',
-      documentId: propertyId,
-      data,
-    }),
+    body: JSON.stringify({...data, _permissions: [
+      { scope: `user(${cabin})`, operation: 'read' },
+    ]}),
   });
 
   if (!response.ok) {
@@ -114,15 +109,10 @@ export async function updateCabinProperty(
 }
 
 export async function deleteCabinProperty(propertyId: string): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/api/databases/delete-document`, {
+  const response = await fetch(`${API_BASE_URL}/api/databases/royaltv_main/cabin_properties/${propertyId}`, {
     method: 'DELETE',
     credentials: 'include',
     headers: getApiHeaders(),
-    body: JSON.stringify({
-      databaseId: 'royaltv_main',
-      collectionId: 'cabin_properties',
-      documentId: propertyId,
-    }),
   });
 
   if (!response.ok) {
