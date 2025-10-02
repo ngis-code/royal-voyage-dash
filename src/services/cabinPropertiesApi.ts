@@ -12,7 +12,7 @@ export interface CabinProperties {
   CabinType?: string;
   CabinTypeDesc?: string;
   MusterStation?: string;
-  MusterStationDesc?: string;
+  MusterStatusDesc?: string;
   CabinStatus?: string;
   _createdBy?: string;
   createdAt: Date;

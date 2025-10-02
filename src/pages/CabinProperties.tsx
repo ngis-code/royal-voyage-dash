@@ -144,7 +144,10 @@ export default function CabinPropertiesPage() {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Cabin Properties</h1>
-          <p className="text-muted-foreground">Manage cabin properties and configurations</p>
+          <p className="text-muted-foreground">
+            Manage cabin properties and configurations
+            {!loading && ` • Total: ${totalPages * itemsPerPage - (itemsPerPage - properties.length)}`}
+          </p>
         </div>
         <Button onClick={() => setIsFormOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
@@ -253,8 +256,8 @@ export default function CabinPropertiesPage() {
                   <TableCell>
                     <div>
                       <div>{property.MusterStation}</div>
-                      {property.MusterStationDesc && (
-                        <div className="text-xs text-muted-foreground">{property.MusterStationDesc}</div>
+                      {property.MusterStatusDesc && (
+                        <div className="text-xs text-muted-foreground">{property.MusterStatusDesc}</div>
                       )}
                     </div>
                   </TableCell>

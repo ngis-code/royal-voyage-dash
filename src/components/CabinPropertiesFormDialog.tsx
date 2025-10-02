@@ -34,7 +34,7 @@ export function CabinPropertiesFormDialog({
           CabinType: "",
           CabinTypeDesc: "",
           MusterStation: "",
-          MusterStationDesc: "",
+          MusterStatusDesc: "",
           CabinStatus: "",
         });
       }
@@ -56,7 +56,7 @@ export function CabinPropertiesFormDialog({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="Cabin">Cabin</Label>
-              <Input id="Cabin" {...register("Cabin")} />
+              <Input id="Cabin" {...register("Cabin")} disabled={!!property} />
             </div>
 
             <div className="space-y-2">
@@ -90,8 +90,8 @@ export function CabinPropertiesFormDialog({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="MusterStationDesc">Muster Station Description</Label>
-              <Input id="MusterStationDesc" {...register("MusterStationDesc")} />
+              <Label htmlFor="MusterStatusDesc">Muster Status Description</Label>
+              <Input id="MusterStatusDesc" {...register("MusterStatusDesc")} />
             </div>
 
             <div className="space-y-2 col-span-2">
