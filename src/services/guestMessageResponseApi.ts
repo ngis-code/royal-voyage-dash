@@ -54,7 +54,7 @@ export interface GuestMessageResponsesResponse {
 }
 
 export async function getGuestMessageSummary(messageId: string): Promise<GuestMessageSummaryResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/services/request/guest-messaging/summary/${messageId}`, {
+  const response = await fetch(`${API_BASE_URL}/api/services/request/guest_messaging/summary/${messageId}`, {
     method: 'GET',
     credentials: 'include',
     headers: getApiHeaders()
