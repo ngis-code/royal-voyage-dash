@@ -13,6 +13,7 @@ import VideoOnDemand from "./pages/VideoOnDemand";
 import GuestMessages from "./pages/GuestMessages";
 import GuestMessageResponses from "./pages/GuestMessageResponses";
 import Devices from "./pages/Devices";
+import CabinProperties from "./pages/CabinProperties";
 import Login from "./pages/Login";
 import PasswordReset from "./pages/PasswordReset";
 import NotFound from "./pages/NotFound";
@@ -50,6 +51,7 @@ const App = () => (
                       <Route path="/guest-messages" element={<GuestMessages />} />
                       <Route path="/guest-messages/:messageId/responses" element={<GuestMessageResponses />} />
                       <Route path="/ads" element={<Ads />} />
+                      <Route path="/cabin-properties" element={<CabinProperties />} />
                       <Route path="/devices" element={<Devices />} />
                       {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                       <Route path="*" element={<NotFound />} />

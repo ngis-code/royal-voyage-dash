@@ -1,4 +1,4 @@
-import { Home, Tv, Film, MessageSquare, Monitor, Megaphone } from "lucide-react"
+import { Home, Tv, Film, MessageSquare, Monitor, Megaphone, DoorOpen } from "lucide-react"
 import { NavLink, useLocation } from "react-router-dom"
 import rcclLogo from "@/assets/rccl-logo.png"
 
@@ -20,6 +20,7 @@ const menuItems = [
   { title: "Video on Demand", url: "/vod", icon: Film },
   { title: "Guest Messages", url: "/guest-messages", icon: MessageSquare },
   { title: "Ads", url: "/ads", icon: Megaphone },
+  { title: "Cabin Properties", url: "/cabin-properties", icon: DoorOpen },
   { title: "Devices", url: "/devices", icon: Monitor },
 ]
 
