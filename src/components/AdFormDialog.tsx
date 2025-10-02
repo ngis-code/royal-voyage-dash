@@ -120,7 +120,7 @@ export default function AdFormDialog({
           if (filename) {
             const uploadResponse = await updateImage(filename, selectedFile);
             fileName = uploadResponse.filename;
-            finalAdUrl = `${import.meta.env.VITE_STATIC_SERVER_URL}/videos/${uploadResponse.filename}`;
+            finalAdUrl = `/videos/${uploadResponse.filename}`;
           }
         } else {
           // Upload new file
