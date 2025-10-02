@@ -50,10 +50,10 @@ export default function CabinPropertiesPage() {
   const fetchProperties = async () => {
     try {
       setLoading(true);
-      const filter: Partial<CabinProperties> = {};
+      const filter: Record<string, any> = {};
 
       if (searchTerm && filterField !== "all") {
-        filter[filterField as keyof CabinProperties] = searchTerm as any;
+        filter[filterField] = searchTerm;
       }
 
       const response = await listCabinProperties({
@@ -167,6 +167,9 @@ export default function CabinPropertiesPage() {
             <SelectItem value="CabinType">Cabin Type</SelectItem>
             <SelectItem value="CabinStatus">Cabin Status</SelectItem>
             <SelectItem value="MusterStation">Muster Station</SelectItem>
+            <SelectItem value="CabinDesign">Cabin Design</SelectItem>
+            <SelectItem value="Starboard">Side</SelectItem>
+            <SelectItem value="VZone">VZone</SelectItem>
           </SelectContent>
         </Select>
         <Input
@@ -193,15 +196,33 @@ export default function CabinPropertiesPage() {
                   <ArrowUpDown className="h-4 w-4" />
                 </div>
               </TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort("CabinDesign")}>
+                <div className="flex items-center gap-2">
+                  Design
+                  <ArrowUpDown className="h-4 w-4" />
+                </div>
+              </TableHead>
               <TableHead className="cursor-pointer" onClick={() => handleSort("CabinType")}>
                 <div className="flex items-center gap-2">
-                  Cabin Type
+                  Type
                   <ArrowUpDown className="h-4 w-4" />
                 </div>
               </TableHead>
               <TableHead className="cursor-pointer" onClick={() => handleSort("MusterStation")}>
                 <div className="flex items-center gap-2">
-                  Muster Station
+                  Muster
+                  <ArrowUpDown className="h-4 w-4" />
+                </div>
+              </TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort("Starboard")}>
+                <div className="flex items-center gap-2">
+                  Side
+                  <ArrowUpDown className="h-4 w-4" />
+                </div>
+              </TableHead>
+              <TableHead className="cursor-pointer" onClick={() => handleSort("VZone")}>
+                <div className="flex items-center gap-2">
+                  VZone
                   <ArrowUpDown className="h-4 w-4" />
                 </div>
               </TableHead>
@@ -211,25 +232,19 @@ export default function CabinPropertiesPage() {
                   <ArrowUpDown className="h-4 w-4" />
                 </div>
               </TableHead>
-              <TableHead className="cursor-pointer" onClick={() => handleSort("createdAt")}>
-                <div className="flex items-center gap-2">
-                  Created
-                  <ArrowUpDown className="h-4 w-4" />
-                </div>
-              </TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center">
+                <TableCell colSpan={9} className="text-center">
                   Loading...
                 </TableCell>
               </TableRow>
             ) : properties.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center">
+                <TableCell colSpan={9} className="text-center">
                   No cabin properties found
                 </TableCell>
               </TableRow>
@@ -244,6 +259,9 @@ export default function CabinPropertiesPage() {
                         <div className="text-xs text-muted-foreground">{property.DeckDesc}</div>
                       )}
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    {property.CabinDesign === "P" ? "Passenger" : property.CabinDesign === "C" ? "Crew" : "-"}
                   </TableCell>
                   <TableCell>
                     <div>
@@ -261,8 +279,11 @@ export default function CabinPropertiesPage() {
                       )}
                     </div>
                   </TableCell>
+                  <TableCell>
+                    {property.Starboard === "0" ? "Starboard" : property.Starboard === "1" ? "Portside" : "-"}
+                  </TableCell>
+                  <TableCell>{property.VZone || "-"}</TableCell>
                   <TableCell>{property.CabinStatus}</TableCell>
-                  <TableCell>{formatDate(property.createdAt)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button

@@ -3,17 +3,8 @@ import { getApiHeaders } from '@/lib/apiHeaders';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-export interface CabinProperties {
+interface BaseDocument {
   _id: string;
-  Cabin?: string;
-  Deck?: string;
-  DeckDesc?: string;
-  CabinDesign?: string;
-  CabinType?: string;
-  CabinTypeDesc?: string;
-  MusterStation?: string;
-  MusterStationDesc?: string;
-  CabinStatus?: string;
   _createdBy?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -21,6 +12,28 @@ export interface CabinProperties {
     scope: string;
     operation: "read" | "create" | "update" | "delete";
   }[];
+}
+
+export interface CabinProperties extends BaseDocument {
+  Cabin?: string;
+  Deck?: string;
+  DeckDesc?: string;
+  /**
+   * "P" = Passenger
+   * "C" = Crew
+   */
+  CabinDesign?: "P" | "C";
+  CabinType?: string;
+  CabinTypeDesc?: string;
+  MusterStation?: string;
+  MusterStatusDesc?: string;
+  CabinStatus?: string;
+  /**
+   * 0 = Starboard
+   * 1 = Portside
+   */
+  Starboard?: "0" | "1";
+  VZone?: string;
 }
 
 export interface CabinPropertiesResponse {

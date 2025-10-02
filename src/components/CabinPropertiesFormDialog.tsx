@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CabinProperties } from "@/services/cabinPropertiesApi";
 
 interface CabinPropertiesFormDialogProps {
@@ -30,12 +31,14 @@ export function CabinPropertiesFormDialog({
           Cabin: "",
           Deck: "",
           DeckDesc: "",
-          CabinDesign: "",
+          CabinDesign: undefined,
           CabinType: "",
           CabinTypeDesc: "",
           MusterStation: "",
           MusterStatusDesc: "",
           CabinStatus: "",
+          Starboard: undefined,
+          VZone: "",
         });
       }
     }
@@ -71,7 +74,20 @@ export function CabinPropertiesFormDialog({
 
             <div className="space-y-2">
               <Label htmlFor="CabinDesign">Cabin Design</Label>
-              <Input id="CabinDesign" {...register("CabinDesign")} />
+              <Select
+                value={property?.CabinDesign || ""}
+                onValueChange={(value) => {
+                  reset({ ...property, CabinDesign: value as "P" | "C" });
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select design" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="P">P - Passenger</SelectItem>
+                  <SelectItem value="C">C - Crew</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
@@ -94,9 +110,32 @@ export function CabinPropertiesFormDialog({
               <Input id="MusterStatusDesc" {...register("MusterStatusDesc")} />
             </div>
 
-            <div className="space-y-2 col-span-2">
+            <div className="space-y-2">
               <Label htmlFor="CabinStatus">Cabin Status</Label>
               <Input id="CabinStatus" {...register("CabinStatus")} />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="Starboard">Side</Label>
+              <Select
+                value={property?.Starboard || ""}
+                onValueChange={(value) => {
+                  reset({ ...property, Starboard: value as "0" | "1" });
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select side" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">0 - Starboard</SelectItem>
+                  <SelectItem value="1">1 - Portside</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="VZone">VZone</Label>
+              <Input id="VZone" {...register("VZone")} />
             </div>
           </div>
 
